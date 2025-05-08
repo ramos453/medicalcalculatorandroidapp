@@ -11,6 +11,8 @@ import com.example.medicalcalculatorapp.data.model.Category
 import com.example.medicalcalculatorapp.data.model.FieldType
 import com.example.medicalcalculatorapp.data.model.MedicalCalculator
 import com.example.medicalcalculatorapp.databinding.ActivityTestBinding
+import android.widget.Button
+import android.widget.TextView
 
 class TestActivity : AppCompatActivity() {
 
@@ -29,20 +31,44 @@ class TestActivity : AppCompatActivity() {
         }, 2000) // 2 second delay
     }
 
+//    private fun showMainContent() {
+//        // Initialize binding and set the original layout
+//        binding = ActivityTestBinding.inflate(layoutInflater)
+//        setContentView(binding.root)
+//        isShowingSplash = false
+//
+//        // Test our data models to make sure they're working
+//        val testModels = createTestModels()
+//
+//        // Set up button click listener
+//        binding.testButton.setOnClickListener {
+//            // Display a toast with info from our test models
+//            val message = "Test models created: ${testModels.size} calculators"
+//            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+//        }
+//    }
     private fun showMainContent() {
-        // Initialize binding and set the original layout
-        binding = ActivityTestBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        // Instead of showing the test activity layout, show the login layout
+        setContentView(R.layout.fragment_login)
         isShowingSplash = false
 
-        // Test our data models to make sure they're working
-        val testModels = createTestModels()
+        // You won't be able to use binding here since you're not using a fragment
+        // So get references to the views directly
+        val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val tvRegister = findViewById<TextView>(R.id.tvRegister)
+        val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
 
-        // Set up button click listener
-        binding.testButton.setOnClickListener {
-            // Display a toast with info from our test models
-            val message = "Test models created: ${testModels.size} calculators"
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        // Set up click listeners
+        btnLogin.setOnClickListener {
+            Toast.makeText(this, "Login button clicked", Toast.LENGTH_SHORT).show()
+        }
+
+        tvRegister.setOnClickListener {
+            Toast.makeText(this, "Would navigate to registration", Toast.LENGTH_LONG).show()
+        }
+
+        tvForgotPassword.setOnClickListener {
+            Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show()
         }
     }
 

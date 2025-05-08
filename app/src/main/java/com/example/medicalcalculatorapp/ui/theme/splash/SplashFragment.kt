@@ -29,12 +29,12 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Simulate checking if user is logged in
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            // For now, always navigate to login (we'll update this later)
-//            findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
-//        }, 2000) // 2 seconds splash
-//
-    }
+        Handler(Looper.getMainLooper()).postDelayed({
+           // For now, always navigate to login (we'll update this later)
+            findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
+        }, 2000) // 2 seconds splash
+
+   }
 
     override fun onDestroyView() {
         super.onDestroyView()
