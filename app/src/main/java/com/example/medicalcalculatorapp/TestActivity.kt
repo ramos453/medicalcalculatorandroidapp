@@ -1,6 +1,8 @@
 package com.example.medicalcalculatorapp
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.medicalcalculatorapp.data.model.CalculationResult
@@ -13,11 +15,25 @@ import com.example.medicalcalculatorapp.databinding.ActivityTestBinding
 class TestActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTestBinding
+    private var isShowingSplash = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Start with splash screen
+        setContentView(R.layout.fragment_splash)
+
+        // After delay, switch to main test activity content
+        Handler(Looper.getMainLooper()).postDelayed({
+            showMainContent()
+        }, 2000) // 2 second delay
+    }
+
+    private fun showMainContent() {
+        // Initialize binding and set the original layout
         binding = ActivityTestBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        isShowingSplash = false
 
         // Test our data models to make sure they're working
         val testModels = createTestModels()
@@ -104,5 +120,12 @@ class TestActivity : AppCompatActivity() {
 
         // Return a list of test calculators
         return listOf(bmiCalculator)
+    }
+
+    // Handle back button press - prevents closing the app while in splash screen
+    override fun onBackPressed() {
+        if (!isShowingSplash) {
+            super.onBackPressed()
+        }
     }
 }
