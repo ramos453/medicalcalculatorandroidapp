@@ -1,3 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Medical Calculator App</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="no_account">Don\'t have an account?</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
+
+    <!-- Calculators -->
+    <string name="calculators">Calculators</string>
+    <string name="favorites">Favorites</string>
+    <string name="recent">Recent</string>
+    <string name="search">Search</string>
+    <string name="categories">Categories</string>
+    <string name="calculate">Calculate</string>
+    <string name="reset">Reset</string>
+    <string name="results">Results</string>
+
+    <!-- Auth Strings -->
+    <string name="login_welcome">Sign in to your account</string>
+    <string name="register_subtitle">Create a new account</string>
+    <string name="full_name">Full Name</string>
+    <string name="back">Back</string>
+    <string name="email_required">Email is required</string>
+    <string name="password_required">Password is required</string>
+    <string name="passwords_not_matching">Passwords do not match</string>
+    <string name="name_required">Name is required</string>
+    <string name="login_success">Login successful</string>
+    <string name="login_failed">Login failed</string>
+    <string name="register_success">Registration successful</string>
+    <string name="register_failed">Registration failed</string>
+
 </resources>

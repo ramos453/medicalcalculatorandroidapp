@@ -12,16 +12,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MedicalCalculatorApp"
         tools:targetApi="31">
+
+        <!-- Test Activity for validating our setup -->
+        <activity
+            android:name=".TestActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Main Activity (commented out launcher intent to use TestActivity for now) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MedicalCalculatorApp">
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            -->
         </activity>
     </application>
 
