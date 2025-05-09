@@ -42,5 +42,8 @@
     <string name="login_failed">Login failed</string>
     <string name="register_success">Registration successful</string>
     <string name="register_failed">Registration failed</string>
+    <string name="remember_me">Remember me</string>
+    <string name="invalid_email">Please enter a valid email address</string>
+    <string name="password_too_short">Password must be at least 6 characters</string>
 
 </resources>
