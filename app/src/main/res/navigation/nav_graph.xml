@@ -22,6 +22,26 @@
         android:name="com.example.medicalcalculatorapp.ui.theme.auth.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
-        <!-- We'll add more actions here later -->
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_calculatorListFragment"
+            app:destination="@id/calculatorListFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.medicalcalculatorapp.ui.theme.auth.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register" />
+
+    <fragment
+        android:id="@+id/calculatorListFragment"
+        android:name="com.example.medicalcalculatorapp.ui.theme.calculators.CalculatorListFragment"
+        android:label="Calculator List"
+        tools:layout="@layout/fragment_calculator_list" />
+
 </navigation>
