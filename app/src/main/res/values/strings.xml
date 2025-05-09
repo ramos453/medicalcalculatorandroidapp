@@ -51,4 +51,37 @@
     <string name="invalid_email">Please enter a valid email address</string>
     <string name="password_too_short">Password must be at least 6 characters</string>
 
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_text">Privacy Policy for Medical Calculator App\n\n
+Last updated: [Current Date]\n\n
+1. INTRODUCTION\n
+Welcome to the Medical Calculator App (\"we,\" \"our,\" or \"us\"). We are committed to protecting your privacy and handling your data with transparency. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.\n\n
+2. INFORMATION WE COLLECT\n
+- Account Information: Email address when you register.\n
+- Usage Data: How you interact with our app, including calculators used and calculations performed.\n
+- Device Information: Operating system, device type, and other technical data.\n\n
+3. HOW WE USE YOUR INFORMATION\n
+- To provide you with access to our medical calculators\n
+- To remember your preferences\n
+- To improve our app\'s functionality\n
+- To analyze usage patterns\n\n
+4. DATA SECURITY\n
+We implement appropriate security measures to protect your personal information. We use encryption for stored credentials and secure communication protocols.\n\n
+5. YOUR RIGHTS\n
+You have the right to:\n
+- Access the personal data we hold about you\n
+- Request correction of inaccurate data\n
+- Request deletion of your data\n
+- Opt out of certain data collection\n\n
+6. MEDICAL DISCLAIMER\n
+This app provides medical calculations for informational purposes only. It is not intended to provide medical advice or replace professional medical judgment. Always consult a qualified healthcare provider for medical advice.\n\n
+7. CHILDREN\'S PRIVACY\n
+Our app is not intended for children under 13. We do not knowingly collect information from children under 13.\n\n
+8. CHANGES TO THIS POLICY\n
+We may update this privacy policy from time to time. We will notify you of significant changes by posting the new policy in the app.\n\n
+9. CONTACT US\n
+If you have any questions about this privacy policy, please contact us at: [Your Contact Information]\n\n
+By using this app, you consent to the terms of this Privacy Policy.</string>
+    <string name="view_privacy_policy">Privacy Policy</string>
+
 </resources>

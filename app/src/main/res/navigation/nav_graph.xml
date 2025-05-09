@@ -30,7 +30,18 @@
             app:destination="@id/calculatorListFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <!-- Add this new action inside the loginFragment element -->
+        <action
+            android:id="@+id/action_loginFragment_to_privacyPolicyFragment"
+            app:destination="@id/privacyPolicyFragment" />
     </fragment>
+
+    <!-- Add this new fragment definition -->
+    <fragment
+        android:id="@+id/privacyPolicyFragment"
+        android:name="com.example.medicalcalculatorapp.ui.theme.auth.PrivacyPolicyFragment"
+        android:label="Privacy Policy"
+        tools:layout="@layout/fragment_privacy_policy" />
 
     <fragment
         android:id="@+id/registerFragment"

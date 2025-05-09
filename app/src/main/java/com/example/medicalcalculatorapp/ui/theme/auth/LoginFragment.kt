@@ -43,6 +43,9 @@ class LoginFragment : Fragment() {
                 performLogin()
             }
         }
+        binding.tvPrivacyPolicy.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_privacyPolicyFragment)
+        }
 
         binding.tvRegister.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
