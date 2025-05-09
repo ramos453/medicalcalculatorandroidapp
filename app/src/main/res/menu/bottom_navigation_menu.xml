@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/btnHome"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="@string/home" />
+    <item
+        android:id="@+id/btnSettings"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="@string/settings" />
+</menu>

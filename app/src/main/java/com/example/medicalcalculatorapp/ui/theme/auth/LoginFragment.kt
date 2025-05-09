@@ -9,12 +9,20 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
+import com.example.medicalcalculatorapp.util.SecureStorageManager
 import android.content.Context
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var secureStorageManager: SecureStorageManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        secureStorageManager = SecureStorageManager(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,8 +45,8 @@ class LoginFragment : Fragment() {
         }
 
         binding.tvRegister.setOnClickListener {
-            //findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-            Toast.makeText(requireContext(), "Would navigate to registration", Toast.LENGTH_LONG).show()
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
+            //Toast.makeText(requireContext(), "Would navigate to registration", Toast.LENGTH_LONG).show()
         }
 
         binding.tvForgotPassword.setOnClickListener {
@@ -119,39 +127,61 @@ private fun validateInputs(): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
+    private fun loadSavedCredentials() {
+        val rememberCredentials = secureStorageManager.getRememberMeFlag()
+        if (rememberCredentials) {
+            val savedEmail = secureStorageManager.getEmail()
+            savedEmail?.let {
+                binding.etEmail.setText(it)
+                binding.cbRememberMe.isChecked = true
+            }
+        }
+    }
+
     private fun saveCredentialsIfNeeded() {
         val email = binding.etEmail.text.toString().trim()
         val isChecked = binding.cbRememberMe.isChecked
 
-        val sharedPrefs = requireActivity().getSharedPreferences(
-            "auth_prefs",
-            Context.MODE_PRIVATE
-        )
-
-        with(sharedPrefs.edit()) {
-            putBoolean("remember_credentials", isChecked)
-            if (isChecked) {
-                putString("saved_email", email)
-            } else {
-                remove("saved_email")
-            }
-            apply()
+        secureStorageManager.saveRememberMeFlag(isChecked)
+        if (isChecked) {
+            secureStorageManager.saveEmail(email)
+        } else {
+            secureStorageManager.clearCredentials()
         }
     }
-
-    private fun loadSavedCredentials() {
-        val sharedPrefs = requireActivity().getSharedPreferences(
-            "auth_prefs",
-            Context.MODE_PRIVATE
-        )
-
-        val rememberCredentials = sharedPrefs.getBoolean("remember_credentials", false)
-        if (rememberCredentials) {
-            val savedEmail = sharedPrefs.getString("saved_email", "")
-            binding.etEmail.setText(savedEmail)
-            binding.cbRememberMe.isChecked = true
-        }
-    }
+//    private fun saveCredentialsIfNeeded() {
+//        val email = binding.etEmail.text.toString().trim()
+//        val isChecked = binding.cbRememberMe.isChecked
+//
+//        val sharedPrefs = requireActivity().getSharedPreferences(
+//            "auth_prefs",
+//            Context.MODE_PRIVATE
+//        )
+//
+//        with(sharedPrefs.edit()) {
+//            putBoolean("remember_credentials", isChecked)
+//            if (isChecked) {
+//                putString("saved_email", email)
+//            } else {
+//                remove("saved_email")
+//            }
+//            apply()
+//        }
+//    }
+//
+//    private fun loadSavedCredentials() {
+//        val sharedPrefs = requireActivity().getSharedPreferences(
+//            "auth_prefs",
+//            Context.MODE_PRIVATE
+//        )
+//
+//        val rememberCredentials = sharedPrefs.getBoolean("remember_credentials", false)
+//        if (rememberCredentials) {
+//            val savedEmail = sharedPrefs.getString("saved_email", "")
+//            binding.etEmail.setText(savedEmail)
+//            binding.cbRememberMe.isChecked = true
+//        }
+//    }
 
 
 //    private fun performLogin() {
