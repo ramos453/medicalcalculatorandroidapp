@@ -50,7 +50,15 @@
     <string name="remember_me">Remember me</string>
     <string name="invalid_email">Please enter a valid email address</string>
     <string name="password_too_short">Password must be at least 6 characters</string>
+    <string name="invalid_input">Invalid input detected</string>
+    <string name="password_requirements">Password must be at least 8 characters with letters, numbers, and special characters</string>
 
+    <!-- Disclaimers -->
+    <string name="medical_disclaimer">Medical Disclaimer</string>
+    <string name="disclaimer_text">IMPORTANT: READ CAREFULLY\n\nThis medical calculator app is provided for informational and educational purposes only. It is not intended to serve as a substitute for professional medical advice, diagnosis, or treatment.\n\nThe calculations provided by this app are based on generally accepted medical formulas and equations. However, they should always be verified by a healthcare professional before making any clinical decisions.\n\nBy using this app, you acknowledge that:\n\n1. You will consult with a qualified healthcare provider before making any health-related decisions.\n\n2. The developers of this app are not liable for any harm, injury, or damage resulting from reliance on the information provided by this app.\n\n3. Medical knowledge evolves continuously, and formulas may change over time.\n\n4. Results from calculations should be interpreted within the context of a patient\'s complete clinical picture.\n\nIf you have any medical concerns, please consult with a physician or other qualified healthcare provider.</string>
+    <string name="agree_disclaimer">I understand and agree to the disclaimer</string>
+    <string name="continue_text">Continue</string>
+    <string name="must_agree">You must agree to continue</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_text">Privacy Policy for Medical Calculator App\n\n
 Last updated: [Current Date]\n\n

@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
 import com.example.medicalcalculatorapp.util.SecureStorageManager
+import com.example.medicalcalculatorapp.util.ValidationUtils
 import android.content.Context
 
 class LoginFragment : Fragment() {
@@ -57,74 +58,67 @@ class LoginFragment : Fragment() {
             Toast.makeText(context, "Forgot password clicked", Toast.LENGTH_SHORT).show()
         }
     }
-
-//    private fun validateInputs(): Boolean {
-//        var isValid = true
+//private fun validateInputs(): Boolean {
+//    var isValid = true
 //
-//        val email = binding.etEmail.text.toString().trim()
-//        val password = binding.etPassword.text.toString().trim()
+//    val email = binding.etEmail.text.toString().trim()
+//    val password = binding.etPassword.text.toString().trim()
 //
-//        if (email.isEmpty()) {
-//            binding.tilEmail.error = getString(R.string.email_required)
-//            isValid = false
-//        } else {
-//            binding.tilEmail.error = null
-//        }
-//
-//        if (password.isEmpty()) {
-//            binding.tilPassword.error = getString(R.string.password_required)
-//            isValid = false
-//        } else {
-//            binding.tilPassword.error = null
-//        }
-//
-//        return isValid
+//    // Email validation
+//    if (email.isEmpty()) {
+//        binding.tilEmail.error = getString(R.string.email_required)
+//        isValid = false
+//    } else if (!isValidEmail(email)) {
+//        binding.tilEmail.error = getString(R.string.invalid_email)
+//        isValid = false
+//    } else {
+//        binding.tilEmail.error = null
 //    }
-
-//    private fun performLogin() {
-//        binding.progressBar.visibility = View.VISIBLE
 //
-//        // Simulate network delay
-//        view?.postDelayed({
-//            binding.progressBar.visibility = View.GONE
-//
-//            // For now, simulate successful login
-//            Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
-//
-//            // Navigate to main screen (calculator list)
-//            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-//        }, 1500)
+//    // Password validation
+//    if (password.isEmpty()) {
+//        binding.tilPassword.error = getString(R.string.password_required)
+//        isValid = false
+//    } else if (password.length < 6) {
+//        binding.tilPassword.error = getString(R.string.password_too_short)
+//        isValid = false
+//    } else {
+//        binding.tilPassword.error = null
 //    }
-private fun validateInputs(): Boolean {
-    var isValid = true
+//
+//    return isValid
+//}
 
-    val email = binding.etEmail.text.toString().trim()
-    val password = binding.etPassword.text.toString().trim()
+    private fun validateInputs(): Boolean {
+        var isValid = true
 
-    // Email validation
-    if (email.isEmpty()) {
-        binding.tilEmail.error = getString(R.string.email_required)
-        isValid = false
-    } else if (!isValidEmail(email)) {
-        binding.tilEmail.error = getString(R.string.invalid_email)
-        isValid = false
-    } else {
-        binding.tilEmail.error = null
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString()
+
+        // Email validation
+        if (email.isEmpty()) {
+            binding.tilEmail.error = getString(R.string.email_required)
+            isValid = false
+        } else if (!ValidationUtils.isValidEmail(email)) {
+            binding.tilEmail.error = getString(R.string.invalid_email)
+            isValid = false
+        } else if (ValidationUtils.containsSuspiciousPatterns(email)) {
+            binding.tilEmail.error = getString(R.string.invalid_input)
+            isValid = false
+        } else {
+            binding.tilEmail.error = null
+        }
+
+        // Password validation - simplified for login
+        if (password.isEmpty()) {
+            binding.tilPassword.error = getString(R.string.password_required)
+            isValid = false
+        } else {
+            binding.tilPassword.error = null
+        }
+
+        return isValid
     }
-
-    // Password validation
-    if (password.isEmpty()) {
-        binding.tilPassword.error = getString(R.string.password_required)
-        isValid = false
-    } else if (password.length < 6) {
-        binding.tilPassword.error = getString(R.string.password_too_short)
-        isValid = false
-    } else {
-        binding.tilPassword.error = null
-    }
-
-    return isValid
-}
 
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()

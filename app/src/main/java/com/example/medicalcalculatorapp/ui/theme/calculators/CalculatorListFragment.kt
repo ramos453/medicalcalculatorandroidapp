@@ -11,6 +11,8 @@ import com.example.medicalcalculatorapp.data.model.MedicalCalculator
 import com.example.medicalcalculatorapp.data.repository.CalculatorRepository
 import com.example.medicalcalculatorapp.databinding.FragmentCalculatorListBinding
 import com.example.medicalcalculatorapp.R
+import com.example.medicalcalculatorapp.ui.theme.auth.DisclaimerDialogFragment
+import com.example.medicalcalculatorapp.util.SecureStorageManager
 
 class CalculatorListFragment : Fragment() {
 
@@ -18,10 +20,16 @@ class CalculatorListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var calculatorAdapter: CalculatorAdapter
+    private lateinit var secureStorageManager: SecureStorageManager
     private val calculatorRepository = CalculatorRepository()
 
     // Track current filter mode
     private var currentFilterMode = FilterMode.ALL
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        secureStorageManager = SecureStorageManager(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,9 +43,21 @@ class CalculatorListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!secureStorageManager.isDisclaimerAccepted()) {
+            showDisclaimerDialog()
+        }
+
         setupRecyclerView()
         setupFilterButtons()
         loadCalculators()
+    }
+
+    private fun showDisclaimerDialog() {
+        val disclaimerDialog = DisclaimerDialogFragment()
+        disclaimerDialog.setOnDisclaimerAcceptedListener {
+            // User accepted the disclaimer, proceed with normal app flow
+        }
+        disclaimerDialog.show(childFragmentManager, DisclaimerDialogFragment.TAG)
     }
 
     private fun setupRecyclerView() {
