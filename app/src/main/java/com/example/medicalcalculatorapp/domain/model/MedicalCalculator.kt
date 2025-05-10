@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.data.model
+package com.example.medicalcalculatorapp.domain.model
 
 /**
  * Represents a medical calculator with its properties and calculation fields

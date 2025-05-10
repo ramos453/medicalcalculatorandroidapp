@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.ui.theme.auth
+package com.example.medicalcalculatorapp.presentation.auth
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,7 +11,6 @@ import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 import com.example.medicalcalculatorapp.util.ValidationUtils
-import android.content.Context
 
 class LoginFragment : Fragment() {
 

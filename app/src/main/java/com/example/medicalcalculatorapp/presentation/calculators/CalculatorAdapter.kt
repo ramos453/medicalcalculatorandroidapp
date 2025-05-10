@@ -1,11 +1,11 @@
-package com.example.medicalcalculatorapp.ui.theme.calculators
+package com.example.medicalcalculatorapp.presentation.calculators
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.medicalcalculatorapp.data.model.MedicalCalculator
+import com.example.medicalcalculatorapp.domain.model.MedicalCalculator
 import com.example.medicalcalculatorapp.databinding.ItemCalculatorBinding
 
 class CalculatorAdapter(

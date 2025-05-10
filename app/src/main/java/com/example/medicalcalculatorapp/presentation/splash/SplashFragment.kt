@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.ui.theme.splash
+package com.example.medicalcalculatorapp.presentation.splash
 
 import android.os.Bundle
 import android.os.Handler

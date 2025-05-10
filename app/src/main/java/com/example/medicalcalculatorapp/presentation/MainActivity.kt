@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp
+package com.example.medicalcalculatorapp.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +7,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

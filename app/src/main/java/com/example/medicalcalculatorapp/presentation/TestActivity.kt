@@ -1,18 +1,19 @@
-package com.example.medicalcalculatorapp
+package com.example.medicalcalculatorapp.presentation
 
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.medicalcalculatorapp.data.model.CalculationResult
-import com.example.medicalcalculatorapp.data.model.CalculatorField
-import com.example.medicalcalculatorapp.data.model.Category
-import com.example.medicalcalculatorapp.data.model.FieldType
-import com.example.medicalcalculatorapp.data.model.MedicalCalculator
+import com.example.medicalcalculatorapp.domain.model.CalculationResult
+import com.example.medicalcalculatorapp.domain.model.CalculatorField
+import com.example.medicalcalculatorapp.domain.model.Category
+import com.example.medicalcalculatorapp.domain.model.FieldType
+import com.example.medicalcalculatorapp.domain.model.MedicalCalculator
 import com.example.medicalcalculatorapp.databinding.ActivityTestBinding
 import android.widget.Button
 import android.widget.TextView
+import com.example.medicalcalculatorapp.R
 
 class TestActivity : AppCompatActivity() {
 

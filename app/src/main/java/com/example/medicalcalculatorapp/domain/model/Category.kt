@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.data.model
+package com.example.medicalcalculatorapp.domain.model
 
 /**
  * Represents a category for organizing medical calculators

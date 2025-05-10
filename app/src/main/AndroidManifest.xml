@@ -15,7 +15,7 @@
 
         <!-- Test Activity for validating our setup -->
         <activity
-            android:name=".TestActivity"
+            android:name=".presentation.TestActivity"
             android:exported="true">
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.MAIN" />-->
@@ -25,7 +25,7 @@
 
         <!-- Main Activity (commented out launcher intent to use TestActivity for now) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MedicalCalculatorApp">
 

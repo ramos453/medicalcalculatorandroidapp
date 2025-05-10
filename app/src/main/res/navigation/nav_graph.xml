@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.example.medicalcalculatorapp.ui.theme.splash.SplashFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.splash.SplashFragment"
         android:label="Splash"
         tools:layout="@layout/fragment_splash">
         <action
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.medicalcalculatorapp.ui.theme.auth.LoginFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.auth.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
         <action
@@ -39,19 +39,19 @@
     <!-- Add this new fragment definition -->
     <fragment
         android:id="@+id/privacyPolicyFragment"
-        android:name="com.example.medicalcalculatorapp.ui.theme.auth.PrivacyPolicyFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.auth.PrivacyPolicyFragment"
         android:label="Privacy Policy"
         tools:layout="@layout/fragment_privacy_policy" />
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.example.medicalcalculatorapp.ui.theme.auth.RegisterFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.auth.RegisterFragment"
         android:label="Register"
         tools:layout="@layout/fragment_register" />
 
     <fragment
         android:id="@+id/calculatorListFragment"
-        android:name="com.example.medicalcalculatorapp.ui.theme.calculators.CalculatorListFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.calculators.CalculatorListFragment"
         android:label="Calculator List"
         tools:layout="@layout/fragment_calculator_list" />
 

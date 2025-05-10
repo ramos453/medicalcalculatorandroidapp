@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.ui.theme.calculators
+package com.example.medicalcalculatorapp.presentation.calculators
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.medicalcalculatorapp.data.model.MedicalCalculator
 import com.example.medicalcalculatorapp.data.repository.CalculatorRepository
 import com.example.medicalcalculatorapp.databinding.FragmentCalculatorListBinding
 import com.example.medicalcalculatorapp.R
-import com.example.medicalcalculatorapp.ui.theme.auth.DisclaimerDialogFragment
+import com.example.medicalcalculatorapp.presentation.auth.DisclaimerDialogFragment
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 
 class CalculatorListFragment : Fragment() {

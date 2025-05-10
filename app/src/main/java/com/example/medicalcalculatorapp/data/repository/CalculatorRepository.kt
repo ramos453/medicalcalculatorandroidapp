@@ -1,8 +1,8 @@
 package com.example.medicalcalculatorapp.data.repository
 
-import com.example.medicalcalculatorapp.data.model.CalculatorField
-import com.example.medicalcalculatorapp.data.model.FieldType
-import com.example.medicalcalculatorapp.data.model.MedicalCalculator
+import com.example.medicalcalculatorapp.domain.model.CalculatorField
+import com.example.medicalcalculatorapp.domain.model.FieldType
+import com.example.medicalcalculatorapp.domain.model.MedicalCalculator
 
 class CalculatorRepository {
 

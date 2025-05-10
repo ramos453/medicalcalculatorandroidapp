@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.ui.theme.auth
+package com.example.medicalcalculatorapp.presentation.auth
 
 import android.os.Bundle
 import android.view.LayoutInflater

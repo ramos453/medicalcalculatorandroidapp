@@ -1,4 +1,4 @@
-package com.example.medicalcalculatorapp.ui.theme
+package com.example.medicalcalculatorapp.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
