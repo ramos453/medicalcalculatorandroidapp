@@ -107,12 +107,12 @@ class CalculatorListFragment : Fragment() {
         // Set up top filter buttons
         binding.btnAll.setOnClickListener {
             viewModel.setFilterMode(CalculatorListViewModel.FilterMode.ALL)
-            updateFilterButtonsUI(CalculatorListViewModel.FilterMode.ALL)
+            //updateFilterButtonsUI(CalculatorListViewModel.FilterMode.ALL)
         }
 
         binding.btnFavorites.setOnClickListener {
             viewModel.setFilterMode(CalculatorListViewModel.FilterMode.FAVORITES)
-            updateFilterButtonsUI(CalculatorListViewModel.FilterMode.FAVORITES)
+            //updateFilterButtonsUI(CalculatorListViewModel.FilterMode.FAVORITES)
         }
 
         // Set up search functionality

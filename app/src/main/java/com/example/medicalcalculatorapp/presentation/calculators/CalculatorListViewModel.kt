@@ -41,10 +41,10 @@ class CalculatorListViewModel(
     }
 
     fun setFilterMode(mode: FilterMode) {
-        if (_currentFilterMode.value != mode) {
+        //if (_currentFilterMode.value != mode) {
             _currentFilterMode.value = mode
             loadCalculators()
-        }
+        //}
     }
 
     fun searchCalculators(query: String?) {
