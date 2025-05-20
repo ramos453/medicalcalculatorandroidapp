@@ -1,213 +1,181 @@
 package com.example.medicalcalculatorapp.data.repository
 
-import com.example.medicalcalculatorapp.domain.model.CalculatorField
-import com.example.medicalcalculatorapp.domain.model.FieldType
+import com.example.medicalcalculatorapp.data.db.MedicalCalculatorDatabase
+import com.example.medicalcalculatorapp.data.db.entity.FavoriteEntity
+import com.example.medicalcalculatorapp.data.db.mapper.CalculatorMapper
+import com.example.medicalcalculatorapp.data.user.UserManager
 import com.example.medicalcalculatorapp.domain.model.MedicalCalculator
+import com.example.medicalcalculatorapp.domain.repository.ICalculatorRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
-class CalculatorRepository {
+@OptIn(ExperimentalCoroutinesApi::class)
+class CalculatorRepository(
+    private val database: MedicalCalculatorDatabase,
+    private val calculatorMapper: CalculatorMapper,
+    private val userManager: UserManager
+) : ICalculatorRepository {
 
-    fun getCalculators(): List<MedicalCalculator> {
-        // In a real professional app, this would come from a database or API
-        return listOf(
-            // BMI Calculator
-            MedicalCalculator(
-                id = "bmi_calc",
-                name = "BMI Calculator",
-                description = "Calculate Body Mass Index based on height and weight",
-                category = "general",
-                inputFields = listOf(
-                    CalculatorField(
-                        id = "height",
-                        name = "Height",
-                        type = FieldType.NUMBER,
-                        units = "cm",
-                        minValue = 50.0,
-                        maxValue = 300.0,
-                        defaultValue = "170"
-                    ),
-                    CalculatorField(
-                        id = "weight",
-                        name = "Weight",
-                        type = FieldType.NUMBER,
-                        units = "kg",
-                        minValue = 20.0,
-                        maxValue = 500.0,
-                        defaultValue = "70"
-                    )
-                ),
-                resultFields = listOf(
-                    CalculatorField(
-                        id = "bmi",
-                        name = "BMI",
-                        type = FieldType.NUMBER,
-                        units = "kg/m²"
-                    ),
-                    CalculatorField(
-                        id = "category",
-                        name = "Category",
-                        type = FieldType.TEXT
-                    )
-                )
-            ),
+    override fun getAllCalculators(): Flow<List<MedicalCalculator>> {
+        val userId = userManager.getCurrentUserId()
 
-            // Creatinine Clearance
-            MedicalCalculator(
-                id = "creatinine_clearance",
-                name = "Creatinine Clearance",
-                description = "Estimates creatinine clearance (kidney function)",
-                category = "renal",
-                inputFields = listOf(
-                    CalculatorField(
-                        id = "age",
-                        name = "Age",
-                        type = FieldType.NUMBER,
-                        units = "years",
-                        minValue = 18.0,
-                        maxValue = 120.0,
-                        defaultValue = "50"
-                    ),
-                    CalculatorField(
-                        id = "weight",
-                        name = "Weight",
-                        type = FieldType.NUMBER,
-                        units = "kg",
-                        minValue = 20.0,
-                        maxValue = 500.0,
-                        defaultValue = "70"
-                    ),
-                    CalculatorField(
-                        id = "gender",
-                        name = "Gender",
-                        type = FieldType.RADIO,
-                        options = listOf("Male", "Female")
-                    ),
-                    CalculatorField(
-                        id = "serum_creatinine",
-                        name = "Serum Creatinine",
-                        type = FieldType.NUMBER,
-                        units = "mg/dL",
-                        minValue = 0.1,
-                        maxValue = 20.0,
-                        defaultValue = "1.0"
-                    )
-                ),
-                resultFields = listOf(
-                    CalculatorField(
-                        id = "creatinine_clearance",
-                        name = "Creatinine Clearance",
-                        type = FieldType.NUMBER,
-                        units = "mL/min"
-                    )
-                ),
-                isFavorite = true
-            ),
+        // Get all calculators, their fields, and favorite status
+        val calculatorsFlow = database.calculatorDao().getAllCalculators()
 
-            // Mean Arterial Pressure
-            MedicalCalculator(
-                id = "map_calc",
-                name = "Mean Arterial Pressure (MAP)",
-                description = "Calculates MAP.",
-                category = "cardiology",
-                inputFields = listOf(
-                    CalculatorField(
-                        id = "systolic",
-                        name = "Systolic BP",
-                        type = FieldType.NUMBER,
-                        units = "mmHg",
-                        minValue = 40.0,
-                        maxValue = 300.0,
-                        defaultValue = "120"
-                    ),
-                    CalculatorField(
-                        id = "diastolic",
-                        name = "Diastolic BP",
-                        type = FieldType.NUMBER,
-                        units = "mmHg",
-                        minValue = 20.0,
-                        maxValue = 200.0,
-                        defaultValue = "80"
-                    )
-                ),
-                resultFields = listOf(
-                    CalculatorField(
-                        id = "map",
-                        name = "MAP",
-                        type = FieldType.NUMBER,
-                        units = "mmHg"
-                    )
-                )
-            ),
+        return calculatorsFlow.flatMapLatest { calculators ->
+            // For each calculator, we need to fetch its fields and favorite status
+            if (calculators.isEmpty()) {
+                return@flatMapLatest flow { emit(emptyList<MedicalCalculator>()) }
+            }
 
-            // Pregnancy Due Date
-            MedicalCalculator(
-                id = "pregnancy_calc",
-                name = "Pregnancy Due Dates",
-                description = "From LMP, EGA, or date of conception.",
-                category = "obstetrics",
-                inputFields = listOf(
-                    CalculatorField(
-                        id = "lmp_date",
-                        name = "Last Menstrual Period",
-                        type = FieldType.TEXT,
-                        defaultValue = ""
+            // Create a flow for each calculator with its fields and favorite status
+            val calculatorFlows = calculators.map { calculator ->
+                combine(
+                    database.fieldDao().getInputFieldsForCalculator(calculator.id),
+                    database.fieldDao().getResultFieldsForCalculator(calculator.id),
+                    database.favoriteDao().isCalculatorFavorited(calculator.id, userId)
+                ) { inputFields, resultFields, isFavorite ->
+                    calculatorMapper.mapEntityToDomain(
+                        calculator,
+                        inputFields,
+                        resultFields,
+                        isFavorite
                     )
-                ),
-                resultFields = listOf(
-                    CalculatorField(
-                        id = "due_date",
-                        name = "Due Date",
-                        type = FieldType.TEXT
-                    ),
-                    CalculatorField(
-                        id = "current_ega",
-                        name = "Current EGA",
-                        type = FieldType.TEXT
-                    )
-                ),
-                isFavorite = true
-            ),
+                }
+            }
 
-            // BMI & BSA
-            MedicalCalculator(
-                id = "bmi_bsa_calc",
-                name = "BMI & BSA",
-                description = "Categorizes obesity, assists some med dosing.",
-                category = "general",
-                inputFields = listOf(
-                    CalculatorField(
-                        id = "height",
-                        name = "Height",
-                        type = FieldType.NUMBER,
-                        units = "cm",
-                        minValue = 50.0,
-                        maxValue = 300.0,
-                        defaultValue = "170"
-                    ),
-                    CalculatorField(
-                        id = "weight",
-                        name = "Weight",
-                        type = FieldType.NUMBER,
-                        units = "kg",
-                        minValue = 20.0,
-                        maxValue = 500.0,
-                        defaultValue = "70"
+            // Combine all calculator flows into a single list
+            combine(calculatorFlows) { calculatorArray ->
+                calculatorArray.toList()
+            }
+        }
+    }
+
+    override fun getCalculatorById(calculatorId: String): Flow<MedicalCalculator?> {
+        val userId = userManager.getCurrentUserId()
+
+        return flow {
+            val calculator = database.calculatorDao().getCalculatorById(calculatorId) ?: return@flow emit(null)
+            val inputFields = database.fieldDao().getInputFieldsForCalculator(calculatorId).firstOrNull() ?: emptyList()
+            val resultFields = database.fieldDao().getResultFieldsForCalculator(calculatorId).firstOrNull() ?: emptyList()
+            val isFavorite = database.favoriteDao().isCalculatorFavorited(calculatorId, userId).firstOrNull() ?: false
+
+            emit(calculatorMapper.mapEntityToDomain(calculator, inputFields, resultFields, isFavorite))
+        }
+    }
+
+    override fun getCalculatorsByCategory(categoryId: String): Flow<List<MedicalCalculator>> {
+        val userId = userManager.getCurrentUserId()
+
+        val calculatorsFlow = database.calculatorDao().getCalculatorsByCategory(categoryId)
+
+        return calculatorsFlow.flatMapLatest { calculators ->
+            if (calculators.isEmpty()) {
+                return@flatMapLatest flow { emit(emptyList<MedicalCalculator>()) }
+            }
+
+            val calculatorFlows = calculators.map { calculator ->
+                combine(
+                    database.fieldDao().getInputFieldsForCalculator(calculator.id),
+                    database.fieldDao().getResultFieldsForCalculator(calculator.id),
+                    database.favoriteDao().isCalculatorFavorited(calculator.id, userId)
+                ) { inputFields, resultFields, isFavorite ->
+                    calculatorMapper.mapEntityToDomain(
+                        calculator,
+                        inputFields,
+                        resultFields,
+                        isFavorite
                     )
-                ),
-                resultFields = listOf(
-                    CalculatorField(
-                        id = "bmi",
-                        name = "BMI",
-                        type = FieldType.NUMBER,
-                        units = "kg/m²"
-                    ),
-                    CalculatorField(
-                        id = "bsa",
-                        name = "BSA",
-                        type = FieldType.NUMBER,
-                        units = "m²"
-                    )
-                )
+                }
+            }
+
+            combine(calculatorFlows) { calculatorArray ->
+                calculatorArray.toList()
+            }
+        }
+    }
+
+    override fun getFavoriteCalculators(userId: String): Flow<List<MedicalCalculator>> {
+        return database.calculatorDao().getFavoriteCalculators(userId)
+            .flatMapLatest { calculators ->
+                if (calculators.isEmpty()) {
+                    return@flatMapLatest flow { emit(emptyList<MedicalCalculator>()) }
+                }
+
+                val calculatorFlows = calculators.map { calculator ->
+                    combine(
+                        database.fieldDao().getInputFieldsForCalculator(calculator.id),
+                        database.fieldDao().getResultFieldsForCalculator(calculator.id),
+                    ) { inputFields, resultFields ->
+                        calculatorMapper.mapEntityToDomain(
+                            calculator,
+                            inputFields,
+                            resultFields,
+                            true // These are favorite calculators
+                        )
+                    }
+                }
+
+                combine(calculatorFlows) { calculatorArray ->
+                    calculatorArray.toList()
+                }
+            }
+    }
+
+    override fun searchCalculators(query: String): Flow<List<MedicalCalculator>> {
+        val userId = userManager.getCurrentUserId()
+
+        return database.calculatorDao().searchCalculators(query)
+            .flatMapLatest { calculators ->
+                if (calculators.isEmpty()) {
+                    return@flatMapLatest flow { emit(emptyList<MedicalCalculator>()) }
+                }
+
+                val calculatorFlows = calculators.map { calculator ->
+                    combine(
+                        database.fieldDao().getInputFieldsForCalculator(calculator.id),
+                        database.fieldDao().getResultFieldsForCalculator(calculator.id),
+                        database.favoriteDao().isCalculatorFavorited(calculator.id, userId)
+                    ) { inputFields, resultFields, isFavorite ->
+                        calculatorMapper.mapEntityToDomain(
+                            calculator,
+                            inputFields,
+                            resultFields,
+                            isFavorite
+                        )
+                    }
+                }
+
+                combine(calculatorFlows) { calculatorArray ->
+                    calculatorArray.toList()
+                }
+            }
+    }
+
+    override suspend fun toggleFavorite(calculatorId: String, userId: String): Boolean {
+        val isFavorite = database.favoriteDao().isCalculatorFavorited(calculatorId, userId).firstOrNull() ?: false
+
+        if (isFavorite) {
+            // Remove from favorites
+            database.favoriteDao().deleteFavorite(calculatorId, userId)
+            return false
+        } else {
+            // Add to favorites
+            val favorite = FavoriteEntity(
+                calculatorId = calculatorId,
+                userId = userId
             )
-        )
+            database.favoriteDao().insertFavorite(favorite)
+            return true
+        }
+    }
+
+    override suspend fun isFavorite(calculatorId: String, userId: String): Flow<Boolean> {
+        return database.favoriteDao().isCalculatorFavorited(calculatorId, userId)
     }
 }

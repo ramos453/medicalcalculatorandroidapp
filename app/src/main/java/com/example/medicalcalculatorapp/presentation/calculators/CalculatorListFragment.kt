@@ -6,12 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.medicalcalculatorapp.data.repository.CalculatorRepository
-import com.example.medicalcalculatorapp.databinding.FragmentCalculatorListBinding
 import com.example.medicalcalculatorapp.R
+import com.example.medicalcalculatorapp.databinding.FragmentCalculatorListBinding
+import com.example.medicalcalculatorapp.di.AppDependencies
 import com.example.medicalcalculatorapp.presentation.auth.DisclaimerDialogFragment
 import com.example.medicalcalculatorapp.util.SecureStorageManager
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class CalculatorListFragment : Fragment() {
 
@@ -20,10 +26,14 @@ class CalculatorListFragment : Fragment() {
 
     private lateinit var calculatorAdapter: CalculatorAdapter
     private lateinit var secureStorageManager: SecureStorageManager
-    private val calculatorRepository = CalculatorRepository()
 
-    // Track current filter mode
-    private var currentFilterMode = FilterMode.ALL
+    // Create ViewModel using our Factory
+    private val viewModel: CalculatorListViewModel by viewModels {
+        CalculatorListViewModel.Factory(
+            AppDependencies.provideCalculatorRepository(requireContext()),
+            AppDependencies.provideUserManager(requireContext())
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +58,7 @@ class CalculatorListFragment : Fragment() {
 
         setupRecyclerView()
         setupFilterButtons()
-        loadCalculators()
+        observeViewModel()
     }
 
     private fun showDisclaimerDialog() {
@@ -66,17 +76,8 @@ class CalculatorListFragment : Fragment() {
                 Toast.makeText(requireContext(), "Selected: ${calculator.name}", Toast.LENGTH_SHORT).show()
             },
             onFavoriteClick = { calculator ->
-                // Toggle favorite status
-                val updatedCalculator = calculator.copy(isFavorite = !calculator.isFavorite)
-                // In a real app, would update the database
-                Toast.makeText(
-                    requireContext(),
-                    if (updatedCalculator.isFavorite) "Added to favorites" else "Removed from favorites",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                // Refresh list with updated data
-                loadCalculators()
+                // Toggle favorite status through the ViewModel
+                viewModel.toggleFavorite(calculator.id)
             }
         )
 
@@ -88,20 +89,6 @@ class CalculatorListFragment : Fragment() {
 
     private fun setupFilterButtons() {
         // Set up bottom navigation
-//        binding.bottomNavigation.setOnItemSelectedListener { item ->
-//            when (item.itemId) {
-//                binding.btnHome.id -> {
-//                    // Would navigate to home dashboard in a real app
-//                    true
-//                }
-//                binding.btnSettings.id -> {
-//                    // Would navigate to settings in a real app
-//                    Toast.makeText(requireContext(), "Settings", Toast.LENGTH_SHORT).show()
-//                    true
-//                }
-//                else -> false
-//            }
-//        }
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.btnHome -> {
@@ -116,44 +103,79 @@ class CalculatorListFragment : Fragment() {
                 else -> false
             }
         }
+
         // Set up top filter buttons
         binding.btnAll.setOnClickListener {
-            currentFilterMode = FilterMode.ALL
-            updateFilterButtonsUI()
-            loadCalculators()
+            viewModel.setFilterMode(CalculatorListViewModel.FilterMode.ALL)
+            updateFilterButtonsUI(CalculatorListViewModel.FilterMode.ALL)
         }
 
         binding.btnFavorites.setOnClickListener {
-            currentFilterMode = FilterMode.FAVORITES
-            updateFilterButtonsUI()
-            loadCalculators()
+            viewModel.setFilterMode(CalculatorListViewModel.FilterMode.FAVORITES)
+            updateFilterButtonsUI(CalculatorListViewModel.FilterMode.FAVORITES)
         }
+
+        // Set up search functionality
+        binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.searchCalculators(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrBlank()) {
+                    viewModel.searchCalculators(null)
+                }
+                return true
+            }
+        })
     }
 
-    private fun updateFilterButtonsUI() {
+    private fun updateFilterButtonsUI(filterMode: CalculatorListViewModel.FilterMode) {
         // Update UI to show which filter is selected
-        binding.btnAll.alpha = if (currentFilterMode == FilterMode.ALL) 1.0f else 0.5f
-        binding.btnFavorites.alpha = if (currentFilterMode == FilterMode.FAVORITES) 1.0f else 0.5f
+        binding.btnAll.alpha = if (filterMode == CalculatorListViewModel.FilterMode.ALL) 1.0f else 0.5f
+        binding.btnFavorites.alpha = if (filterMode == CalculatorListViewModel.FilterMode.FAVORITES) 1.0f else 0.5f
     }
 
-    private fun loadCalculators() {
-        val allCalculators = calculatorRepository.getCalculators()
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Use repeatOnLifecycle to automatically cancel flow collection when view is not in active state
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observe calculators
+                launch {
+                    viewModel.calculators.collectLatest { calculators ->
+                        calculatorAdapter.submitList(calculators)
+                    }
+                }
 
-        // Apply filter
-        val filteredCalculators = when (currentFilterMode) {
-            FilterMode.ALL -> allCalculators
-            FilterMode.FAVORITES -> allCalculators.filter { it.isFavorite }
+                // Observe loading state
+                launch {
+                    viewModel.isLoading.collectLatest { isLoading ->
+                        binding.progressBar?.visibility = if (isLoading) View.VISIBLE else View.GONE
+                    }
+                }
+
+                // Observe error messages
+                launch {
+                    viewModel.error.collectLatest { errorMessage ->
+                        errorMessage?.let {
+                            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+
+                // Observe filter mode
+                launch {
+                    viewModel.currentFilterMode.collectLatest { mode ->
+                        updateFilterButtonsUI(mode)
+                    }
+                }
+            }
         }
-
-        calculatorAdapter.submitList(filteredCalculators)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    enum class FilterMode {
-        ALL, FAVORITES
     }
 }
