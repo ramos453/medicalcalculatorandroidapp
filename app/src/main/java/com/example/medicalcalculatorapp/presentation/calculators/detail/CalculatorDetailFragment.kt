@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import com.example.medicalcalculatorapp.presentation.util.FormGenerator
 import android.widget.LinearLayout
 import com.example.medicalcalculatorapp.domain.model.MedicalCalculator
+import com.example.medicalcalculatorapp.domain.model.FieldType
 
 
 class CalculatorDetailFragment : Fragment() {
@@ -71,6 +72,86 @@ class CalculatorDetailFragment : Fragment() {
         // We'll update title when calculator data is loaded
     }
 
+    private fun setupListeners() {
+        binding.btnCalculate.setOnClickListener {
+            // Validate inputs before calculation
+            if (validateInputs()) {
+                viewModel.performCalculation()
+            }
+        }
+
+        binding.btnReset.setOnClickListener {
+            viewModel.resetInputs()
+            // Reset form fields to default values
+            viewModel.calculator.value?.let { calculator ->
+                generateInputFields(calculator)
+            }
+        }
+    }
+
+    private fun validateInputs(): Boolean {
+        // Basic validation - check if required fields have values
+        var isValid = true
+
+        viewModel.calculator.value?.inputFields?.forEach { field ->
+            val value = viewModel.inputValues.value[field.id] ?: ""
+
+            if (value.isBlank()) {
+                // Show error for empty required fields
+                Toast.makeText(
+                    requireContext(),
+                    "Please enter a value for ${field.name}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                isValid = false
+                return@forEach
+            }
+
+            // For number fields, check if the value is a valid number
+            if (field.type == FieldType.NUMBER) {
+                try {
+                    val numValue = value.toDouble()
+
+                    // Check min/max range if defined
+                    field.minValue?.let { min ->
+                        if (numValue < min) {
+                            Toast.makeText(
+                                requireContext(),
+                                "${field.name} must be at least $min",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            isValid = false
+                            return@forEach
+                        }
+                    }
+
+                    field.maxValue?.let { max ->
+                        if (numValue > max) {
+                            Toast.makeText(
+                                requireContext(),
+                                "${field.name} must not exceed $max",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            isValid = false
+                            return@forEach
+                        }
+                    }
+
+                } catch (e: NumberFormatException) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Please enter a valid number for ${field.name}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    isValid = false
+                    return@forEach
+                }
+            }
+        }
+
+        return isValid
+    }
+
     private fun setupObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -114,7 +195,10 @@ class CalculatorDetailFragment : Fragment() {
                 // Observe loading state
                 launch {
                     viewModel.isLoading.collectLatest { isLoading ->
-                        // We'll add progress indicator in final implementation
+                        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                        binding.inputFieldsContainer.visibility = if (isLoading) View.GONE else View.VISIBLE
+                        binding.btnCalculate.isEnabled = !isLoading
+                        binding.btnReset.isEnabled = !isLoading
                     }
                 }
 
@@ -156,16 +240,16 @@ class CalculatorDetailFragment : Fragment() {
         }
     }
 
-    private fun setupListeners() {
-        binding.btnCalculate.setOnClickListener {
-            viewModel.performCalculation()
-        }
-
-        binding.btnReset.setOnClickListener {
-            viewModel.resetInputs()
-            // We'll update input fields in next step
-        }
-    }
+//    private fun setupListeners() {
+//        binding.btnCalculate.setOnClickListener {
+//            viewModel.performCalculation()
+//        }
+//
+//        binding.btnReset.setOnClickListener {
+//            viewModel.resetInputs()
+//            // We'll update input fields in next step
+//        }
+//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
