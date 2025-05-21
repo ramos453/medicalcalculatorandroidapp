@@ -18,6 +18,8 @@ import com.example.medicalcalculatorapp.presentation.auth.DisclaimerDialogFragme
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.NavHostFragment
 
 class CalculatorListFragment : Fragment() {
 
@@ -72,11 +74,13 @@ class CalculatorListFragment : Fragment() {
     private fun setupRecyclerView() {
         calculatorAdapter = CalculatorAdapter(
             onItemClick = { calculator ->
-                // Will implement calculator detail later
-                Toast.makeText(requireContext(), "Selected: ${calculator.name}", Toast.LENGTH_SHORT).show()
+                // Alternative manual approach that doesn't require the generated classes
+                val bundle = Bundle().apply {
+                    putString("calculatorId", calculator.id)
+                }
+                findNavController().navigate(R.id.action_calculatorListFragment_to_calculatorDetailFragment, bundle)
             },
             onFavoriteClick = { calculator ->
-                // Toggle favorite status through the ViewModel
                 viewModel.toggleFavorite(calculator.id)
             }
         )

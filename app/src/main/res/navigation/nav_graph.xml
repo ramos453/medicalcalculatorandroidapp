@@ -53,6 +53,21 @@
         android:id="@+id/calculatorListFragment"
         android:name="com.example.medicalcalculatorapp.presentation.calculators.CalculatorListFragment"
         android:label="Calculator List"
-        tools:layout="@layout/fragment_calculator_list" />
+        tools:layout="@layout/fragment_calculator_list">
+        <action
+            android:id="@+id/action_calculatorListFragment_to_calculatorDetailFragment"
+            app:destination="@id/calculatorDetailFragment" />
+    </fragment>
+
+    <!-- Add this inside the navigation element, along with other fragments -->
+    <fragment
+        android:id="@+id/calculatorDetailFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.calculators.detail.CalculatorDetailFragment"
+        android:label="Calculator"
+        tools:layout="@layout/fragment_calculator_detail">
+        <argument
+            android:name="calculatorId"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
