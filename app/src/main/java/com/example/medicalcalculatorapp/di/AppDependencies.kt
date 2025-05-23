@@ -13,6 +13,9 @@ import com.example.medicalcalculatorapp.domain.repository.ICalculatorRepository
 import com.example.medicalcalculatorapp.domain.repository.ICategoryRepository
 import com.example.medicalcalculatorapp.domain.repository.IHistoryRepository
 import com.google.gson.Gson
+import com.example.medicalcalculatorapp.domain.service.CalculatorService
+import com.example.medicalcalculatorapp.domain.calculator.impl.MedicationDosageCalculator
+
 
 /**
  * A simple dependency provider for the application.
@@ -26,6 +29,7 @@ object AppDependencies {
     private var historyRepository: IHistoryRepository? = null
     private var userManager: UserManager? = null
     private val gson = Gson()
+    private var calculatorService: CalculatorService? = null
 
     fun provideDatabase(context: Context): MedicalCalculatorDatabase {
         return database ?: synchronized(this) {
@@ -57,6 +61,26 @@ object AppDependencies {
                 categoryRepository = it
             }
         }
+    }
+
+    fun provideCalculatorService(): CalculatorService {
+        return calculatorService ?: synchronized(this) {
+            calculatorService ?: createCalculatorService().also {
+                calculatorService = it
+            }
+        }
+    }
+
+    private fun createCalculatorService(): CalculatorService {
+        val service = CalculatorService()
+
+        // Register all calculators
+        service.registerCalculator(MedicationDosageCalculator())
+        // Future calculators will be registered here:
+        // service.registerCalculator(BMICalculator())
+        // service.registerCalculator(MAPCalculator())
+
+        return service
     }
 
     fun provideHistoryRepository(context: Context): IHistoryRepository {

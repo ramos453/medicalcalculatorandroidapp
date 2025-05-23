@@ -36,7 +36,8 @@ class CalculatorDetailFragment : Fragment() {
         CalculatorDetailViewModel.Factory(
             calculatorId = calculatorId,
             calculatorRepository = AppDependencies.provideCalculatorRepository(requireContext()),
-            historyRepository = AppDependencies.provideHistoryRepository(requireContext())
+            historyRepository = AppDependencies.provideHistoryRepository(requireContext()),
+            calculatorService = AppDependencies.provideCalculatorService() // NEW: Add this line
         )
     }
 
