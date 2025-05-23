@@ -140,11 +140,18 @@ class CalculatorDetailViewModel(
         val formattedBmi = String.format("%.1f", bmi)
 
         // Determine BMI category
+//        val category = when {
+//            bmi < 18.5 -> "Underweight"
+//            bmi < 25 -> "Normal weight"
+//            bmi < 30 -> "Overweight"
+//            else -> "Obese"
+//        }
+        // Determine BMI category in Spanish
         val category = when {
-            bmi < 18.5 -> "Underweight"
-            bmi < 25 -> "Normal weight"
-            bmi < 30 -> "Overweight"
-            else -> "Obese"
+            bmi < 18.5 -> "Bajo peso"
+            bmi < 25 -> "Peso normal"
+            bmi < 30 -> "Sobrepeso"
+            else -> "Obesidad"
         }
 
         return mapOf(
@@ -153,25 +160,43 @@ class CalculatorDetailViewModel(
         )
     }
 
-    private fun getInterpretation(calculatorId: String, results: Map<String, String>): String {
-        return when (calculatorId) {
-            "bmi_calc" -> {
-                val bmi = results["bmi"] ?: return ""
-                val category = results["category"] ?: return ""
+//    private fun getInterpretation(calculatorId: String, results: Map<String, String>): String {
+//        return when (calculatorId) {
+//            "bmi_calc" -> {
+//                val bmi = results["bmi"] ?: return ""
+//                val category = results["category"] ?: return ""
+//
+//                // Clinical interpretation for BMI
+//                when (category) {
+//                    "Underweight" -> "BMI $bmi - Underweight (BMI < 18.5)\nPossible nutritional deficiency and osteoporosis risks."
+//                    "Normal weight" -> "BMI $bmi - Normal weight (BMI 18.5-24.9)\nLowest risk of health problems related to weight."
+//                    "Overweight" -> "BMI $bmi - Overweight (BMI 25-29.9)\nIncreased risk of cardiovascular disease and diabetes."
+//                    "Obese" -> "BMI $bmi - Obese (BMI ≥ 30)\nHigher risk of heart disease, stroke, type 2 diabetes and certain cancers."
+//                    else -> ""
+//                }
+//            }
+//            // Add more calculator types as needed
+//            else -> ""
+//        }
+//    }
+private fun getInterpretation(calculatorId: String, results: Map<String, String>): String {
+    return when (calculatorId) {
+        "bmi_calc" -> {
+            val bmi = results["bmi"] ?: return ""
+            val category = results["category"] ?: return ""
 
-                // Clinical interpretation for BMI
-                when (category) {
-                    "Underweight" -> "BMI $bmi - Underweight (BMI < 18.5)\nPossible nutritional deficiency and osteoporosis risks."
-                    "Normal weight" -> "BMI $bmi - Normal weight (BMI 18.5-24.9)\nLowest risk of health problems related to weight."
-                    "Overweight" -> "BMI $bmi - Overweight (BMI 25-29.9)\nIncreased risk of cardiovascular disease and diabetes."
-                    "Obese" -> "BMI $bmi - Obese (BMI ≥ 30)\nHigher risk of heart disease, stroke, type 2 diabetes and certain cancers."
-                    else -> ""
-                }
+            // Clinical interpretation for BMI in Spanish
+            when (category) {
+                "Bajo peso" -> "IMC $bmi - Bajo peso (IMC < 18.5)\nPosibles riesgos de deficiencia nutricional y osteoporosis."
+                "Peso normal" -> "IMC $bmi - Peso normal (IMC 18.5-24.9)\nMenor riesgo de problemas de salud relacionados con el peso."
+                "Sobrepeso" -> "IMC $bmi - Sobrepeso (IMC 25-29.9)\nRiesgo aumentado de enfermedad cardiovascular y diabetes."
+                "Obesidad" -> "IMC $bmi - Obesidad (IMC ≥ 30)\nMayor riesgo de enfermedad cardíaca, accidente cerebrovascular, diabetes tipo 2 y ciertos cánceres."
+                else -> ""
             }
-            // Add more calculator types as needed
-            else -> ""
         }
+        else -> ""
     }
+}
 
     private fun saveCalculationToHistory(
         calculatorId: String,

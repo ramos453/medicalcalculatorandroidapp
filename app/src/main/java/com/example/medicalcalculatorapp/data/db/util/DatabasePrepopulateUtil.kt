@@ -28,33 +28,34 @@ object DatabasePrepopulateUtil {
         }
     }
 
+
     private fun createInitialCategories(): List<CategoryEntity> {
         return listOf(
             CategoryEntity(
                 id = "general",
                 name = "General",
-                description = "General medical calculators",
+                description = "Calculadoras médicas generales",
                 iconResId = R.drawable.ic_launcher_foreground,
                 displayOrder = 0
             ),
             CategoryEntity(
                 id = "cardiology",
-                name = "Cardiology",
-                description = "Cardiovascular calculators",
+                name = "Cardiología",
+                description = "Calculadoras cardiovasculares",
                 iconResId = R.drawable.ic_launcher_foreground,
                 displayOrder = 1
             ),
             CategoryEntity(
                 id = "renal",
-                name = "Nephrology",
-                description = "Kidney function calculators",
+                name = "Nefrología",
+                description = "Calculadoras de función renal",
                 iconResId = R.drawable.ic_launcher_foreground,
                 displayOrder = 2
             ),
             CategoryEntity(
                 id = "obstetrics",
-                name = "Obstetrics",
-                description = "Pregnancy and childbirth calculators",
+                name = "Obstetricia",
+                description = "Calculadoras de embarazo y parto",
                 iconResId = R.drawable.ic_launcher_foreground,
                 displayOrder = 3
             )
@@ -65,36 +66,105 @@ object DatabasePrepopulateUtil {
         return listOf(
             CalculatorEntity(
                 id = "bmi_calc",
-                name = "BMI Calculator",
-                description = "Calculate Body Mass Index based on height and weight",
+                name = "Calculadora de IMC",
+                description = "Calcula el Índice de Masa Corporal basado en altura y peso",
                 categoryId = "general"
             ),
             CalculatorEntity(
                 id = "creatinine_clearance",
-                name = "Creatinine Clearance",
-                description = "Estimates creatinine clearance (kidney function)",
+                name = "Depuración de Creatinina",
+                description = "Estima la depuración de creatinina (función renal)",
                 categoryId = "renal"
             ),
             CalculatorEntity(
                 id = "map_calc",
-                name = "Mean Arterial Pressure (MAP)",
-                description = "Calculates MAP.",
+                name = "Presión Arterial Media (PAM)",
+                description = "Calcula la PAM.",
                 categoryId = "cardiology"
             ),
             CalculatorEntity(
                 id = "pregnancy_calc",
-                name = "Pregnancy Due Dates",
-                description = "From LMP, EGA, or date of conception.",
+                name = "Fechas de Embarazo",
+                description = "Desde FUM, EG, o fecha de concepción.",
                 categoryId = "obstetrics"
             ),
             CalculatorEntity(
                 id = "bmi_bsa_calc",
-                name = "BMI & BSA",
-                description = "Categorizes obesity, assists some med dosing.",
+                name = "IMC y SC",
+                description = "Categoriza obesidad, ayuda en dosificación de medicamentos.",
                 categoryId = "general"
             )
         )
     }
+
+//
+//    private fun createInitialCategories(): List<CategoryEntity> {
+//        return listOf(
+//            CategoryEntity(
+//                id = "general",
+//                name = "General",
+//                description = "General medical calculators",
+//                iconResId = R.drawable.ic_launcher_foreground,
+//                displayOrder = 0
+//            ),
+//            CategoryEntity(
+//                id = "cardiology",
+//                name = "Cardiology",
+//                description = "Cardiovascular calculators",
+//                iconResId = R.drawable.ic_launcher_foreground,
+//                displayOrder = 1
+//            ),
+//            CategoryEntity(
+//                id = "renal",
+//                name = "Nephrology",
+//                description = "Kidney function calculators",
+//                iconResId = R.drawable.ic_launcher_foreground,
+//                displayOrder = 2
+//            ),
+//            CategoryEntity(
+//                id = "obstetrics",
+//                name = "Obstetrics",
+//                description = "Pregnancy and childbirth calculators",
+//                iconResId = R.drawable.ic_launcher_foreground,
+//                displayOrder = 3
+//            )
+//        )
+//    }
+//
+//    private fun createInitialCalculators(): List<CalculatorEntity> {
+//        return listOf(
+//            CalculatorEntity(
+//                id = "bmi_calc",
+//                name = "BMI Calculator",
+//                description = "Calculate Body Mass Index based on height and weight",
+//                categoryId = "general"
+//            ),
+//            CalculatorEntity(
+//                id = "creatinine_clearance",
+//                name = "Creatinine Clearance",
+//                description = "Estimates creatinine clearance (kidney function)",
+//                categoryId = "renal"
+//            ),
+//            CalculatorEntity(
+//                id = "map_calc",
+//                name = "Mean Arterial Pressure (MAP)",
+//                description = "Calculates MAP.",
+//                categoryId = "cardiology"
+//            ),
+//            CalculatorEntity(
+//                id = "pregnancy_calc",
+//                name = "Pregnancy Due Dates",
+//                description = "From LMP, EGA, or date of conception.",
+//                categoryId = "obstetrics"
+//            ),
+//            CalculatorEntity(
+//                id = "bmi_bsa_calc",
+//                name = "BMI & BSA",
+//                description = "Categorizes obesity, assists some med dosing.",
+//                categoryId = "general"
+//            )
+//        )
+//    }
 
     private fun createInitialFields(): List<FieldEntity> {
         val fields = mutableListOf<FieldEntity>()
@@ -103,10 +173,35 @@ object DatabasePrepopulateUtil {
         fields.addAll(
             listOf(
                 // Input fields
+//                FieldEntity(
+//                    calculatorId = "bmi_calc",
+//                    id = "height",
+//                    name = "Height",
+//                    type = FieldType.NUMBER.name,
+//                    isInputField = true,
+//                    units = "cm",
+//                    minValue = 50.0,
+//                    maxValue = 300.0,
+//                    defaultValue = "170",
+//                    displayOrder = 0
+//                ),
+//                FieldEntity(
+//                    calculatorId = "bmi_calc",
+//                    id = "weight",
+//                    name = "Weight",
+//                    type = FieldType.NUMBER.name,
+//                    isInputField = true,
+//                    units = "kg",
+//                    minValue = 20.0,
+//                    maxValue = 500.0,
+//                    defaultValue = "70",
+//                    displayOrder = 1
+//                ),
+                // Update field names to Spanish
                 FieldEntity(
                     calculatorId = "bmi_calc",
                     id = "height",
-                    name = "Height",
+                    name = "Altura",
                     type = FieldType.NUMBER.name,
                     isInputField = true,
                     units = "cm",
@@ -118,7 +213,7 @@ object DatabasePrepopulateUtil {
                 FieldEntity(
                     calculatorId = "bmi_calc",
                     id = "weight",
-                    name = "Weight",
+                    name = "Peso",
                     type = FieldType.NUMBER.name,
                     isInputField = true,
                     units = "kg",
