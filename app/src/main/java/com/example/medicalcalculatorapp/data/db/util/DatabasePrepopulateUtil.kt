@@ -460,6 +460,612 @@ object DatabasePrepopulateUtil {
             )
         ))
 
+
+// ==============================================
+// 4. IV DRIP RATE CALCULATOR (Updated)
+// ==============================================
+        fields.addAll(listOf(
+            // Input fields
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "total_volume",
+                name = "Volumen Total a Administrar",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 1.0,
+                maxValue = 5000.0,
+                defaultValue = "1000",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "infusion_time_hours",
+                name = "Tiempo de Infusión",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "horas",
+                minValue = 0.1,
+                maxValue = 48.0,
+                defaultValue = "8",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "drop_factor_type",
+                name = "Tipo de Equipo de Goteo",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["Macrogotero", "Microgotero"]""",
+                defaultValue = "Macrogotero",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "drop_factor",
+                name = "Factor de Goteo",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["10 gtt/mL", "15 gtt/mL", "20 gtt/mL", "60 gtt/mL (microgotero)"]""",
+                defaultValue = "20 gtt/mL",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "fluid_type",
+                name = "Tipo de Fluido (opcional)",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Solución Salina 0.9%", "Dextrosa 5%", "Lactato de Ringer", "Solución Mixta", "Medicamento Diluido", "Sangre/Hemoderivados", "Otro"]""",
+                defaultValue = "Solución Salina 0.9%",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "patient_weight",
+                name = "Peso del Paciente (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "kg",
+                minValue = 1.0,
+                maxValue = 200.0,
+                defaultValue = "70",
+                displayOrder = 5
+            ),
+
+            // Output fields
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "drip_rate",
+                name = "Velocidad de Goteo",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "gtt/min",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "flow_rate",
+                name = "Velocidad de Flujo",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL/h",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "drops_per_15_seconds",
+                name = "Gotas en 15 segundos",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "gtt",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "infusion_duration",
+                name = "Duración Total",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "safety_warnings",
+                name = "Advertencias de Seguridad",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "iv_drip_rate",
+                id = "monitoring_guidelines",
+                name = "Guías de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 5
+            )
+        ))
+
+
+// ==============================================
+// 5. FLUID BALANCE CALCULATOR (24 HOURS)
+// ==============================================
+        fields.addAll(listOf(
+            // INTAKE INPUT FIELDS
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "oral_intake",
+                name = "Ingesta Oral",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 10000.0,
+                defaultValue = "1500",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "iv_fluids",
+                name = "Fluidos Intravenosos",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 10000.0,
+                defaultValue = "2000",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "enteral_feeding",
+                name = "Alimentación Enteral",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 5000.0,
+                defaultValue = "0",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "medications_fluids",
+                name = "Fluidos con Medicamentos",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 2000.0,
+                defaultValue = "200",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "other_intake",
+                name = "Otros Ingresos",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 3000.0,
+                defaultValue = "0",
+                displayOrder = 4
+            ),
+
+            // OUTPUT INPUT FIELDS
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "urine_output",
+                name = "Diuresis",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 8000.0,
+                defaultValue = "1500",
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "vomit",
+                name = "Vómitos",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 3000.0,
+                defaultValue = "0",
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "drainage",
+                name = "Drenajes",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 5000.0,
+                defaultValue = "0",
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "diarrhea",
+                name = "Diarrea",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mL",
+                minValue = 0.0,
+                maxValue = 3000.0,
+                defaultValue = "0",
+                displayOrder = 8
+            ),
+
+            // PATIENT FACTORS FOR INSENSIBLE LOSSES
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "patient_weight",
+                name = "Peso del Paciente",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "kg",
+                minValue = 1.0,
+                maxValue = 200.0,
+                defaultValue = "70",
+                displayOrder = 9
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "has_fever",
+                name = "Fiebre (>37.5°C)",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 10
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "temperature",
+                name = "Temperatura Corporal",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "°C",
+                minValue = 35.0,
+                maxValue = 42.0,
+                defaultValue = "36.5",
+                displayOrder = 11
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "on_mechanical_ventilation",
+                name = "Ventilación Mecánica",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 12
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "hyperventilation",
+                name = "Hiperventilación",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 13
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "environmental_factors",
+                name = "Factores Ambientales",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Normal", "Calor Extremo", "Fototerapia", "Incubadora", "Ambiente Seco"]""",
+                defaultValue = "Normal",
+                displayOrder = 14
+            ),
+
+            // OUTPUT FIELDS
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "total_intake",
+                name = "Ingresos Totales",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "total_output",
+                name = "Egresos Totales",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "insensible_losses",
+                name = "Pérdidas Insensibles Calculadas",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "fluid_balance",
+                name = "Balance Hídrico Neto",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "balance_interpretation",
+                name = "Interpretación del Balance",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "intake_breakdown",
+                name = "Desglose de Ingresos",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "output_breakdown",
+                name = "Desglose de Egresos",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "fluid_balance",
+                id = "clinical_recommendations",
+                name = "Recomendaciones Clínicas",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 7
+            )
+        ))
+
+        // Add this to the createInitialFields() function in DatabasePrepopulateUtil.kt
+// Replace or add the electrolyte_management fields:
+
+// ==============================================
+// 6. ELECTROLYTE MANAGEMENT CALCULATOR
+// ==============================================
+        fields.addAll(listOf(
+            // PATIENT INFORMATION
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "patient_weight",
+                name = "Peso del Paciente",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "kg",
+                minValue = 1.0,
+                maxValue = 200.0,
+                defaultValue = "70",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "patient_age",
+                name = "Edad del Paciente",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "años",
+                minValue = 0.1,
+                maxValue = 120.0,
+                defaultValue = "45",
+                displayOrder = 1
+            ),
+
+            // SODIUM MANAGEMENT
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "current_sodium",
+                name = "Sodio Sérico Actual",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mEq/L",
+                minValue = 100.0,
+                maxValue = 180.0,
+                defaultValue = "130",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "target_sodium",
+                name = "Sodio Deseado",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mEq/L",
+                minValue = 135.0,
+                maxValue = 145.0,
+                defaultValue = "140",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "correction_time_hours",
+                name = "Tiempo de Corrección",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "horas",
+                minValue = 6.0,
+                maxValue = 48.0,
+                defaultValue = "24",
+                displayOrder = 4
+            ),
+
+            // POTASSIUM MANAGEMENT
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "current_potassium",
+                name = "Potasio Sérico Actual",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mEq/L",
+                minValue = 1.5,
+                maxValue = 6.0,
+                defaultValue = "3.0",
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "target_potassium",
+                name = "Potasio Deseado",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mEq/L",
+                minValue = 3.5,
+                maxValue = 5.0,
+                defaultValue = "4.0",
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "potassium_route",
+                name = "Vía de Administración K+",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["Vía Oral", "Vía Intravenosa"]""",
+                defaultValue = "Vía Intravenosa",
+                displayOrder = 7
+            ),
+
+            // CLINICAL FACTORS
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "renal_function",
+                name = "Función Renal",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Normal", "Insuficiencia Leve", "Insuficiencia Moderada", "Insuficiencia Severa", "Diálisis"]""",
+                defaultValue = "Normal",
+                displayOrder = 8
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "cardiac_status",
+                name = "Estado Cardíaco",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Normal", "Arritmias", "Insuficiencia Cardíaca", "Monitoreo Cardíaco"]""",
+                defaultValue = "Normal",
+                displayOrder = 9
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "diuretic_use",
+                name = "Uso de Diuréticos",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 10
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "neurological_symptoms",
+                name = "Síntomas Neurológicos",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 11
+            ),
+
+            // OUTPUT FIELDS
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "sodium_deficit",
+                name = "Déficit de Sodio",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mEq",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "sodium_replacement_rate",
+                name = "Velocidad de Reemplazo Na+",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mEq/h",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "sodium_solution_volume",
+                name = "Volumen de Solución Salina",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "potassium_deficit",
+                name = "Déficit de Potasio",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mEq",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "potassium_dose",
+                name = "Dosis de Potasio",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mEq",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "potassium_infusion_rate",
+                name = "Velocidad de Infusión K+",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mEq/h",
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "safety_warnings",
+                name = "Advertencias de Seguridad",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "monitoring_protocol",
+                name = "Protocolo de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "electrolyte_management",
+                id = "solution_recommendations",
+                name = "Recomendaciones de Soluciones",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 8
+            )
+        ))
+
         // ==============================================
         // 2. BMI CALCULATOR
         // ==============================================
@@ -748,436 +1354,3 @@ object DatabasePrepopulateUtil {
     }
 }
 
-// package com.example.medicalcalculatorapp.data.db.util
-//
-//import android.content.Context
-//import com.example.medicalcalculatorapp.R
-//import com.example.medicalcalculatorapp.data.db.MedicalCalculatorDatabase
-//import com.example.medicalcalculatorapp.data.db.entity.CalculatorEntity
-//import com.example.medicalcalculatorapp.data.db.entity.CategoryEntity
-//import com.example.medicalcalculatorapp.data.db.entity.FieldEntity
-//import com.example.medicalcalculatorapp.domain.model.FieldType
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.withContext
-//
-//object DatabasePrepopulateUtil {
-//
-//    suspend fun prepopulateDatabase(context: Context, database: MedicalCalculatorDatabase) {
-//        withContext(Dispatchers.IO) {
-//            // First, insert categories
-//            val categories = createInitialCategories()
-//            database.categoryDao().insertCategories(categories)
-//
-//            // Then, insert calculators
-//            val calculators = createInitialCalculators()
-//            database.calculatorDao().insertCalculators(calculators)
-//
-//            // Finally, insert fields for each calculator
-//            val allFields = createInitialFields()
-//            database.fieldDao().insertFields(allFields)
-//        }
-//    }
-//
-//
-//    private fun createInitialCategories(): List<CategoryEntity> {
-//        return listOf(
-//            CategoryEntity(
-//                id = "general",
-//                name = "General",
-//                description = "Calculadoras médicas generales",
-//                iconResId = R.drawable.ic_launcher_foreground,
-//                displayOrder = 0
-//            ),
-//            CategoryEntity(
-//                id = "cardiology",
-//                name = "Cardiología",
-//                description = "Calculadoras cardiovasculares",
-//                iconResId = R.drawable.ic_launcher_foreground,
-//                displayOrder = 1
-//            ),
-//            CategoryEntity(
-//                id = "renal",
-//                name = "Nefrología",
-//                description = "Calculadoras de función renal",
-//                iconResId = R.drawable.ic_launcher_foreground,
-//                displayOrder = 2
-//            ),
-//            CategoryEntity(
-//                id = "obstetrics",
-//                name = "Obstetricia",
-//                description = "Calculadoras de embarazo y parto",
-//                iconResId = R.drawable.ic_launcher_foreground,
-//                displayOrder = 3
-//            )
-//        )
-//    }
-//
-//    private fun createInitialCalculators(): List<CalculatorEntity> {
-//        return listOf(
-//            CalculatorEntity(
-//                id = "bmi_calc",
-//                name = "Calculadora de IMC",
-//                description = "Calcula el Índice de Masa Corporal basado en altura y peso",
-//                categoryId = "general"
-//            ),
-//            CalculatorEntity(
-//                id = "creatinine_clearance",
-//                name = "Depuración de Creatinina",
-//                description = "Estima la depuración de creatinina (función renal)",
-//                categoryId = "renal"
-//            ),
-//            CalculatorEntity(
-//                id = "map_calc",
-//                name = "Presión Arterial Media (PAM)",
-//                description = "Calcula la PAM.",
-//                categoryId = "cardiology"
-//            ),
-//            CalculatorEntity(
-//                id = "pregnancy_calc",
-//                name = "Fechas de Embarazo",
-//                description = "Desde FUM, EG, o fecha de concepción.",
-//                categoryId = "obstetrics"
-//            ),
-//            CalculatorEntity(
-//                id = "bmi_bsa_calc",
-//                name = "IMC y SC",
-//                description = "Categoriza obesidad, ayuda en dosificación de medicamentos.",
-//                categoryId = "general"
-//            )
-//        )
-//    }
-//
-////
-////    private fun createInitialCategories(): List<CategoryEntity> {
-////        return listOf(
-////            CategoryEntity(
-////                id = "general",
-////                name = "General",
-////                description = "General medical calculators",
-////                iconResId = R.drawable.ic_launcher_foreground,
-////                displayOrder = 0
-////            ),
-////            CategoryEntity(
-////                id = "cardiology",
-////                name = "Cardiology",
-////                description = "Cardiovascular calculators",
-////                iconResId = R.drawable.ic_launcher_foreground,
-////                displayOrder = 1
-////            ),
-////            CategoryEntity(
-////                id = "renal",
-////                name = "Nephrology",
-////                description = "Kidney function calculators",
-////                iconResId = R.drawable.ic_launcher_foreground,
-////                displayOrder = 2
-////            ),
-////            CategoryEntity(
-////                id = "obstetrics",
-////                name = "Obstetrics",
-////                description = "Pregnancy and childbirth calculators",
-////                iconResId = R.drawable.ic_launcher_foreground,
-////                displayOrder = 3
-////            )
-////        )
-////    }
-////
-////    private fun createInitialCalculators(): List<CalculatorEntity> {
-////        return listOf(
-////            CalculatorEntity(
-////                id = "bmi_calc",
-////                name = "BMI Calculator",
-////                description = "Calculate Body Mass Index based on height and weight",
-////                categoryId = "general"
-////            ),
-////            CalculatorEntity(
-////                id = "creatinine_clearance",
-////                name = "Creatinine Clearance",
-////                description = "Estimates creatinine clearance (kidney function)",
-////                categoryId = "renal"
-////            ),
-////            CalculatorEntity(
-////                id = "map_calc",
-////                name = "Mean Arterial Pressure (MAP)",
-////                description = "Calculates MAP.",
-////                categoryId = "cardiology"
-////            ),
-////            CalculatorEntity(
-////                id = "pregnancy_calc",
-////                name = "Pregnancy Due Dates",
-////                description = "From LMP, EGA, or date of conception.",
-////                categoryId = "obstetrics"
-////            ),
-////            CalculatorEntity(
-////                id = "bmi_bsa_calc",
-////                name = "BMI & BSA",
-////                description = "Categorizes obesity, assists some med dosing.",
-////                categoryId = "general"
-////            )
-////        )
-////    }
-//
-//    private fun createInitialFields(): List<FieldEntity> {
-//        val fields = mutableListOf<FieldEntity>()
-//
-//        // BMI Calculator fields
-//        fields.addAll(
-//            listOf(
-//                // Input fields
-////                FieldEntity(
-////                    calculatorId = "bmi_calc",
-////                    id = "height",
-////                    name = "Height",
-////                    type = FieldType.NUMBER.name,
-////                    isInputField = true,
-////                    units = "cm",
-////                    minValue = 50.0,
-////                    maxValue = 300.0,
-////                    defaultValue = "170",
-////                    displayOrder = 0
-////                ),
-////                FieldEntity(
-////                    calculatorId = "bmi_calc",
-////                    id = "weight",
-////                    name = "Weight",
-////                    type = FieldType.NUMBER.name,
-////                    isInputField = true,
-////                    units = "kg",
-////                    minValue = 20.0,
-////                    maxValue = 500.0,
-////                    defaultValue = "70",
-////                    displayOrder = 1
-////                ),
-//                // Update field names to Spanish
-//                FieldEntity(
-//                    calculatorId = "bmi_calc",
-//                    id = "height",
-//                    name = "Altura",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "cm",
-//                    minValue = 50.0,
-//                    maxValue = 300.0,
-//                    defaultValue = "170",
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "bmi_calc",
-//                    id = "weight",
-//                    name = "Peso",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "kg",
-//                    minValue = 20.0,
-//                    maxValue = 500.0,
-//                    defaultValue = "70",
-//                    displayOrder = 1
-//                ),
-//                // Output fields
-//                FieldEntity(
-//                    calculatorId = "bmi_calc",
-//                    id = "bmi",
-//                    name = "BMI",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = false,
-//                    units = "kg/m²",
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "bmi_calc",
-//                    id = "category",
-//                    name = "Category",
-//                    type = FieldType.TEXT.name,
-//                    isInputField = false,
-//                    displayOrder = 1
-//                )
-//            )
-//        )
-//
-//        // Add Creatinine Clearance fields
-//        fields.addAll(
-//            listOf(
-//                // Input fields
-//                FieldEntity(
-//                    calculatorId = "creatinine_clearance",
-//                    id = "age",
-//                    name = "Age",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "years",
-//                    minValue = 18.0,
-//                    maxValue = 120.0,
-//                    defaultValue = "50",
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "creatinine_clearance",
-//                    id = "weight",
-//                    name = "Weight",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "kg",
-//                    minValue = 20.0,
-//                    maxValue = 500.0,
-//                    defaultValue = "70",
-//                    displayOrder = 1
-//                ),
-//                FieldEntity(
-//                    calculatorId = "creatinine_clearance",
-//                    id = "gender",
-//                    name = "Gender",
-//                    type = FieldType.RADIO.name,
-//                    isInputField = true,
-//                    options = """["Male", "Female"]""", // JSON string
-//                    displayOrder = 2
-//                ),
-//                FieldEntity(
-//                    calculatorId = "creatinine_clearance",
-//                    id = "serum_creatinine",
-//                    name = "Serum Creatinine",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "mg/dL",
-//                    minValue = 0.1,
-//                    maxValue = 20.0,
-//                    defaultValue = "1.0",
-//                    displayOrder = 3
-//                ),
-//                // Output field
-//                FieldEntity(
-//                    calculatorId = "creatinine_clearance",
-//                    id = "creatinine_clearance",
-//                    name = "Creatinine Clearance",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = false,
-//                    units = "mL/min",
-//                    displayOrder = 0
-//                )
-//            )
-//        )
-//
-//        // Add MAP Calculator fields
-//        fields.addAll(
-//            listOf(
-//                // Input fields
-//                FieldEntity(
-//                    calculatorId = "map_calc",
-//                    id = "systolic",
-//                    name = "Systolic BP",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "mmHg",
-//                    minValue = 40.0,
-//                    maxValue = 300.0,
-//                    defaultValue = "120",
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "map_calc",
-//                    id = "diastolic",
-//                    name = "Diastolic BP",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "mmHg",
-//                    minValue = 20.0,
-//                    maxValue = 200.0,
-//                    defaultValue = "80",
-//                    displayOrder = 1
-//                ),
-//                // Output field
-//                FieldEntity(
-//                    calculatorId = "map_calc",
-//                    id = "map",
-//                    name = "MAP",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = false,
-//                    units = "mmHg",
-//                    displayOrder = 0
-//                )
-//            )
-//        )
-//
-//        // Add Pregnancy Calculator fields
-//        fields.addAll(
-//            listOf(
-//                // Input field
-//                FieldEntity(
-//                    calculatorId = "pregnancy_calc",
-//                    id = "lmp_date",
-//                    name = "Last Menstrual Period",
-//                    type = FieldType.TEXT.name,
-//                    isInputField = true,
-//                    displayOrder = 0
-//                ),
-//                // Output fields
-//                FieldEntity(
-//                    calculatorId = "pregnancy_calc",
-//                    id = "due_date",
-//                    name = "Due Date",
-//                    type = FieldType.TEXT.name,
-//                    isInputField = false,
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "pregnancy_calc",
-//                    id = "current_ega",
-//                    name = "Current EGA",
-//                    type = FieldType.TEXT.name,
-//                    isInputField = false,
-//                    displayOrder = 1
-//                )
-//            )
-//        )
-//
-//        // Add BMI & BSA Calculator fields
-//        fields.addAll(
-//            listOf(
-//                // Input fields
-//                FieldEntity(
-//                    calculatorId = "bmi_bsa_calc",
-//                    id = "height",
-//                    name = "Height",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "cm",
-//                    minValue = 50.0,
-//                    maxValue = 300.0,
-//                    defaultValue = "170",
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "bmi_bsa_calc",
-//                    id = "weight",
-//                    name = "Weight",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = true,
-//                    units = "kg",
-//                    minValue = 20.0,
-//                    maxValue = 500.0,
-//                    defaultValue = "70",
-//                    displayOrder = 1
-//                ),
-//                // Output fields
-//                FieldEntity(
-//                    calculatorId = "bmi_bsa_calc",
-//                    id = "bmi",
-//                    name = "BMI",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = false,
-//                    units = "kg/m²",
-//                    displayOrder = 0
-//                ),
-//                FieldEntity(
-//                    calculatorId = "bmi_bsa_calc",
-//                    id = "bsa",
-//                    name = "BSA",
-//                    type = FieldType.NUMBER.name,
-//                    isInputField = false,
-//                    units = "m²",
-//                    displayOrder = 1
-//                )
-//            )
-//        )
-//
-//        return fields
-//    }
-//}
