@@ -233,6 +233,233 @@ object DatabasePrepopulateUtil {
             )
         ))
 
+
+// ==============================================
+// 2. HEPARIN DOSAGE CALCULATOR (Updated)
+// ==============================================
+        fields.addAll(listOf(
+            // Input fields
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "patient_weight",
+                name = "Peso del Paciente",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "kg",
+                minValue = 3.0,
+                maxValue = 200.0,
+                defaultValue = "70",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "treatment_type",
+                name = "Tipo de Tratamiento",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["Profiláctico", "Terapéutico"]""",
+                defaultValue = "Profiláctico",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "dosing_schedule",
+                name = "Esquema de Dosificación (solo terapéutico)",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 mg/kg cada 12h", "1.5 mg/kg cada 24h"]""",
+                defaultValue = "1 mg/kg cada 12h",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "high_bleeding_risk",
+                name = "Alto Riesgo Hemorrágico",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "renal_insufficiency",
+                name = "Insuficiencia Renal (ClCr <30 mL/min)",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "elderly_patient",
+                name = "Paciente >75 años",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "drug_concentration",
+                name = "Concentración del Medicamento (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mg/mL",
+                minValue = 1.0,
+                maxValue = 200.0,
+                defaultValue = "100", // Common enoxaparin concentration
+                displayOrder = 6
+            ),
+
+            // Output fields
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "recommended_dose",
+                name = "Dosis Recomendada",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mg",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "administration_frequency",
+                name = "Frecuencia de Administración",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "volume_to_administer",
+                name = "Volumen a Administrar",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "safety_warnings",
+                name = "Advertencias de Seguridad",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "heparin_dosage",
+                id = "monitoring_recommendations",
+                name = "Recomendaciones de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            )
+        ))
+
+
+
+// ==============================================
+// 3. UNIT CONVERTER CALCULATOR
+// ==============================================
+        fields.addAll(listOf(
+            // Input fields
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "conversion_type",
+                name = "Tipo de Conversión",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["mg → mL", "mL → mg", "mEq → mg", "mg → mEq", "mcg → mg", "mg → mcg", "Unidades → mL"]""",
+                defaultValue = "mg → mL",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "input_value",
+                name = "Valor a Convertir",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                minValue = 0.001,
+                maxValue = 999999.0,
+                defaultValue = "100",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "concentration",
+                name = "Concentración (mg/mL o U/mL)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mg/mL",
+                minValue = 0.001,
+                maxValue = 10000.0,
+                defaultValue = "50",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "substance_for_meq",
+                name = "Sustancia (solo para mEq)",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["KCl (Cloruro de Potasio)", "NaCl (Cloruro de Sodio)", "CaCl2 (Cloruro de Calcio)", "MgSO4 (Sulfato de Magnesio)", "NaHCO3 (Bicarbonato de Sodio)"]""",
+                defaultValue = "KCl (Cloruro de Potasio)",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "insulin_type",
+                name = "Tipo de Insulina (solo para Unidades)",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Insulina Regular (100 U/mL)", "Insulina NPH (100 U/mL)", "Insulina Rápida (100 U/mL)", "Insulina Lenta (40 U/mL)"]""",
+                defaultValue = "Insulina Regular (100 U/mL)",
+                displayOrder = 4
+            ),
+
+            // Output fields
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "converted_value",
+                name = "Valor Convertido",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "output_unit",
+                name = "Unidad de Salida",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "conversion_formula",
+                name = "Fórmula Utilizada",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "clinical_notes",
+                name = "Notas Clínicas",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "unit_converter",
+                id = "equivalent_weight_info",
+                name = "Información de Peso Equivalente",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            )
+        ))
+
         // ==============================================
         // 2. BMI CALCULATOR
         // ==============================================

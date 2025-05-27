@@ -14,7 +14,12 @@ import com.example.medicalcalculatorapp.domain.repository.ICategoryRepository
 import com.example.medicalcalculatorapp.domain.repository.IHistoryRepository
 import com.google.gson.Gson
 import com.example.medicalcalculatorapp.domain.service.CalculatorService
+
+// Import your domain calculators here
 import com.example.medicalcalculatorapp.domain.calculator.impl.MedicationDosageCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.HeparinDosageCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.UnitConverterCalculator
+
 
 
 /**
@@ -76,6 +81,8 @@ object AppDependencies {
 
         // Register all calculators
         service.registerCalculator(MedicationDosageCalculator())
+        service.registerCalculator(HeparinDosageCalculator())
+        service.registerCalculator(UnitConverterCalculator())
         // Future calculators will be registered here:
         // service.registerCalculator(BMICalculator())
         // service.registerCalculator(MAPCalculator())
