@@ -28,6 +28,9 @@ class PrivacyPolicyFragment : Fragment() {
         binding.ivBack.setOnClickListener {
             findNavController().popBackStack()
         }
+
+        // Make sure the privacy policy text is loaded and scrollable
+        binding.tvPrivacyPolicy.text = getString(com.example.medicalcalculatorapp.R.string.privacy_policy_text)
     }
 
     override fun onDestroyView() {
