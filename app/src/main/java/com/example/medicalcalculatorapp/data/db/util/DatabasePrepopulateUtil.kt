@@ -9,6 +9,8 @@ import com.example.medicalcalculatorapp.data.db.entity.FieldEntity
 import com.example.medicalcalculatorapp.domain.model.FieldType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first  // Add this import instead of firstOrNull
+
 
 object DatabasePrepopulateUtil {
 
@@ -25,6 +27,26 @@ object DatabasePrepopulateUtil {
             // Finally, insert fields for each calculator
             val allFields = createInitialFields()
             database.fieldDao().insertFields(allFields)
+        }
+    }
+
+    suspend fun prepopulateIfNeeded(context: Context, database: MedicalCalculatorDatabase) {
+        withContext(Dispatchers.IO) {
+            try {
+                // Check if database is already populated
+                val existingCalculators = database.calculatorDao().getAllCalculators().first()
+
+                if (existingCalculators.isNullOrEmpty()) {
+                    // Database is empty, populate it
+                    prepopulateDatabase(context, database)
+                    println("✅ Database populated successfully with ${existingCalculators?.size ?: 0} calculators")
+                } else {
+                    println("✅ Database already populated with ${existingCalculators.size} calculators")
+                }
+            } catch (e: Exception) {
+                println("❌ Error checking/populating database: ${e.message}")
+                e.printStackTrace()
+            }
         }
     }
 
@@ -70,19 +92,23 @@ object DatabasePrepopulateUtil {
 
     private fun createInitialCalculators(): List<CalculatorEntity> {
         return listOf(
-            // 1. DOSIFICACIÓN Y MEDICACIÓN
+            // 1. MEDICATION DOSAGE CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "medication_dosage",
                 name = "Calculadora de Dosis de Medicamentos",
                 description = "Cálculos de dosis (mg/kg), unidades y concentraciones",
                 categoryId = "dosing_medication"
             ),
+
+            // 2. HEPARIN DOSAGE CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "heparin_dosage",
                 name = "Calculadora de Dosis de Heparina",
                 description = "HBPM y aPTT - Anticoagulación especializada",
                 categoryId = "dosing_medication"
             ),
+
+            // 3. UNIT CONVERTER CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "unit_converter",
                 name = "Conversor de Unidades",
@@ -90,19 +116,23 @@ object DatabasePrepopulateUtil {
                 categoryId = "dosing_medication"
             ),
 
-            // 2. FLUIDOS Y ELECTROLITOS
+            // 4. IV DRIP RATE CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "iv_drip_rate",
                 name = "Velocidad de Goteo IV",
                 description = "Cálculo de gtt/min y mL/h para terapia intravenosa",
                 categoryId = "fluids_electrolytes"
             ),
+
+            // 5. FLUID BALANCE CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "fluid_balance",
                 name = "Balance Hídrico 24h",
                 description = "Ingresos y egresos en 24 horas",
                 categoryId = "fluids_electrolytes"
             ),
+
+            // 6. ELECTROLYTE MANAGEMENT CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "electrolyte_management",
                 name = "Gestión de Fluidos y Electrolitos",
@@ -110,55 +140,126 @@ object DatabasePrepopulateUtil {
                 categoryId = "fluids_electrolytes"
             ),
 
-            // 3. MONITOREO DE SIGNOS VITALES
+            // 7. BMI CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "bmi_calculator",
                 name = "Índice de Masa Corporal (IMC)",
                 description = "Evaluación nutricional: peso ÷ talla²",
                 categoryId = "vital_signs"
             ),
+
+            // 8. MAP CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
                 id = "map_calculator",
                 name = "Presión Arterial Media (PAM)",
                 description = "Cálculo hemodinámico: (PAS + 2×PAD)/3",
                 categoryId = "vital_signs"
             ),
+
+            // 9. MINUTE VENTILATION CALCULATOR ✅ IMPLEMENTED
             CalculatorEntity(
-                id = "pain_scale",
-                name = "Escala de Valoración del Dolor (EVA/VAS)",
-                description = "Puntuación de dolor de 0-10",
+                id = "minute_ventilation",
+                name = "Calculadora de Ventilación Minuto",
+                description = "Cálculo de VE = FR × VT para evaluación ventilatoria",
                 categoryId = "vital_signs"
-            ),
-
-            // 4. ESCALAS DE VALORACIÓN CLÍNICA
-            CalculatorEntity(
-                id = "braden_scale",
-                name = "Escala de Braden",
-                description = "Evaluación de riesgo de úlceras por presión",
-                categoryId = "clinical_scales"
-            ),
-            CalculatorEntity(
-                id = "glasgow_coma_scale",
-                name = "Escala de Coma de Glasgow",
-                description = "Nivel de conciencia en urgencias neurológicas",
-                categoryId = "clinical_scales"
-            ),
-
-            // 5. PEDIATRÍA Y NEONATOLOGÍA
-            CalculatorEntity(
-                id = "pediatric_dosage",
-                name = "Dosis Pediátrica",
-                description = "Dosificación (mg/kg) según peso y edad",
-                categoryId = "pediatric_neonatal"
-            ),
-            CalculatorEntity(
-                id = "apgar_score",
-                name = "Puntuación APGAR",
-                description = "Evaluación inmediata del recién nacido",
-                categoryId = "pediatric_neonatal"
             )
         )
     }
+
+
+//    private fun createInitialCalculators(): List<CalculatorEntity> {
+//        return listOf(
+//            // 1. DOSIFICACIÓN Y MEDICACIÓN
+//            CalculatorEntity(
+//                id = "medication_dosage",
+//                name = "Calculadora de Dosis de Medicamentos",
+//                description = "Cálculos de dosis (mg/kg), unidades y concentraciones",
+//                categoryId = "dosing_medication"
+//            ),
+//            CalculatorEntity(
+//                id = "heparin_dosage",
+//                name = "Calculadora de Dosis de Heparina",
+//                description = "HBPM y aPTT - Anticoagulación especializada",
+//                categoryId = "dosing_medication"
+//            ),
+//            CalculatorEntity(
+//                id = "unit_converter",
+//                name = "Conversor de Unidades",
+//                description = "mg⇄mL, mEq⇄mg y otras conversiones médicas",
+//                categoryId = "dosing_medication"
+//            ),
+//
+//            // 2. FLUIDOS Y ELECTROLITOS
+//            CalculatorEntity(
+//                id = "iv_drip_rate",
+//                name = "Velocidad de Goteo IV",
+//                description = "Cálculo de gtt/min y mL/h para terapia intravenosa",
+//                categoryId = "fluids_electrolytes"
+//            ),
+//            CalculatorEntity(
+//                id = "fluid_balance",
+//                name = "Balance Hídrico 24h",
+//                description = "Ingresos y egresos en 24 horas",
+//                categoryId = "fluids_electrolytes"
+//            ),
+//            CalculatorEntity(
+//                id = "electrolyte_management",
+//                name = "Gestión de Fluidos y Electrolitos",
+//                description = "Reemplazo de potasio, sodio y otros electrolitos",
+//                categoryId = "fluids_electrolytes"
+//            ),
+//
+//            // 3. MONITOREO DE SIGNOS VITALES
+//            CalculatorEntity(
+//                id = "bmi_calculator",
+//                name = "Índice de Masa Corporal (IMC)",
+//                description = "Evaluación nutricional: peso ÷ talla²",
+//                categoryId = "vital_signs"
+//            ),
+//            CalculatorEntity(
+//                id = "map_calculator",
+//                name = "Presión Arterial Media (PAM)",
+//                description = "Cálculo hemodinámico: (PAS + 2×PAD)/3",
+//                categoryId = "vital_signs"
+//            ),
+//
+//
+//            // 4. ESCALAS DE VALORACIÓN CLÍNICA
+//            CalculatorEntity(
+//                id = "braden_scale",
+//                name = "Escala de Braden",
+//                description = "Evaluación de riesgo de úlceras por presión",
+//                categoryId = "clinical_scales"
+//            ),
+//            CalculatorEntity(
+//                id = "glasgow_coma_scale",
+//                name = "Escala de Coma de Glasgow",
+//                description = "Nivel de conciencia en urgencias neurológicas",
+//                categoryId = "clinical_scales"
+//            ),
+//
+//            // 5. PEDIATRÍA Y NEONATOLOGÍA
+//            CalculatorEntity(
+//                id = "pediatric_dosage",
+//                name = "Dosis Pediátrica",
+//                description = "Dosificación (mg/kg) según peso y edad",
+//                categoryId = "pediatric_neonatal"
+//            ),
+//            CalculatorEntity(
+//                id = "apgar_score",
+//                name = "Puntuación APGAR",
+//                description = "Evaluación inmediata del recién nacido",
+//                categoryId = "pediatric_neonatal"
+//            ),
+//            CalculatorEntity(
+//                id = "minute_ventilation",
+//                name = "Calculadora de Ventilación Minuto",
+//                description = "Cálculo de VE = FR × VT para evaluación ventilatoria",
+//                categoryId = "vital_signs"
+//            )
+//
+//        )
+//    }
 
     private fun createInitialFields(): List<FieldEntity> {
         val fields = mutableListOf<FieldEntity>()
@@ -1067,19 +1168,19 @@ object DatabasePrepopulateUtil {
         ))
 
         // ==============================================
-        // 2. BMI CALCULATOR
+        // 7. BMI CALCULATOR (Updated)
         // ==============================================
         fields.addAll(listOf(
             // Input fields
             FieldEntity(
                 calculatorId = "bmi_calculator",
                 id = "height",
-                name = "Altura",
+                name = "Estatura",
                 type = FieldType.NUMBER.name,
                 isInputField = true,
                 units = "cm",
                 minValue = 50.0,
-                maxValue = 300.0,
+                maxValue = 250.0,
                 defaultValue = "170",
                 displayOrder = 0
             ),
@@ -1090,11 +1191,12 @@ object DatabasePrepopulateUtil {
                 type = FieldType.NUMBER.name,
                 isInputField = true,
                 units = "kg",
-                minValue = 2.0,
-                maxValue = 500.0,
+                minValue = 3.0,
+                maxValue = 300.0,
                 defaultValue = "70",
                 displayOrder = 1
             ),
+
             // Output fields
             FieldEntity(
                 calculatorId = "bmi_calculator",
@@ -1112,11 +1214,28 @@ object DatabasePrepopulateUtil {
                 type = FieldType.TEXT.name,
                 isInputField = false,
                 displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "bmi_calculator",
+                id = "health_recommendations",
+                name = "Recomendaciones de Salud",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "bmi_calculator",
+                id = "weight_range",
+                name = "Rango de Peso Saludable",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
             )
         ))
 
+
         // ==============================================
-        // 3. MAP CALCULATOR
+        // 8. MAP CALCULATOR (Updated)
         // ==============================================
         fields.addAll(listOf(
             // Input fields
@@ -1128,7 +1247,7 @@ object DatabasePrepopulateUtil {
                 isInputField = true,
                 units = "mmHg",
                 minValue = 50.0,
-                maxValue = 300.0,
+                maxValue = 250.0,
                 defaultValue = "120",
                 displayOrder = 0
             ),
@@ -1140,10 +1259,33 @@ object DatabasePrepopulateUtil {
                 isInputField = true,
                 units = "mmHg",
                 minValue = 30.0,
-                maxValue = 200.0,
+                maxValue = 150.0,
                 defaultValue = "80",
                 displayOrder = 1
             ),
+            FieldEntity(
+                calculatorId = "map_calculator",
+                id = "patient_age",
+                name = "Edad del Paciente (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "años",
+                minValue = 1.0,
+                maxValue = 120.0,
+                defaultValue = "45",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "map_calculator",
+                id = "clinical_context",
+                name = "Contexto Clínico",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Paciente Estable", "Cuidados Intensivos", "Postoperatorio", "Emergencia", "Choque"]""",
+                defaultValue = "Paciente Estable",
+                displayOrder = 3
+            ),
+
             // Output fields
             FieldEntity(
                 calculatorId = "map_calculator",
@@ -1161,192 +1303,22 @@ object DatabasePrepopulateUtil {
                 type = FieldType.TEXT.name,
                 isInputField = false,
                 displayOrder = 1
-            )
-        ))
-
-        // ==============================================
-        // 4. IV DRIP RATE CALCULATOR
-        // ==============================================
-        fields.addAll(listOf(
-            // Input fields
-            FieldEntity(
-                calculatorId = "iv_drip_rate",
-                id = "total_volume",
-                name = "Volumen Total",
-                type = FieldType.NUMBER.name,
-                isInputField = true,
-                units = "mL",
-                minValue = 1.0,
-                maxValue = 3000.0,
-                defaultValue = "1000",
-                displayOrder = 0
             ),
             FieldEntity(
-                calculatorId = "iv_drip_rate",
-                id = "infusion_time",
-                name = "Tiempo de Infusión",
-                type = FieldType.NUMBER.name,
-                isInputField = true,
-                units = "horas",
-                minValue = 0.1,
-                maxValue = 24.0,
-                defaultValue = "8",
-                displayOrder = 1
-            ),
-            FieldEntity(
-                calculatorId = "iv_drip_rate",
-                id = "drop_factor",
-                name = "Factor de Goteo",
-                type = FieldType.DROPDOWN.name,
-                isInputField = true,
-                options = """["10 gtt/mL", "15 gtt/mL", "20 gtt/mL", "60 gtt/mL (microgotero)"]""",
-                defaultValue = "20 gtt/mL",
-                displayOrder = 2
-            ),
-            // Output fields
-            FieldEntity(
-                calculatorId = "iv_drip_rate",
-                id = "ml_per_hour",
-                name = "Velocidad",
-                type = FieldType.NUMBER.name,
-                isInputField = false,
-                units = "mL/h",
-                displayOrder = 0
-            ),
-            FieldEntity(
-                calculatorId = "iv_drip_rate",
-                id = "drops_per_minute",
-                name = "Goteo",
-                type = FieldType.NUMBER.name,
-                isInputField = false,
-                units = "gtt/min",
-                displayOrder = 1
-            )
-        ))
-
-        // ==============================================
-        // 5. GLASGOW COMA SCALE
-        // ==============================================
-        fields.addAll(listOf(
-            // Input fields
-            FieldEntity(
-                calculatorId = "glasgow_coma_scale",
-                id = "eye_response",
-                name = "Respuesta Ocular",
-                type = FieldType.RADIO.name,
-                isInputField = true,
-                options = """["4 - Espontánea", "3 - Al llamado verbal", "2 - Al dolor", "1 - Sin respuesta"]""",
-                defaultValue = "4 - Espontánea",
-                displayOrder = 0
-            ),
-            FieldEntity(
-                calculatorId = "glasgow_coma_scale",
-                id = "verbal_response",
-                name = "Respuesta Verbal",
-                type = FieldType.RADIO.name,
-                isInputField = true,
-                options = """["5 - Orientado", "4 - Confuso", "3 - Palabras inapropiadas", "2 - Sonidos incomprensibles", "1 - Sin respuesta"]""",
-                defaultValue = "5 - Orientado",
-                displayOrder = 1
-            ),
-            FieldEntity(
-                calculatorId = "glasgow_coma_scale",
-                id = "motor_response",
-                name = "Respuesta Motora",
-                type = FieldType.RADIO.name,
-                isInputField = true,
-                options = """["6 - Obedece órdenes", "5 - Localiza dolor", "4 - Retira al dolor", "3 - Flexión anormal", "2 - Extensión anormal", "1 - Sin respuesta"]""",
-                defaultValue = "6 - Obedece órdenes",
-                displayOrder = 2
-            ),
-            // Output fields
-            FieldEntity(
-                calculatorId = "glasgow_coma_scale",
-                id = "total_score",
-                name = "Puntuación Total",
-                type = FieldType.NUMBER.name,
-                isInputField = false,
-                units = "puntos",
-                displayOrder = 0
-            ),
-            FieldEntity(
-                calculatorId = "glasgow_coma_scale",
-                id = "severity_level",
-                name = "Nivel de Severidad",
+                calculatorId = "map_calculator",
+                id = "clinical_recommendations",
+                name = "Recomendaciones Clínicas",
                 type = FieldType.TEXT.name,
                 isInputField = false,
-                displayOrder = 1
-            )
-        ))
-
-        // ==============================================
-        // 6. PEDIATRIC DOSAGE
-        // ==============================================
-        fields.addAll(listOf(
-            // Input fields
-            FieldEntity(
-                calculatorId = "pediatric_dosage",
-                id = "child_weight",
-                name = "Peso del Niño",
-                type = FieldType.NUMBER.name,
-                isInputField = true,
-                units = "kg",
-                minValue = 0.5,
-                maxValue = 80.0,
-                defaultValue = "20",
-                displayOrder = 0
-            ),
-            FieldEntity(
-                calculatorId = "pediatric_dosage",
-                id = "child_age",
-                name = "Edad",
-                type = FieldType.NUMBER.name,
-                isInputField = true,
-                units = "años",
-                minValue = 0.1,
-                maxValue = 18.0,
-                defaultValue = "5",
-                displayOrder = 1
-            ),
-            FieldEntity(
-                calculatorId = "pediatric_dosage",
-                id = "adult_dose",
-                name = "Dosis de Adulto",
-                type = FieldType.NUMBER.name,
-                isInputField = true,
-                units = "mg",
-                minValue = 1.0,
-                maxValue = 2000.0,
-                defaultValue = "500",
                 displayOrder = 2
             ),
             FieldEntity(
-                calculatorId = "pediatric_dosage",
-                id = "calculation_method",
-                name = "Método de Cálculo",
-                type = FieldType.RADIO.name,
-                isInputField = true,
-                options = """["Por peso (mg/kg)", "Fórmula de Young (edad)", "Fórmula de Clark (peso)"]""",
-                defaultValue = "Por peso (mg/kg)",
+                calculatorId = "map_calculator",
+                id = "perfusion_status",
+                name = "Estado de Perfusión",
+                type = FieldType.TEXT.name,
+                isInputField = false,
                 displayOrder = 3
-            ),
-            // Output fields
-            FieldEntity(
-                calculatorId = "pediatric_dosage",
-                id = "pediatric_dose",
-                name = "Dosis Pediátrica",
-                type = FieldType.NUMBER.name,
-                isInputField = false,
-                units = "mg",
-                displayOrder = 0
-            ),
-            FieldEntity(
-                calculatorId = "pediatric_dosage",
-                id = "safety_warning",
-                name = "Advertencia de Seguridad",
-                type = FieldType.TEXT.name,
-                isInputField = false,
-                displayOrder = 1
             )
         ))
 

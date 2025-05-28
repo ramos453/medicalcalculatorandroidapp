@@ -65,12 +65,6 @@ abstract class MedicalCalculatorDatabase : RoomDatabase() {
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
-                            // Pre-populate database when created
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val database = getDatabase(context)
-                                // Prepopulate database here - we'll implement this in Checkpoint 6
-                                DatabasePrepopulateUtil.prepopulateDatabase(context, database)
-                            }
                         }
                     })
                     .build()

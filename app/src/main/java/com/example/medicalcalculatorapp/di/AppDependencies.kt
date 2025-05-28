@@ -22,6 +22,11 @@ import com.example.medicalcalculatorapp.domain.calculator.impl.UnitConverterCalc
 import com.example.medicalcalculatorapp.domain.calculator.impl.IVDripRateCalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.FluidBalanceCalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.ElectrolyteManagementCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.BMICalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.MAPCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.MinuteVentilationCalculator
+
+
 
 
 /**
@@ -88,9 +93,9 @@ object AppDependencies {
         service.registerCalculator(IVDripRateCalculator())
         service.registerCalculator(FluidBalanceCalculator())
         service.registerCalculator(ElectrolyteManagementCalculator())
-        // Future calculators will be registered here:
-        // service.registerCalculator(BMICalculator())
-        // service.registerCalculator(MAPCalculator())
+        service.registerCalculator(BMICalculator())
+        service.registerCalculator(MAPCalculator())
+        service.registerCalculator(MinuteVentilationCalculator())
 
         return service
     }
