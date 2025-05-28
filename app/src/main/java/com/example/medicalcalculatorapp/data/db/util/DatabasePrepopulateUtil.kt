@@ -162,104 +162,38 @@ object DatabasePrepopulateUtil {
                 name = "Calculadora de Ventilación Minuto",
                 description = "Cálculo de VE = FR × VT para evaluación ventilatoria",
                 categoryId = "vital_signs"
+            ),
+            // 10. BRADEN SCALE CALCULATOR ✅ IMPLEMENTED
+            CalculatorEntity(
+                id = "braden_scale",
+                name = "Escala de Braden",
+                description = "Evaluación de riesgo de úlceras por presión",
+                categoryId = "clinical_scales"
+            ),
+            // 11. GLASGOW SCALE CALCULATOR ✅ IMPLEMENTED
+            CalculatorEntity(
+                id = "glasgow_coma_scale",
+                name = "Escala de Coma de Glasgow",
+                description = "Valoración del nivel de conciencia y función neurológica",
+                categoryId = "clinical_scales"
+            ),
+            // 12. PEDIATRIC DOSAGE CALCULATOR ✅ IMPLEMENTED
+            CalculatorEntity(
+                id = "pediatric_dosage",
+                name = "Dosis Pediátrica",
+                description = "Dosificación (mg/kg) según peso y edad",
+                categoryId = "pediatric_neonatal"
+            ),
+            // 13. APGAR SCORE CALCULATOR ✅ IMPLEMENTED
+            CalculatorEntity(
+                id = "apgar_score",
+                name = "Puntuación APGAR",
+                description = "Evaluación inmediata del recién nacido",
+                categoryId = "pediatric_neonatal"
             )
         )
     }
 
-
-//    private fun createInitialCalculators(): List<CalculatorEntity> {
-//        return listOf(
-//            // 1. DOSIFICACIÓN Y MEDICACIÓN
-//            CalculatorEntity(
-//                id = "medication_dosage",
-//                name = "Calculadora de Dosis de Medicamentos",
-//                description = "Cálculos de dosis (mg/kg), unidades y concentraciones",
-//                categoryId = "dosing_medication"
-//            ),
-//            CalculatorEntity(
-//                id = "heparin_dosage",
-//                name = "Calculadora de Dosis de Heparina",
-//                description = "HBPM y aPTT - Anticoagulación especializada",
-//                categoryId = "dosing_medication"
-//            ),
-//            CalculatorEntity(
-//                id = "unit_converter",
-//                name = "Conversor de Unidades",
-//                description = "mg⇄mL, mEq⇄mg y otras conversiones médicas",
-//                categoryId = "dosing_medication"
-//            ),
-//
-//            // 2. FLUIDOS Y ELECTROLITOS
-//            CalculatorEntity(
-//                id = "iv_drip_rate",
-//                name = "Velocidad de Goteo IV",
-//                description = "Cálculo de gtt/min y mL/h para terapia intravenosa",
-//                categoryId = "fluids_electrolytes"
-//            ),
-//            CalculatorEntity(
-//                id = "fluid_balance",
-//                name = "Balance Hídrico 24h",
-//                description = "Ingresos y egresos en 24 horas",
-//                categoryId = "fluids_electrolytes"
-//            ),
-//            CalculatorEntity(
-//                id = "electrolyte_management",
-//                name = "Gestión de Fluidos y Electrolitos",
-//                description = "Reemplazo de potasio, sodio y otros electrolitos",
-//                categoryId = "fluids_electrolytes"
-//            ),
-//
-//            // 3. MONITOREO DE SIGNOS VITALES
-//            CalculatorEntity(
-//                id = "bmi_calculator",
-//                name = "Índice de Masa Corporal (IMC)",
-//                description = "Evaluación nutricional: peso ÷ talla²",
-//                categoryId = "vital_signs"
-//            ),
-//            CalculatorEntity(
-//                id = "map_calculator",
-//                name = "Presión Arterial Media (PAM)",
-//                description = "Cálculo hemodinámico: (PAS + 2×PAD)/3",
-//                categoryId = "vital_signs"
-//            ),
-//
-//
-//            // 4. ESCALAS DE VALORACIÓN CLÍNICA
-//            CalculatorEntity(
-//                id = "braden_scale",
-//                name = "Escala de Braden",
-//                description = "Evaluación de riesgo de úlceras por presión",
-//                categoryId = "clinical_scales"
-//            ),
-//            CalculatorEntity(
-//                id = "glasgow_coma_scale",
-//                name = "Escala de Coma de Glasgow",
-//                description = "Nivel de conciencia en urgencias neurológicas",
-//                categoryId = "clinical_scales"
-//            ),
-//
-//            // 5. PEDIATRÍA Y NEONATOLOGÍA
-//            CalculatorEntity(
-//                id = "pediatric_dosage",
-//                name = "Dosis Pediátrica",
-//                description = "Dosificación (mg/kg) según peso y edad",
-//                categoryId = "pediatric_neonatal"
-//            ),
-//            CalculatorEntity(
-//                id = "apgar_score",
-//                name = "Puntuación APGAR",
-//                description = "Evaluación inmediata del recién nacido",
-//                categoryId = "pediatric_neonatal"
-//            ),
-//            CalculatorEntity(
-//                id = "minute_ventilation",
-//                name = "Calculadora de Ventilación Minuto",
-//                description = "Cálculo de VE = FR × VT para evaluación ventilatoria",
-//                categoryId = "vital_signs"
-//            )
-//
-//        )
-//    }
 
     private fun createInitialFields(): List<FieldEntity> {
         val fields = mutableListOf<FieldEntity>()
@@ -1321,6 +1255,749 @@ object DatabasePrepopulateUtil {
                 displayOrder = 3
             )
         ))
+
+        // ==============================================
+        // 10. BRADEN SCALE CALCULATOR
+        // ==============================================
+        fields.addAll(listOf(
+            // INPUT FIELDS - The 6 Braden Scale Components
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "sensory_perception",
+                name = "Percepción Sensorial",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - Completamente limitada", "2 - Muy limitada", "3 - Ligeramente limitada", "4 - Sin alteraciones"]""",
+                defaultValue = "4 - Sin alteraciones",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "moisture",
+                name = "Exposición a la Humedad",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - Constantemente húmeda", "2 - Muy húmeda", "3 - Ocasionalmente húmeda", "4 - Raramente húmeda"]""",
+                defaultValue = "4 - Raramente húmeda",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "activity",
+                name = "Actividad",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - Encamado", "2 - En silla", "3 - Camina ocasionalmente", "4 - Camina frecuentemente"]""",
+                defaultValue = "4 - Camina frecuentemente",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "mobility",
+                name = "Movilidad",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - Completamente inmóvil", "2 - Muy limitada", "3 - Ligeramente limitada", "4 - Sin limitaciones"]""",
+                defaultValue = "4 - Sin limitaciones",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "nutrition",
+                name = "Nutrición",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - Muy pobre", "2 - Probablemente inadecuada", "3 - Adecuada", "4 - Excelente"]""",
+                defaultValue = "4 - Excelente",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "friction_shear",
+                name = "Fricción y Deslizamiento",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - Problema", "2 - Problema potencial", "3 - Sin problema aparente"]""",
+                defaultValue = "3 - Sin problema aparente",
+                displayOrder = 5
+            ),
+
+            // OPTIONAL PATIENT INFORMATION
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "patient_age",
+                name = "Edad del Paciente (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "años",
+                minValue = 0.0,
+                maxValue = 120.0,
+                defaultValue = "65",
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "chronic_conditions",
+                name = "Condiciones Crónicas (diabetes, enfermedad vascular)",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "bed_rest",
+                name = "Reposo en Cama Prolongado",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 8
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "critical_illness",
+                name = "Enfermedad Crítica/UCI",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 9
+            ),
+
+            // OUTPUT FIELDS
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "total_score",
+                name = "Puntuación Total",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "puntos",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "risk_level",
+                name = "Nivel de Riesgo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "risk_interpretation",
+                name = "Interpretación del Riesgo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "detailed_assessment",
+                name = "Evaluación Detallada",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "prevention_recommendations",
+                name = "Recomendaciones de Prevención",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "monitoring_schedule",
+                name = "Cronograma de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "braden_scale",
+                id = "risk_factors_analysis",
+                name = "Análisis de Factores de Riesgo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 6
+            )
+        ))
+
+        // ==============================================
+// 11. GLASGOW COMA SCALE CALCULATOR
+// ==============================================
+        fields.addAll(listOf(
+            // INPUT FIELDS - The 3 Glasgow Coma Scale Components
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "eye_response",
+                name = "Respuesta Ocular",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - No abre los ojos", "2 - Abre los ojos al dolor", "3 - Abre los ojos a la voz", "4 - Abre los ojos espontáneamente"]""",
+                defaultValue = "4 - Abre los ojos espontáneamente",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "verbal_response",
+                name = "Respuesta Verbal",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - No respuesta verbal", "2 - Sonidos incomprensibles", "3 - Palabras inapropiadas", "4 - Confuso", "5 - Orientado"]""",
+                defaultValue = "5 - Orientado",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "motor_response",
+                name = "Respuesta Motora",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 - No respuesta motora", "2 - Extensión anormal (descerebración)", "3 - Flexión anormal (decorticación)", "4 - Flexión de retirada", "5 - Localiza el dolor", "6 - Obedece órdenes"]""",
+                defaultValue = "6 - Obedece órdenes",
+                displayOrder = 2
+            ),
+
+            // CLINICAL CONTEXT AND PATIENT FACTORS
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "is_intubated",
+                name = "Paciente Intubado",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "patient_age",
+                name = "Edad del Paciente (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "años",
+                minValue = 0.0,
+                maxValue = 120.0,
+                defaultValue = "45",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "traumatic_brain_injury",
+                name = "Traumatismo Craneoencefálico",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "has_seizures",
+                name = "Actividad Convulsiva",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "drugs_alcohol",
+                name = "Intoxicación por Drogas/Alcohol",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "clinical_context",
+                name = "Contexto Clínico",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Evaluación General", "Urgencias", "UCI", "Postoperatorio", "Trauma", "Neurológico"]""",
+                defaultValue = "Evaluación General",
+                displayOrder = 8
+            ),
+
+            // OUTPUT FIELDS
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "total_score",
+                name = "Puntuación Total",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "puntos",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "consciousness_level",
+                name = "Nivel de Consciencia",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "neurological_interpretation",
+                name = "Interpretación Neurológica",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "detailed_assessment",
+                name = "Evaluación Detallada",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "clinical_recommendations",
+                name = "Recomendaciones Clínicas",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "monitoring_protocol",
+                name = "Protocolo de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "prognostic_indicators",
+                name = "Indicadores Pronósticos",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "glasgow_coma_scale",
+                id = "emergency_alerts",
+                name = "Alertas de Emergencia",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 7
+            )
+        ))
+
+        // ==============================================
+        // 12. PEDIATRIC DOSAGE CALCULATOR
+        // ==============================================
+        fields.addAll(listOf(
+            // PATIENT INFORMATION
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "patient_weight",
+                name = "Peso del Paciente",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "kg",
+                minValue = 0.5,
+                maxValue = 80.0,
+                defaultValue = "10",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "patient_age_months",
+                name = "Edad del Paciente",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "meses",
+                minValue = 0.0,
+                maxValue = 216.0, // 18 years = 216 months
+                defaultValue = "24",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "medication",
+                name = "Medicamento",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Amoxicilina", "Paracetamol", "Ibuprofeno", "Azitromicina", "Cefixima", "Trimetoprim-Sulfametoxazol", "Claritromicina", "Dexametasona", "Salbutamol", "Loratadina", "Cetirizina", "Furosemida", "Otro medicamento"]""",
+                defaultValue = "Amoxicilina",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "custom_dose_per_kg",
+                name = "Dosis personalizada (mg/kg/día) - Solo si seleccionó 'Otro'",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mg/kg/día",
+                minValue = 0.1,
+                maxValue = 500.0,
+                defaultValue = "50",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "custom_doses_per_day",
+                name = "Número de dosis por día - Solo si seleccionó 'Otro'",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "dosis/día",
+                minValue = 1.0,
+                maxValue = 6.0,
+                defaultValue = "2",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "medication_concentration",
+                name = "Concentración del Medicamento (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "mg/mL",
+                minValue = 0.1,
+                maxValue = 1000.0,
+                defaultValue = "50",
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "clinical_condition",
+                name = "Condición Clínica",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Infección Respiratoria", "Infección del Oído", "Fiebre", "Dolor/Inflamación", "Infección Urinaria", "Infección Gastrointestinal", "Asma/Broncoespasmo", "Alergia", "Otra condición"]""",
+                defaultValue = "Infección Respiratoria",
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "severity",
+                name = "Severidad de la Condición",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["Leve", "Moderada", "Severa"]""",
+                defaultValue = "Moderada",
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "renal_function",
+                name = "Función Renal",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Normal", "Insuficiencia Leve", "Insuficiencia Moderada", "Insuficiencia Severa"]""",
+                defaultValue = "Normal",
+                displayOrder = 8
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "premature_infant",
+                name = "Recién Nacido Prematuro",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 9
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "allergies",
+                name = "Alergias Conocidas",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 10
+            ),
+
+            // OUTPUT FIELDS
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "recommended_dose_per_kg",
+                name = "Dosis Recomendada",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mg/kg/día",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "total_daily_dose",
+                name = "Dosis Total Diaria",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mg/día",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "dose_per_administration",
+                name = "Dosis por Administración",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mg",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "volume_per_dose",
+                name = "Volumen por Dosis",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "mL",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "doses_per_day",
+                name = "Número de Dosis por Día",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "dosis",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "dosing_schedule",
+                name = "Horario de Administración",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "safety_warnings",
+                name = "Advertencias de Seguridad",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "administration_instructions",
+                name = "Instrucciones de Administración",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "monitoring_recommendations",
+                name = "Recomendaciones de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 8
+            ),
+            FieldEntity(
+                calculatorId = "pediatric_dosage",
+                id = "age_appropriate_warnings",
+                name = "Advertencias Específicas por Edad",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 9
+            )
+        ))
+
+        // ==============================================
+// 13. APGAR SCORE CALCULATOR
+// ==============================================
+        fields.addAll(listOf(
+            // EVALUATION TIME
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "evaluation_time",
+                name = "Tiempo de Evaluación",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["1 minuto", "5 minutos", "10 minutos"]""",
+                defaultValue = "1 minuto",
+                displayOrder = 0
+            ),
+
+            // THE 5 APGAR CRITERIA
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "appearance_color",
+                name = "Apariencia (Color de la Piel)",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["0 - Cianosis generalizada o palidez", "1 - Extremidades cianóticas, cuerpo rosado", "2 - Rosado completamente"]""",
+                defaultValue = "2 - Rosado completamente",
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "pulse_heart_rate",
+                name = "Pulso (Frecuencia Cardíaca)",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["0 - Ausente", "1 - Menos de 100 lpm", "2 - Más de 100 lpm"]""",
+                defaultValue = "2 - Más de 100 lpm",
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "grimace_reflex",
+                name = "Gesticulación (Irritabilidad Refleja)",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["0 - Sin respuesta", "1 - Mueca o débil", "2 - Llanto vigoroso"]""",
+                defaultValue = "2 - Llanto vigoroso",
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "activity_muscle_tone",
+                name = "Actividad (Tono Muscular)",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["0 - Flácido", "1 - Flexión mínima de extremidades", "2 - Movimientos activos"]""",
+                defaultValue = "2 - Movimientos activos",
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "respiratory_effort",
+                name = "Respiración (Esfuerzo Respiratorio)",
+                type = FieldType.RADIO.name,
+                isInputField = true,
+                options = """["0 - Ausente", "1 - Débil o irregular", "2 - Llanto fuerte"]""",
+                defaultValue = "2 - Llanto fuerte",
+                displayOrder = 5
+            ),
+
+            // ADDITIONAL NEONATAL INFORMATION
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "gestational_age",
+                name = "Edad Gestacional (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "semanas",
+                minValue = 20.0,
+                maxValue = 44.0,
+                defaultValue = "39",
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "birth_weight",
+                name = "Peso al Nacer (opcional)",
+                type = FieldType.NUMBER.name,
+                isInputField = true,
+                units = "gramos",
+                minValue = 500.0,
+                maxValue = 6000.0,
+                defaultValue = "3200",
+                displayOrder = 7
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "delivery_type",
+                name = "Tipo de Parto",
+                type = FieldType.DROPDOWN.name,
+                isInputField = true,
+                options = """["Vaginal espontáneo", "Vaginal instrumentado", "Cesárea electiva", "Cesárea de urgencia"]""",
+                defaultValue = "Vaginal espontáneo",
+                displayOrder = 8
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "maternal_complications",
+                name = "Complicaciones Maternas",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 9
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "multiple_birth",
+                name = "Embarazo Múltiple",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 10
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "resuscitation_needed",
+                name = "Requirió Reanimación",
+                type = FieldType.CHECKBOX.name,
+                isInputField = true,
+                defaultValue = "false",
+                displayOrder = 11
+            ),
+
+            // OUTPUT FIELDS
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "total_score",
+                name = "Puntuación Total APGAR",
+                type = FieldType.NUMBER.name,
+                isInputField = false,
+                units = "puntos",
+                displayOrder = 0
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "clinical_status",
+                name = "Estado Clínico",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 1
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "clinical_interpretation",
+                name = "Interpretación Clínica",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 2
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "detailed_assessment",
+                name = "Evaluación Detallada",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 3
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "immediate_actions",
+                name = "Acciones Inmediatas",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 4
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "monitoring_protocol",
+                name = "Protocolo de Monitoreo",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 5
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "prognostic_indicators",
+                name = "Indicadores Pronósticos",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 6
+            ),
+            FieldEntity(
+                calculatorId = "apgar_score",
+                id = "follow_up_recommendations",
+                name = "Recomendaciones de Seguimiento",
+                type = FieldType.TEXT.name,
+                isInputField = false,
+                displayOrder = 7
+            )
+        ))
+
 
         return fields
     }

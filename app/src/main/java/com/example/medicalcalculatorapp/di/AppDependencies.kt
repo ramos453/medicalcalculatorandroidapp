@@ -25,7 +25,10 @@ import com.example.medicalcalculatorapp.domain.calculator.impl.ElectrolyteManage
 import com.example.medicalcalculatorapp.domain.calculator.impl.BMICalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.MAPCalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.MinuteVentilationCalculator
-
+import com.example.medicalcalculatorapp.domain.calculator.impl.BradenScaleCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.GlasgowComaScaleCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.PediatricDosageCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.ApgarScoreCalculator
 
 
 
@@ -96,6 +99,10 @@ object AppDependencies {
         service.registerCalculator(BMICalculator())
         service.registerCalculator(MAPCalculator())
         service.registerCalculator(MinuteVentilationCalculator())
+        service.registerCalculator(BradenScaleCalculator())
+        service.registerCalculator(GlasgowComaScaleCalculator())
+        service.registerCalculator(PediatricDosageCalculator())
+        service.registerCalculator(ApgarScoreCalculator())
 
         return service
     }
