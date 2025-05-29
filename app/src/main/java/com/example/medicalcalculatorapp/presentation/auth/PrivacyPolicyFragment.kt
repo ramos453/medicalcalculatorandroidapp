@@ -30,7 +30,7 @@ class PrivacyPolicyFragment : Fragment() {
         }
 
         // Make sure the privacy policy text is loaded and scrollable
-        binding.tvPrivacyPolicy.text = getString(com.example.medicalcalculatorapp.R.string.privacy_policy_text)
+        binding.tvPrivacyPolicy.text = getString(com.example.medicalcalculatorapp.R.string.terms_of_use_text)
     }
 
     override fun onDestroyView() {

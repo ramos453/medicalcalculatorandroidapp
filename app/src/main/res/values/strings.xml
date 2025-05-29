@@ -55,105 +55,14 @@
 
     <!-- Avisos Legales -->
     <string name="medical_disclaimer">Aviso Médico</string>
-<!--    <string name="disclaimer_text">IMPORTANTE: LEE CUIDADOSAMENTE\n\nEsta aplicación de calculadoras médicas se proporciona únicamente con fines informativos y educativos. No está destinada a servir como sustituto del consejo, diagnóstico o tratamiento médico profesional.\n\nLos cálculos proporcionados por esta aplicación se basan en fórmulas y ecuaciones médicas generalmente aceptadas. Sin embargo, siempre deben ser verificados por un profesional de la salud antes de tomar cualquier decisión clínica.\n\nAl usar esta aplicación, reconoces que:\n\n1. Consultarás con un proveedor de atención médica calificado antes de tomar cualquier decisión relacionada con la salud.\n\n2. Los desarrolladores de esta aplicación no son responsables de ningún daño, lesión o perjuicio resultante de la dependencia de la información proporcionada por esta aplicación.\n\n3. El conocimiento médico evoluciona continuamente, y las fórmulas pueden cambiar con el tiempo.\n\n4. Los resultados de los cálculos deben interpretarse dentro del contexto del cuadro clínico completo del paciente.\n\nSi tienes alguna preocupación médica, consulta con un médico u otro proveedor de atención médica calificado.</string>-->
-
     <string name="agree_disclaimer">Entiendo y acepto el aviso</string>
     <string name="continue_text">Continuar</string>
     <string name="must_agree">Debes aceptar para continuar</string>
     <string name="privacy_policy">Política de Privacidad</string>
-<!--    <string name="privacy_policy_text">Política de Privacidad para MediCálculos\n\n-->
-<!--            Última actualización: [Fecha Actual]\n\n-->
-<!--            1. INTRODUCCIÓN\n-->
-<!--            Bienvenido a MediCálculos ("nosotros", "nuestro" o "nos"). Estamos comprometidos a proteger tu privacidad y manejar tus datos con transparencia. Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información cuando utilizas nuestra aplicación móvil.\n\n-->
-<!--            2. INFORMACIÓN QUE RECOPILAMOS\n-->
-<!--            - Información de la Cuenta: Dirección de correo electrónico cuando te registras.\n-->
-<!--            - Datos de Uso: Cómo interactúas con nuestra aplicación, incluyendo calculadoras utilizadas y cálculos realizados.\n-->
-<!--            - Información del Dispositivo: Sistema operativo, tipo de dispositivo y otros datos técnicos.\n\n-->
-<!--            3. CÓMO USAMOS TU INFORMACIÓN\n-->
-<!--            - Para proporcionarte acceso a nuestras calculadoras médicas\n-->
-<!--            - Para recordar tus preferencias\n-->
-<!--            - Para mejorar la funcionalidad de nuestra aplicación\n-->
-<!--            - Para analizar patrones de uso\n\n-->
-<!--            4. SEGURIDAD DE DATOS\n-->
-<!--            Implementamos medidas de seguridad apropiadas para proteger tu información personal. Usamos cifrado para credenciales almacenadas y protocolos de comunicación seguros.\n\n-->
-<!--            5. TUS DERECHOS\n-->
-<!--            Tienes derecho a:\n-->
-<!--            - Acceder a los datos personales que tenemos sobre ti\n-->
-<!--            - Solicitar corrección de datos inexactos\n-->
-<!--            - Solicitar eliminación de tus datos\n-->
-<!--            - Optar por no participar en cierta recopilación de datos\n\n-->
-<!--            6. AVISO MÉDICO\n-->
-<!--            Esta aplicación proporciona cálculos médicos solo con fines informativos. No está destinada a proporcionar consejos médicos o reemplazar el juicio médico profesional. Siempre consulta a un proveedor de atención médica calificado para obtener consejos médicos.\n\n-->
-<!--            7. PRIVACIDAD DE MENORES\n-->
-<!--            Nuestra aplicación no está destinada a menores de 13 años. No recopilamos intencionalmente información de menores de 13 años.\n\n-->
-<!--            8. CAMBIOS A ESTA POLÍTICA\n-->
-<!--            Podemos actualizar esta política de privacidad de vez en cuando. Te notificaremos sobre cambios significativos publicando la nueva política en la aplicación.\n\n-->
-<!--            9. CONTÁCTANOS\n-->
-<!--            Si tienes alguna pregunta sobre esta política de privacidad, contáctanos en: [Tu Información de Contacto]\n\n-->
-<!--            Al usar esta aplicación, consientes los términos de esta Política de Privacidad.</string>-->
+    <string name="view_privacy_policy">Términos de Uso</string>
+    <!-- Complete Terms of Use (replaces separate disclaimer) -->
 
-
-    <string name="view_privacy_policy">Política de Privacidad</string>
-
-
-    <!-- Enhanced Medical Disclaimer for Latin America -->
-    <string name="disclaimer_text">⚠️ AVISO MÉDICO IMPORTANTE - LEA CUIDADOSAMENTE ⚠️
-
-🏥 PROPÓSITO EDUCATIVO EXCLUSIVAMENTE
-Esta aplicación es una herramienta de cálculo médico diseñada ÚNICAMENTE con fines educativos e informativos para profesionales de la salud, estudiantes de medicina y enfermería. NO está destinada para uso diagnóstico directo en pacientes.
-
-🚫 NO ES UN DISPOSITIVO MÉDICO
-- Esta aplicación NO es un dispositivo médico certificado
-- NO está aprobada por ANVISA, COFEPRIS, INVIMA ni otras autoridades sanitarias
-- NO reemplaza el juicio clínico profesional
-- NO debe utilizarse como única base para decisiones médicas
-
-👨‍⚕️ SUPERVISIÓN PROFESIONAL OBLIGATORIA
-- TODOS los cálculos deben ser verificados por un médico licenciado
-- Los resultados requieren interpretación dentro del contexto clínico completo
-- Consulte SIEMPRE con un profesional de salud antes de aplicar cualquier resultado
-- Mantenga supervisión médica continua en el cuidado del paciente
-
-⚠️ LIMITACIONES Y ADVERTENCIAS
-- Las fórmulas pueden variar según protocolos institucionales locales
-- Los rangos de referencia pueden diferir por población y laboratorio
-- Factores individuales del paciente pueden alterar la interpretación
-- La responsabilidad clínica recae EXCLUSIVAMENTE en el profesional tratante
-
-🌎 CUMPLIMIENTO REGULATORIO LATINOAMÉRICA
-- Cumple con directrices de apps médicas de Google Play Store
-- Adaptado a regulaciones sanitarias latinoamericanas
-- Diseñado según estándares internacionales de seguridad del paciente
-- Incluye referencias médicas de instituciones reconocidas regionalmente
-
-📋 RESPONSABILIDADES DEL USUARIO
-Al usar esta aplicación, usted declara y garantiza que:
-- Es un profesional de salud licenciado O estudiante bajo supervisión
-- Utilizará los resultados únicamente como referencia educativa
-- NO tomará decisiones clínicas basándose exclusivamente en esta app
-- Verificará todos los cálculos con métodos alternativos
-- Mantendrá actualizada su formación médica profesional
-
-⚖️ LIMITACIÓN DE RESPONSABILIDAD
-Los desarrolladores NO asumen responsabilidad por:
-- Errores en cálculos debido a datos incorrectos
-- Decisiones médicas tomadas basándose en los resultados
-- Daños directos o indirectos resultantes del uso de la aplicación
-- Incompatibilidad con protocolos médicos específicos
-
-🔒 PRIVACIDAD DEL PACIENTE
-- NO ingrese datos personales identificables del paciente
-- Use únicamente datos clínicos despersonalizados
-- Cumpla con leyes locales de protección de datos (LGPD, etc.)
-- Mantenga confidencialidad médica en todo momento
-
-📞 EN CASO DE EMERGENCIA MÉDICA
-Esta aplicación NO debe utilizarse en situaciones de emergencia. En casos críticos, contacte inmediatamente servicios de emergencia locales o traslade al paciente a un centro médico.
-
-✅ ACEPTACIÓN DE TÉRMINOS
-Al continuar, confirma que ha leído, comprendido y acepta todos los términos anteriores, y que utilizará esta aplicación de manera responsable y ética conforme a su formación profesional.</string>
-
-    <!-- Enhanced Privacy Policy for Latin America -->
+    <!-- Add this line to fix the build error -->
     <string name="privacy_policy_text">📱 POLÍTICA DE PRIVACIDAD - MediCálculos
 
 Última actualización: [Fecha Actual]
@@ -183,129 +92,226 @@ Cumplimiento con LGPD (Brasil), LOPD (México) y regulaciones locales
 - Historial clínico detallado
 - Resultados de cálculos específicos de pacientes
 
-🎯 3. PROPÓSITO DE USO DE DATOS
+Al usar MediCálculos, confirmas que has leído y comprendido esta política de privacidad.</string>
+    <string name="terms_of_use_text">📱 TÉRMINOS DE USO Y AVISO MÉDICO - MediCálculos
 
-✅ Usos Permitidos:
-- Mantener funcionalidad de tu cuenta
-- Recordar preferencias de calculadoras
-- Estadísticas agregadas de uso (anónimas)
-- Mejoras técnicas de la aplicación
-- Comunicaciones importantes sobre actualizaciones médicas
+            Última actualización: [Fecha Actual]
+            Vigente en: América Latina
 
-🚫 NO Compartimos Para:
-- Marketing comercial de medicamentos
-- Venta a terceros
-- Análisis comercial de pacientes
-- Fines no relacionados con educación médica
+            ⚖️ ACEPTACIÓN DE TÉRMINOS
 
-🛡️ 4. SEGURIDAD Y PROTECCIÓN
+            Al descargar, instalar o usar la aplicación MediCálculos ("la Aplicación"), usted acepta estar legalmente obligado por estos Términos de Uso. Si no está de acuerdo con algún término, NO use esta aplicación.
 
-🔐 Medidas Implementadas:
-- Cifrado AES-256 para datos almacenados
-- Transmisión HTTPS/TLS 1.3
-- Autenticación segura de credenciales
-- Almacenamiento local cifrado (Android Keystore)
-- Actualizaciones de seguridad regulares
+            🏥 1. NATURALEZA Y PROPÓSITO DE LA APLICACIÓN
 
-⏱️ Retención de Datos:
-- Datos de cuenta: Mientras mantengas la cuenta activa
-- Datos de uso: Máximo 2 años, luego eliminación automática
-- Datos estadísticos: Agregados y anónimos permanentemente
+            📚 Propósito Educativo Exclusivo:
+            • MediCálculos es una herramienta educativa para profesionales de salud
+            • Diseñada para fines informativos y de referencia únicamente
+            • NO es un dispositivo médico certificado ni software diagnóstico
+            • NO reemplaza el juicio clínico profesional
 
-🌎 5. CUMPLIMIENTO REGULATORIO REGIONAL
+            👨‍⚕️ Usuarios Destinatarios:
+            • Médicos licenciados y profesionales de salud
+            • Enfermeros profesionales registrados
+            • Estudiantes de medicina y enfermería (bajo supervisión)
+            • Otros profesionales sanitarios autorizados
 
-🇧🇷 Brasil - LGPD:
-- Derecho de acceso, rectificación y eliminación
-- Consentimiento explícito para procesamiento
-- Oficial de Protección de Datos designado
+            🚫 2. LIMITACIONES Y RESTRICCIONES DE USO
 
-🇲🇽 México - LOPD:
-- Aviso de privacidad conforme a INAI
-- Derechos ARCO respetados
-- Transferencias limitadas dentro de Latinoamérica
+            ❌ Usos Prohibidos:
+            • NO usar para diagnóstico directo de pacientes
+            • NO tomar decisiones clínicas basándose exclusivamente en los resultados
+            • NO usar en situaciones de emergencia médica
+            • NO usar sin supervisión profesional adecuada
+            • NO ingresar datos personales identificables de pacientes
+            • NO distribuir o comercializar los cálculos como servicios médicos
 
-🇨🇴 Colombia - Ley 1581:
-- Autorización previa para datos personales
-- Registro Nacional de Bases de Datos
-- Derecho de hábeas data
+            ⚠️ Obligaciones del Usuario:
+            • Verificar TODOS los cálculos con métodos alternativos
+            • Consultar con profesionales médicos antes de aplicar resultados
+            • Mantener actualizados sus conocimientos médicos profesionales
+            • Cumplir con códigos de ética médica locales
+            • Respetar la confidencialidad del paciente en todo momento
 
-🇦🇷 Argentina - PDPA:
-- Principios de legalidad y calidad de datos
-- Registro en AAIP cuando aplicable
-- Consentimiento informado
+            🏛️ 3. CUMPLIMIENTO REGULATORIO LATINOAMERICANO
 
-📋 6. TUS DERECHOS COMO USUARIO LATINOAMERICANO
+            📋 Declaraciones Regulatorias:
+            • Esta aplicación NO está aprobada por ANVISA (Brasil)
+            • NO está certificada por COFEPRIS (México)
+            • NO está registrada ante INVIMA (Colombia)
+            • NO sustituye equipos médicos certificados por autoridades sanitarias
 
-✅ Derechos Garantizados:
-- Acceso: Obtener copia de tus datos personales
-- Rectificación: Corregir información inexacta
-- Eliminación: Solicitar borrado de tu cuenta y datos
-- Portabilidad: Recibir datos en formato estructurado
-- Oposición: Negarte a ciertos procesamientos
-- Limitación: Restringir el procesamiento
+            ⚕️ Responsabilidad Profesional:
+            • Los usuarios son completamente responsables del uso clínico
+            • Deben cumplir con regulaciones médicas de su país
+            • Mantener licencias profesionales válidas y actualizadas
+            • Seguir protocolos institucionales y guías clínicas locales
 
-📞 Ejercer Derechos:
-Contacta a: [correo-privacidad@medicálculos.com]
-Respuesta garantizada en 15 días hábiles
-Sin costo para el usuario
+            ⚠️ 4. AVISO MÉDICO Y LIMITACIÓN DE RESPONSABILIDAD
 
-🏥 7. CONSIDERACIONES MÉDICAS ESPECIALES
+            🚨 Advertencias Críticas:
+            • NUNCA use esta aplicación en emergencias médicas
+            • Los cálculos pueden contener errores o imprecisiones
+            • Las fórmulas pueden no aplicar a todos los pacientes
+            • Factores individuales pueden alterar significativamente los resultados
+            • La responsabilidad clínica recae EXCLUSIVAMENTE en el profesional tratante
 
-⚕️ Confidencialidad Profesional:
-- Cumplimiento con códigos de ética médica locales
-- Respeto al secreto profesional
-- Separación completa de datos de pacientes
+            🛡️ Limitación de Responsabilidad:
+            MediCálculos, sus desarrolladores y distribuidores NO son responsables por:
+            • Errores en cálculos o interpretaciones
+            • Decisiones médicas basadas en los resultados
+            • Daños directos, indirectos, incidentales o consecuenciales
+            • Pérdidas económicas o profesionales
+            • Complicaciones médicas o resultados adversos para pacientes
+            • Incompatibilidad con protocolos médicos específicos
 
-📊 Investigación Médica:
-- Datos agregados pueden contribuir a estudios epidemiológicos regionales
-- Siempre anónimos y con beneficio para salud pública
-- Colaboración con universidades médicas reconocidas
+            💰 Límite Máximo de Responsabilidad:
+            En ningún caso nuestra responsabilidad excederá el monto pagado por la aplicación (si aplica) o $0 USD para versiones gratuitas.
 
-👶 8. PROTECCIÓN DE MENORES
+            🔒 5. PROPIEDAD INTELECTUAL
 
-🔞 Restricciones de Edad:
-- Aplicación destinada exclusivamente a profesionales adultos
-- No recopilamos datos de menores de 18 años
-- Verificación de edad profesional requerida
+            © Derechos de Autor:
+            • Todo el contenido de la aplicación está protegido por derechos de autor
+            • Las fórmulas médicas son de dominio público, pero su implementación es nuestra
+            • No puede copiar, modificar, distribuir o crear obras derivadas
+            • Uso limitado a los términos de esta licencia
 
-🆘 9. EMERGENCIAS Y DATOS CRÍTICOS
+            📊 Uso de Contenido:
+            • Permitido: Uso personal y profesional según estos términos
+            • Prohibido: Comercialización, redistribución, ingeniería inversa
+            • Las referencias médicas mantienen sus derechos originales
 
-⚠️ Política de Emergencia:
-- En casos médicos críticos, podemos compartir datos con autoridades sanitarias
-- Solo cuando sea legalmente requerido y para proteger vidas
-- Notificación posterior al usuario cuando sea posible
+            🌐 6. PRIVACIDAD Y PROTECCIÓN DE DATOS
 
-📞 10. CONTACTO Y QUEJAS
+            🔐 Compromiso de Privacidad:
+            • Cumplimos con LGPD (Brasil), LOPD (México) y regulaciones regionales
+            • NO recopilamos datos sensibles de pacientes
+            • Ciframos toda información personal almacenada
+            • No vendemos ni compartimos datos con terceros
 
-🏛️ Datos de Contacto:
-Email: privacidad@medicálculos.com
-Oficial de Protección de Datos: [Nombre y contacto]
-Representante Legal en Brasil: [Si aplica]
+            📊 Datos que Recopilamos:
+            • Email de registro (obligatorio)
+            • Preferencias de uso (opcional)
+            • Estadísticas de uso agregadas y anónimas
+            • Información técnica del dispositivo (para soporte)
 
-🆘 Autoridades de Control:
-- Brasil: ANPD (Autoridade Nacional de Proteção de Dados)
-- México: INAI (Instituto Nacional de Transparencia)
-- Colombia: SIC (Superintendencia de Industria y Comercio)
-- Argentina: AAIP (Agencia de Acceso a la Información Pública)
+            👤 Sus Derechos:
+            • Acceso a sus datos personales
+            • Corrección de información inexacta
+            • Eliminación de su cuenta y datos
+            • Portabilidad de datos en formato estructurado
+            • Oposición a ciertos procesamientos
 
-📝 11. ACTUALIZACIONES DE POLÍTICA
+            📞 Contacto de Privacidad: [email-privacidad@medicálculos.com]
 
-🔄 Cambios Importantes:
-- Notificación por email 30 días antes
-- Destacado prominente en la aplicación
-- Derecho a objetar cambios sustanciales
-- Opción de cancelar cuenta si no estás de acuerdo
+            ⚡ 7. EMERGENCIAS MÉDICAS
 
-✅ 12. CONSENTIMIENTO
+            🚨 IMPORTANTE - SITUACIONES DE EMERGENCIA:
+            • Esta aplicación NO debe usarse NUNCA en emergencias
+            • En caso de emergencia médica, contacte inmediatamente:
+              - Servicios de emergencia locales (911, 192, etc.)
+              - Traslade al paciente al hospital más cercano
+              - Use protocolos de emergencia establecidos
 
-Al usar MediCálculos, confirmas que:
-- Has leído y comprendido esta política
-- Eres un profesional de salud licenciado
-- Utilizarás la app de manera ética y profesional
-- Cumplirás con regulaciones médicas locales
-- Respetarás la confidencialidad del paciente
+            🏥 Protocolos de Emergencia:
+            • Mantenga acceso rápido a números de emergencia
+            • Tenga disponibles protocolos de reanimación actualizados
+            • No dependa de aplicaciones móviles en situaciones críticas
 
-Esta política se rige por las leyes de protección de datos aplicables en tu país de residencia dentro de América Latina.</string>
+            🔄 8. ACTUALIZACIONES Y MODIFICACIONES
+
+            📱 Actualizaciones de la Aplicación:
+            • Podemos actualizar la aplicación para mejorar funcionalidad
+            • Nuevas versiones pueden incluir correcciones médicas importantes
+            • Se recomienda mantener la aplicación actualizada
+            • Cambios menores no requieren notificación previa
+
+            📋 Modificaciones de Términos:
+            • Podemos modificar estos términos con aviso de 30 días
+            • Cambios significativos requerirán nueva aceptación
+            • El uso continuado implica aceptación de nuevos términos
+            • Puede cancelar su cuenta si no acepta modificaciones
+
+            🔚 9. TERMINACIÓN DE SERVICIO
+
+            ❌ Terminación por el Usuario:
+            • Puede dejar de usar la aplicación en cualquier momento
+            • Puede solicitar eliminación de cuenta y datos
+            • Conserve copias de información importante antes de cancelar
+
+            ⚠️ Terminación por Nuestra Parte:
+            Podemos suspender o terminar el acceso si:
+            • Viola estos términos de uso
+            • Usa la aplicación de manera no autorizada
+            • Pone en riesgo la seguridad de otros usuarios
+            • Por razones técnicas o legales
+
+            ⚖️ 10. RESOLUCIÓN DE DISPUTAS
+
+            🌎 Jurisdicción Aplicable:
+            • Estos términos se rigen por las leyes del país donde reside el usuario
+            • Para disputas transfronterizas, se aplicará arbitraje internacional
+            • Se priorizará la resolución amigable de conflictos
+
+            📞 Proceso de Resolución:
+            1. Contacto directo: soporte@medicálculos.com
+            2. Mediación (si es necesaria)
+            3. Arbitraje (como último recurso)
+            4. Jurisdicción local aplicable
+
+            🏛️ 11. CUMPLIMIENTO LEGAL REGIONAL
+
+            🇧🇷 Brasil:
+            • Cumplimiento con CFM (Conselho Federal de Medicina)
+            • Respeto a regulaciones de ANVISA
+            • Conformidad con LGPD
+
+            🇲🇽 México:
+            • Cumplimiento con normativas de COFEPRIS
+            • Respeto a lineamientos de la Secretaría de Salud
+            • Conformidad con LOPD
+
+            🇨🇴 Colombia:
+            • Cumplimiento con regulaciones de INVIMA
+            • Respeto a normas del Ministerio de Salud
+            • Conformidad con Ley de Protección de Datos
+
+            🇦🇷 Argentina:
+            • Cumplimiento con regulaciones sanitarias nacionales
+            • Respeto a normativas provinciales de salud
+            • Conformidad con PDPA
+
+            🔗 12. TÉRMINOS GENERALES
+
+            📄 Divisibilidad:
+            Si alguna parte de estos términos es inválida, el resto permanece en vigor.
+
+            🔄 Integralidad:
+            Estos términos constituyen el acuerdo completo entre las partes.
+
+            📞 Contacto:
+            Para preguntas sobre estos términos:
+            Email: legal@medicálculos.com
+            Respuesta garantizada en 5 días hábiles
+
+            ✅ DECLARACIÓN FINAL DE ACEPTACIÓN
+
+            Al usar MediCálculos, usted declara que:
+            • Ha leído y comprendido completamente estos términos
+            • Es un profesional de salud licenciado o estudiante bajo supervisión
+            • Utilizará la aplicación de manera ética y profesional
+            • Acepta todas las limitaciones y responsabilidades descritas
+            • Cumplirá con todas las regulaciones médicas aplicables en su jurisdicción
+
+            Esta aplicación se proporciona "TAL COMO ESTÁ" sin garantías de ningún tipo, expresas o implícitas.
+
+            © 2025 MediCálculos. Todos los derechos reservados.</string>
+
+    <!-- Additional supporting strings -->
+    <string name="terms_of_use">Términos de Uso</string>
+    <string name="accept_terms">Acepto los Términos de Uso</string>
+    <string name="must_accept_terms">Debe aceptar los Términos de Uso para continuar</string>
+    <string name="view_terms">Ver Términos Completos</string>
 
     <!-- Additional strings for enhanced compliance -->
     <string name="professional_verification">Verificación Profesional</string>

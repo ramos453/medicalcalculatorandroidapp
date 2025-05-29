@@ -43,8 +43,17 @@ class LoginFragment : Fragment() {
                 performLogin()
             }
         }
+//        binding.tvPrivacyPolicy.setOnClickListener {
+//            findNavController().navigate(R.id.action_loginFragment_to_privacyPolicyFragment)
+//        }
+
         binding.tvPrivacyPolicy.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_privacyPolicyFragment)
+            // Show Terms of Use dialog instead of separate privacy policy
+            val termsDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
+            termsDialog.setOnAcceptedListener {
+                // User viewed terms - no action needed
+            }
+            termsDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
         }
 
         binding.tvRegister.setOnClickListener {

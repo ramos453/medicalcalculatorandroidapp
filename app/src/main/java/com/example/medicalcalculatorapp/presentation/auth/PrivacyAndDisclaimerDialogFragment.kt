@@ -1,3 +1,5 @@
+// Replace your existing PrivacyAndDisclaimerDialogFragment.kt with this updated version
+
 package com.example.medicalcalculatorapp.presentation.auth
 
 import android.os.Bundle
@@ -17,9 +19,6 @@ class PrivacyAndDisclaimerDialogFragment : DialogFragment() {
 
     private lateinit var secureStorageManager: SecureStorageManager
     private var onAccepted: (() -> Unit)? = null
-
-    private var currentStep = 1 // 1 = Privacy Policy, 2 = Medical Disclaimer
-    private var privacyAccepted = false
 
     fun setOnAcceptedListener(listener: () -> Unit) {
         onAccepted = listener
@@ -43,72 +42,51 @@ class PrivacyAndDisclaimerDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setupStep1() // Start with Privacy Policy
+        setupTermsOfUse()
         setupButtons()
     }
 
-    private fun setupStep1() {
-        // Privacy Policy Step
-        binding.tvPageIndicator.text = "1 de 2: Política de Privacidad"
-        binding.tvTitle.text = "Política de Privacidad"
-        binding.tvContent.text = getString(R.string.privacy_policy_text)
-        binding.cbAgree.text = "He leído y acepto la Política de Privacidad"
-        binding.cbAgree.isChecked = false
-        binding.btnNext.text = "Continuar"
-        currentStep = 1
-    }
-
-    private fun setupStep2() {
-        // Medical Disclaimer Step
-        binding.tvPageIndicator.text = "2 de 2: Aviso Médico Legal"
-        binding.tvTitle.text = "Aviso Médico"
-        binding.tvContent.text = getString(R.string.disclaimer_text)
-        binding.cbAgree.text = getString(R.string.agree_disclaimer)
+    private fun setupTermsOfUse() {
+        // Single comprehensive Terms of Use
+        binding.tvPageIndicator.text = "Términos de Uso y Aviso Médico"
+        binding.tvTitle.text = "📋 Términos de Uso"
+        binding.tvContent.text = getString(R.string.terms_of_use_text)
+        binding.cbAgree.text = "✅ He leído y acepto completamente los Términos de Uso y Aviso Médico"
         binding.cbAgree.isChecked = false
         binding.btnNext.text = "Aceptar y Continuar"
-        binding.btnCancel.text = "Atrás"
-        currentStep = 2
+        binding.btnCancel.text = "Salir de la App"
     }
 
     private fun setupButtons() {
         binding.btnCancel.setOnClickListener {
-            if (currentStep == 1) {
-                // Exit app if they don't want to accept privacy policy
-                requireActivity().finish()
-            } else {
-                // Go back to privacy policy
-                setupStep1()
-            }
+            // Exit app if they don't want to accept terms
+            Toast.makeText(
+                requireContext(),
+                "⚠️ La aplicación requiere aceptación de los Términos de Uso para funcionar",
+                Toast.LENGTH_LONG
+            ).show()
+            requireActivity().finish()
         }
 
         binding.btnNext.setOnClickListener {
-            if (currentStep == 1) {
-                // Privacy Policy step
-                if (binding.cbAgree.isChecked) {
-                    privacyAccepted = true
-                    setupStep2() // Move to medical disclaimer
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "Debe aceptar la Política de Privacidad para continuar",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+            if (binding.cbAgree.isChecked) {
+                // Terms accepted - save and continue
+                secureStorageManager.saveDisclaimerAccepted(true)
+
+                Toast.makeText(
+                    requireContext(),
+                    "✅ Términos aceptados. Bienvenido a MediCálculos",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                onAccepted?.invoke()
+                dismiss()
             } else {
-                // Medical Disclaimer step
-                if (binding.cbAgree.isChecked) {
-                    // Both steps completed - save and continue
-                    secureStorageManager.saveDisclaimerAccepted(true)
-                    onAccepted?.invoke()
-                    dismiss()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.must_agree),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+                Toast.makeText(
+                    requireContext(),
+                    "⚠️ Debe aceptar los Términos de Uso y Aviso Médico para usar la aplicación",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -127,7 +105,7 @@ class PrivacyAndDisclaimerDialogFragment : DialogFragment() {
     }
 
     companion object {
-        const val TAG = "PrivacyDisclaimerDialog"
+        const val TAG = "TermsOfUseDialog"
 
         fun newInstance(): PrivacyAndDisclaimerDialogFragment {
             return PrivacyAndDisclaimerDialogFragment()
