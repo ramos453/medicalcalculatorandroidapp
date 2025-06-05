@@ -26,13 +26,15 @@ class CalculatorListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var calculatorAdapter: CalculatorAdapter
+    private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var secureStorageManager: SecureStorageManager
 
     // Create ViewModel using our Factory
     private val viewModel: CalculatorListViewModel by viewModels {
         CalculatorListViewModel.Factory(
             AppDependencies.provideCalculatorRepository(requireContext()),
-            AppDependencies.provideUserManager(requireContext())
+            AppDependencies.provideUserManager(requireContext()),
+            AppDependencies.provideCategoryRepository(requireContext())
         )
     }
 
@@ -59,6 +61,7 @@ class CalculatorListFragment : Fragment() {
         }
 
         setupRecyclerView()
+        setupCategoryRecyclerView()
         setupFilterButtons()
         setupSearchView()
         observeViewModel()
@@ -112,6 +115,34 @@ class CalculatorListFragment : Fragment() {
         }
     }
 
+//    private fun setupCategoryRecyclerView() {
+//        categoryAdapter = CategoryAdapter { selectedCategory ->
+//            // Handle category selection (null means "All Categories")
+//            viewModel.selectCategory(selectedCategory?.category?.id)
+//        }
+//
+//        binding.recyclerViewCategories.apply {
+//            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+//            adapter = categoryAdapter
+//        }
+//    }
+
+    private fun setupCategoryRecyclerView() {
+        println("🔍 DEBUG: Setting up category RecyclerView")
+
+        categoryAdapter = CategoryAdapter { selectedCategory ->
+            println("🔍 DEBUG: Category selected: ${selectedCategory?.category?.name}")
+            viewModel.selectCategory(selectedCategory?.category?.id)
+        }
+
+        binding.recyclerViewCategories.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = categoryAdapter
+            visibility = View.VISIBLE // Force visibility
+            println("🔍 DEBUG: Category RecyclerView setup complete, visibility: $visibility")
+        }
+    }
+
     private fun setupFilterButtons() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -159,9 +190,68 @@ class CalculatorListFragment : Fragment() {
         binding.recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
 
+//    private fun observeViewModel() {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                launch {
+//                    viewModel.calculators.collectLatest { calculators ->
+//                        calculatorAdapter.submitList(calculators)
+//
+//                        if (calculators.isEmpty() && !viewModel.isLoading.value) {
+//                            showEmptyState()
+//                        } else {
+//                            hideEmptyState()
+//                        }
+//                    }
+//                }
+//
+//                launch {
+//                    viewModel.isLoading.collectLatest { isLoading ->
+//                        showLoading(isLoading)
+//                    }
+//                }
+//
+//                launch {
+//                    viewModel.error.collectLatest { errorMessage ->
+//                        errorMessage?.let {
+//                            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+//                        }
+//                    }
+//                }
+//
+//                launch {
+//                    viewModel.currentFilterMode.collectLatest { mode ->
+//                        updateFilterButtonsUI(mode)
+//                    }
+//
+////                    launch {
+////                        viewModel.categories.collectLatest { categories ->
+////                            categoryAdapter.submitList(categories)
+////                        }
+////                    }
+//                    launch {
+//                        viewModel.categories.collectLatest { categories ->
+//                            println("🔍 DEBUG Fragment: Received ${categories.size} categories for adapter")
+//                            categoryAdapter.submitList(categories)
+//                        }
+//                    }
+//
+//                    launch {
+//                        viewModel.selectedCategoryId.collectLatest { selectedId ->
+//                            categoryAdapter.setSelectedCategory(selectedId)
+//                        }
+//                    }
+//
+//
+//                }
+//            }
+//        }
+//    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observe calculators
                 launch {
                     viewModel.calculators.collectLatest { calculators ->
                         calculatorAdapter.submitList(calculators)
@@ -174,12 +264,30 @@ class CalculatorListFragment : Fragment() {
                     }
                 }
 
+                // Observe categories - FIX HERE
+                launch {
+                    viewModel.categories.collectLatest { categories ->
+                        println("🔍 DEBUG Fragment: Received ${categories.size} categories for adapter")
+                        categoryAdapter.submitList(categories)
+                    }
+                }
+
+                // Observe selected category
+                launch {
+                    viewModel.selectedCategoryId.collectLatest { selectedId ->
+                        println("🔍 DEBUG Fragment: Selected category ID: $selectedId")
+                        categoryAdapter.setSelectedCategory(selectedId)
+                    }
+                }
+
+                // Observe loading state
                 launch {
                     viewModel.isLoading.collectLatest { isLoading ->
                         showLoading(isLoading)
                     }
                 }
 
+                // Observe errors
                 launch {
                     viewModel.error.collectLatest { errorMessage ->
                         errorMessage?.let {
@@ -188,6 +296,7 @@ class CalculatorListFragment : Fragment() {
                     }
                 }
 
+                // Observe filter mode
                 launch {
                     viewModel.currentFilterMode.collectLatest { mode ->
                         updateFilterButtonsUI(mode)

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_marginEnd="8dp"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tvCategoryName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"
+        android:text="Category Name" />
+
+    <TextView
+        android:id="@+id/tvCalculatorCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/secondary_text"
+        android:layout_marginTop="2dp"
+        android:text="(5)" />
+
+</LinearLayout>

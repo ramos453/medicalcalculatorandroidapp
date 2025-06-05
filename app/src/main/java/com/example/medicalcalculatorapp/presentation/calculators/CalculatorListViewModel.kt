@@ -11,11 +11,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.example.medicalcalculatorapp.domain.model.CategoryWithCount
+import com.example.medicalcalculatorapp.domain.repository.ICategoryRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CalculatorListViewModel(
     private val calculatorRepository: ICalculatorRepository,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val categoryRepository: ICategoryRepository // Add this line
 ) : ViewModel() {
 
     // UI state
@@ -36,8 +39,16 @@ class CalculatorListViewModel(
     private val _searchQuery = MutableStateFlow<String?>(null)
     val searchQuery: StateFlow<String?> = _searchQuery
 
+    // Categories state
+    private val _categories = MutableStateFlow<List<CategoryWithCount>>(emptyList())
+    val categories: StateFlow<List<CategoryWithCount>> = _categories
+
+    private val _selectedCategoryId = MutableStateFlow<String?>(null)
+    val selectedCategoryId: StateFlow<String?> = _selectedCategoryId
+
     init {
         loadCalculators()
+        loadCategories()
     }
 
     fun setFilterMode(mode: FilterMode) {
@@ -64,34 +75,125 @@ class CalculatorListViewModel(
         }
     }
 
+    fun selectCategory(categoryId: String?) {
+        _selectedCategoryId.value = categoryId
+        loadCalculators()
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            try {
+                println("🔍 DEBUG: Starting to load categories...")
+                categoryRepository.getAllCategoriesWithCounts().collectLatest { categories ->
+                    println("🔍 DEBUG: Loaded ${categories.size} categories: ${categories.map { it.category.name }}")
+                    _categories.value = categories
+                }
+            } catch (e: Exception) {
+                println("❌ DEBUG: Failed to load categories: ${e.message}")
+                e.printStackTrace()
+                _error.value = "Failed to load categories: ${e.message}"
+            }
+        }
+    }
+
+//    private fun loadCategories() {
+//        viewModelScope.launch {
+//            try {
+//                categoryRepository.getAllCategoriesWithCounts().collectLatest { categories ->
+//                    _categories.value = categories
+//                }
+//            } catch (e: Exception) {
+//                _error.value = "Failed to load categories: ${e.message}"
+//            }
+//        }
+//    }
+
+//    private fun loadCalculators() {
+//        viewModelScope.launch {
+//            _isLoading.value = true
+//            _error.value = null
+//
+//            try {
+//                // Handle search query first
+//                val query = _searchQuery.value
+//                if (!query.isNullOrBlank()) {
+//                    calculatorRepository.searchCalculators(query).collectLatest {
+//                        _calculators.value = it
+//                        _isLoading.value = false
+//                    }
+//                    return@launch
+//                }
+//
+//                // Then handle filter mode
+//                when (_currentFilterMode.value) {
+//                    FilterMode.ALL -> {
+//                        calculatorRepository.getAllCalculators().collectLatest {
+//                            _calculators.value = it
+//                            _isLoading.value = false
+//                        }
+//                    }
+//                    FilterMode.FAVORITES -> {
+//                        val userId = userManager.getCurrentUserId()
+//                        calculatorRepository.getFavoriteCalculators(userId).collectLatest {
+//                            _calculators.value = it
+//                            _isLoading.value = false
+//                        }
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                _error.value = "Failed to load calculators: ${e.message}"
+//                _isLoading.value = false
+//            }
+//        }
+//    }
+
     private fun loadCalculators() {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
 
             try {
-                // Handle search query first
+                val selectedCategory = _selectedCategoryId.value
                 val query = _searchQuery.value
+
+                // Handle search query first
                 if (!query.isNullOrBlank()) {
-                    calculatorRepository.searchCalculators(query).collectLatest {
-                        _calculators.value = it
+                    calculatorRepository.searchCalculators(query).collectLatest { allCalculators ->
+                        val filteredCalculators = if (selectedCategory != null) {
+                            allCalculators.filter { it.category == selectedCategory }
+                        } else {
+                            allCalculators
+                        }
+                        _calculators.value = filteredCalculators
                         _isLoading.value = false
                     }
                     return@launch
                 }
 
-                // Then handle filter mode
+                // Handle category + filter mode combination
                 when (_currentFilterMode.value) {
                     FilterMode.ALL -> {
-                        calculatorRepository.getAllCalculators().collectLatest {
-                            _calculators.value = it
-                            _isLoading.value = false
+                        if (selectedCategory != null) {
+                            calculatorRepository.getCalculatorsByCategory(selectedCategory).collectLatest {
+                                _calculators.value = it
+                                _isLoading.value = false
+                            }
+                        } else {
+                            calculatorRepository.getAllCalculators().collectLatest {
+                                _calculators.value = it
+                                _isLoading.value = false
+                            }
                         }
                     }
                     FilterMode.FAVORITES -> {
                         val userId = userManager.getCurrentUserId()
-                        calculatorRepository.getFavoriteCalculators(userId).collectLatest {
-                            _calculators.value = it
+                        calculatorRepository.getFavoriteCalculators(userId).collectLatest { favorites ->
+                            val filteredFavorites = if (selectedCategory != null) {
+                                favorites.filter { it.category == selectedCategory }
+                            } else {
+                                favorites
+                            }
+                            _calculators.value = filteredFavorites
                             _isLoading.value = false
                         }
                     }
@@ -112,12 +214,13 @@ class CalculatorListViewModel(
      */
     class Factory(
         private val calculatorRepository: ICalculatorRepository,
-        private val userManager: UserManager
+        private val userManager: UserManager,
+        private val categoryRepository: ICategoryRepository // Add this parameter
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CalculatorListViewModel::class.java)) {
-                return CalculatorListViewModel(calculatorRepository, userManager) as T
+                return CalculatorListViewModel(calculatorRepository, userManager, categoryRepository) as T // Add categoryRepository
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
