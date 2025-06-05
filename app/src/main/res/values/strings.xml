@@ -323,4 +323,126 @@ Al usar MediCálculos, confirmas que has leído y comprendido esta política de 
     <string name="data_anonymization_notice">Sus cálculos son procesados de forma anónima</string>
     <string name="regulatory_compliance">Cumplimiento Regulatorio Latinoamericano</string>
 
+
+    <!-- Settings and Profile Strings -->
+    <string name="profile">Perfil</string>
+    <string name="profile_settings">Configuración del Perfil</string>
+    <string name="account_settings">Configuración de Cuenta</string>
+    <string name="app_settings">Configuración de la App</string>
+    <string name="privacy_settings">Configuración de Privacidad</string>
+    <string name="calculator_settings">Configuración de Calculadoras</string>
+
+    <!-- Profile Information -->
+    <string name="personal_information">Información Personal</string>
+    <string name="professional_information">Información Profesional</string>
+    <string name="profile_picture">Foto de Perfil</string>
+    <string name="change_profile_picture">Cambiar Foto de Perfil</string>
+    <string name="profession">Profesión</string>
+    <string name="specialization">Especialización</string>
+    <string name="institution">Institución</string>
+    <string name="license_number">Número de Licencia/Cédula</string>
+    <string name="country">País</string>
+    <string name="language_preference">Idioma Preferido</string>
+
+    <!-- Medical Professions -->
+    <string name="select_profession">Seleccionar Profesión</string>
+    <string name="doctor">Médico</string>
+    <string name="nurse">Enfermero/a</string>
+    <string name="pharmacist">Farmacéutico/a</string>
+    <string name="physiotherapist">Fisioterapeuta</string>
+    <string name="nutritionist">Nutricionista</string>
+    <string name="medical_student">Estudiante de Medicina</string>
+    <string name="nursing_student">Estudiante de Enfermería</string>
+    <string name="resident">Residente</string>
+    <string name="specialist">Especialista</string>
+    <string name="other_profession">Otro</string>
+
+    <!-- Account Settings -->
+    <string name="change_email">Cambiar Correo Electrónico</string>
+    <string name="change_password">Cambiar Contraseña</string>
+    <string name="current_password">Contraseña Actual</string>
+    <string name="new_password">Nueva Contraseña</string>
+    <string name="confirm_new_password">Confirmar Nueva Contraseña</string>
+    <string name="password_changed_successfully">Contraseña cambiada exitosamente</string>
+    <string name="email_changed_successfully">Correo electrónico cambiado exitosamente</string>
+
+    <!-- App Preferences -->
+    <string name="theme">Tema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="theme_system">Seguir sistema</string>
+    <string name="language">Idioma</string>
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+    <string name="portuguese">Português</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="enable_notifications">Habilitar Notificaciones</string>
+    <string name="biometric_auth">Autenticación Biométrica</string>
+    <string name="enable_biometric">Habilitar Huella/FaceID</string>
+    <string name="units">Sistema de Unidades</string>
+    <string name="metric_system">Sistema Métrico</string>
+    <string name="imperial_system">Sistema Imperial</string>
+
+    <!-- Calculator Preferences -->
+    <string name="auto_save_calculations">Guardar Cálculos Automáticamente</string>
+    <string name="show_detailed_results">Mostrar Resultados Detallados</string>
+    <string name="show_references">Mostrar Referencias Científicas</string>
+    <string name="confirm_before_reset">Confirmar Antes de Reiniciar</string>
+    <string name="save_calculation_history">Guardar Historial de Cálculos</string>
+    <string name="max_history_items">Máximo de Elementos en Historial</string>
+
+    <!-- Privacy and Data -->
+    <string name="data_privacy">Privacidad de Datos</string>
+    <string name="share_usage_data">Compartir Datos de Uso</string>
+    <string name="share_anonymous_statistics">Compartir Estadísticas Anónimas</string>
+    <string name="allow_data_export">Permitir Exportación de Datos</string>
+    <string name="data_retention">Retención de Datos</string>
+    <string name="data_retention_days">Días de Retención de Datos</string>
+    <string name="export_my_data">Exportar Mis Datos</string>
+    <string name="delete_my_account">Eliminar Mi Cuenta</string>
+
+    <!-- Actions and Buttons -->
+    <string name="edit_profile">Editar Perfil</string>
+    <string name="save_changes">Guardar Cambios</string>
+    <string name="discard_changes">Descartar Cambios</string>
+    <string name="reset_to_default">Restablecer a Predeterminado</string>
+    <string name="sign_out_confirm">¿Estás seguro de que quieres cerrar sesión?</string>
+    <string name="delete_account_confirm">¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.</string>
+    <string name="reset_settings_confirm">¿Restablecer todas las configuraciones a los valores predeterminados?</string>
+
+    <!-- Messages and Feedback -->
+    <string name="profile_updated_successfully">Perfil actualizado exitosamente</string>
+    <string name="settings_updated_successfully">Configuraciones actualizadas exitosamente</string>
+    <string name="settings_reset_successfully">Configuraciones restablecidas exitosamente</string>
+    <string name="data_exported_successfully">Datos exportados exitosamente</string>
+    <string name="error_updating_profile">Error al actualizar el perfil</string>
+    <string name="error_updating_settings">Error al actualizar las configuraciones</string>
+    <string name="invalid_license_number">Número de licencia inválido</string>
+    <string name="field_required">Este campo es obligatorio</string>
+
+    <!-- Section Headers -->
+    <string name="about_section">Acerca de</string>
+    <string name="support_section">Soporte</string>
+    <string name="legal_section">Legal</string>
+    <string name="version_info">Información de Versión</string>
+    <string name="app_version">Versión de la App</string>
+    <string name="database_version">Versión de Base de Datos</string>
+    <string name="last_sync">Última Sincronización</string>
+    <string name="never_synced">Nunca sincronizado</string>
+
+    <!-- Help and Support -->
+    <string name="help_support">Ayuda y Soporte</string>
+    <string name="contact_support">Contactar Soporte</string>
+    <string name="user_guide">Guía de Usuario</string>
+    <string name="report_bug">Reportar Error</string>
+    <string name="rate_app">Calificar App</string>
+    <string name="share_app">Compartir App</string>
+
+    <!-- Legal and Compliance -->
+    <string name="view_privacy_policy_full">Ver Política de Privacidad Completa</string>
+    <string name="view_terms_of_service">Ver Términos de Servicio</string>
+    <string name="licenses">Licencias de Código Abierto</string>
+    <string name="medical_disclaimer_title">Aviso Médico Importante</string>
+    <string name="gdpr_compliance">Cumplimiento GDPR/LGPD</string>
+
 </resources>

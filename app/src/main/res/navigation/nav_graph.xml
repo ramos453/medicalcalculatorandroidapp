@@ -57,6 +57,11 @@
         <action
             android:id="@+id/action_calculatorListFragment_to_calculatorDetailFragment"
             app:destination="@id/calculatorDetailFragment" />
+
+        <action
+            android:id="@+id/action_calculatorListFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+
     </fragment>
 
     <!-- Add this inside the navigation element, along with other fragments -->
@@ -69,5 +74,34 @@
             android:name="calculatorId"
             app:argType="string" />
     </fragment>
+
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.settings.SettingsFragment"
+        android:label="@string/profile_settings"
+        tools:layout="@layout/fragment_settings">
+
+<!--        <action-->
+<!--            android:id="@+id/action_settingsFragment_to_profileEditFragment"-->
+<!--            app:destination="@id/profileEditFragment" />-->
+
+<!--        <action-->
+<!--            android:id="@+id/action_settingsFragment_to_appPreferencesFragment"-->
+<!--            app:destination="@id/appPreferencesFragment" />-->
+    </fragment>
+
+<!--    <fragment-->
+<!--        android:id="@+id/profileEditFragment"-->
+<!--        android:name="com.example.medicalcalculatorapp.presentation.settings.ProfileEditFragment"-->
+<!--        android:label="@string/edit_profile"-->
+<!--        tools:layout="@layout/fragment_profile_edit" />-->
+
+<!--    <fragment-->
+<!--        android:id="@+id/appPreferencesFragment"-->
+<!--        android:name="com.example.medicalcalculatorapp.presentation.settings.AppPreferencesFragment"-->
+<!--        android:label="@string/app_settings"-->
+<!--        tools:layout="@layout/fragment_app_preferences" />-->
+
 
 </navigation>

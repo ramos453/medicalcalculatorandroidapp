@@ -5,13 +5,17 @@ import com.example.medicalcalculatorapp.data.db.MedicalCalculatorDatabase
 import com.example.medicalcalculatorapp.data.db.mapper.CalculatorMapper
 import com.example.medicalcalculatorapp.data.db.mapper.CategoryMapper
 import com.example.medicalcalculatorapp.data.db.mapper.HistoryMapper
+import com.example.medicalcalculatorapp.data.db.mapper.UserProfileMapper
+import com.example.medicalcalculatorapp.data.db.mapper.UserSettingsMapper
 import com.example.medicalcalculatorapp.data.repository.CalculatorRepository
 import com.example.medicalcalculatorapp.data.repository.CategoryRepository
 import com.example.medicalcalculatorapp.data.repository.HistoryRepository
+import com.example.medicalcalculatorapp.data.repository.UserRepository
 import com.example.medicalcalculatorapp.data.user.UserManager
 import com.example.medicalcalculatorapp.domain.repository.ICalculatorRepository
 import com.example.medicalcalculatorapp.domain.repository.ICategoryRepository
 import com.example.medicalcalculatorapp.domain.repository.IHistoryRepository
+import com.example.medicalcalculatorapp.domain.repository.IUserRepository
 import com.google.gson.Gson
 import com.example.medicalcalculatorapp.domain.service.CalculatorService
 
@@ -30,8 +34,6 @@ import com.example.medicalcalculatorapp.domain.calculator.impl.GlasgowComaScaleC
 import com.example.medicalcalculatorapp.domain.calculator.impl.PediatricDosageCalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.ApgarScoreCalculator
 
-
-
 /**
  * A simple dependency provider for the application.
  * In a larger app, you might want to use a proper DI framework like Hilt or Koin.
@@ -42,6 +44,7 @@ object AppDependencies {
     private var calculatorRepository: ICalculatorRepository? = null
     private var categoryRepository: ICategoryRepository? = null
     private var historyRepository: IHistoryRepository? = null
+    private var userRepository: IUserRepository? = null
     private var userManager: UserManager? = null
     private val gson = Gson()
     private var calculatorService: CalculatorService? = null
@@ -86,6 +89,22 @@ object AppDependencies {
         }
     }
 
+    fun provideHistoryRepository(context: Context): IHistoryRepository {
+        return historyRepository ?: synchronized(this) {
+            historyRepository ?: createHistoryRepository(context).also {
+                historyRepository = it
+            }
+        }
+    }
+
+    fun provideUserRepository(context: Context): IUserRepository {
+        return userRepository ?: synchronized(this) {
+            userRepository ?: createUserRepository(context).also {
+                userRepository = it
+            }
+        }
+    }
+
     private fun createCalculatorService(): CalculatorService {
         val service = CalculatorService()
 
@@ -107,14 +126,6 @@ object AppDependencies {
         return service
     }
 
-    fun provideHistoryRepository(context: Context): IHistoryRepository {
-        return historyRepository ?: synchronized(this) {
-            historyRepository ?: createHistoryRepository(context).also {
-                historyRepository = it
-            }
-        }
-    }
-
     private fun createCalculatorRepository(context: Context): CalculatorRepository {
         val database = provideDatabase(context)
         val userManager = provideUserManager(context)
@@ -133,5 +144,12 @@ object AppDependencies {
         val userManager = provideUserManager(context)
         val historyMapper = HistoryMapper(gson)
         return HistoryRepository(database, historyMapper, userManager)
+    }
+
+    private fun createUserRepository(context: Context): UserRepository {
+        val database = provideDatabase(context)
+        val userProfileMapper = UserProfileMapper()
+        val userSettingsMapper = UserSettingsMapper(gson)
+        return UserRepository(database, userProfileMapper, userSettingsMapper)
     }
 }
