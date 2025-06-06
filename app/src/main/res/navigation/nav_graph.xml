@@ -5,6 +5,7 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/splashFragment">
 
+    <!-- AUTH FLOW -->
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.example.medicalcalculatorapp.presentation.splash.SplashFragment"
@@ -30,18 +31,10 @@
             app:destination="@id/calculatorListFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
-        <!-- Add this new action inside the loginFragment element -->
         <action
             android:id="@+id/action_loginFragment_to_privacyPolicyFragment"
             app:destination="@id/privacyPolicyFragment" />
     </fragment>
-
-    <!-- Add this new fragment definition -->
-    <fragment
-        android:id="@+id/privacyPolicyFragment"
-        android:name="com.example.medicalcalculatorapp.presentation.auth.PrivacyPolicyFragment"
-        android:label="Privacy Policy"
-        tools:layout="@layout/fragment_privacy_policy" />
 
     <fragment
         android:id="@+id/registerFragment"
@@ -50,6 +43,13 @@
         tools:layout="@layout/fragment_register" />
 
     <fragment
+        android:id="@+id/privacyPolicyFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.auth.PrivacyPolicyFragment"
+        android:label="Privacy Policy"
+        tools:layout="@layout/fragment_privacy_policy" />
+
+    <!-- MAIN APP FLOW -->
+    <fragment
         android:id="@+id/calculatorListFragment"
         android:name="com.example.medicalcalculatorapp.presentation.calculators.CalculatorListFragment"
         android:label="Calculator List"
@@ -57,14 +57,11 @@
         <action
             android:id="@+id/action_calculatorListFragment_to_calculatorDetailFragment"
             app:destination="@id/calculatorDetailFragment" />
-
         <action
             android:id="@+id/action_calculatorListFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
-
     </fragment>
 
-    <!-- Add this inside the navigation element, along with other fragments -->
     <fragment
         android:id="@+id/calculatorDetailFragment"
         android:name="com.example.medicalcalculatorapp.presentation.calculators.detail.CalculatorDetailFragment"
@@ -75,33 +72,43 @@
             app:argType="string" />
     </fragment>
 
+    <!-- ✅ SETTINGS FRAGMENTS DEFINED FIRST -->
+    <fragment
+        android:id="@+id/profileEditFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.settings.ProfileEditFragment"
+        android:label="@string/edit_profile"
+        tools:layout="@layout/fragment_profile_edit" />
 
+    <fragment
+        android:id="@+id/appPreferencesFragment"
+        android:name="com.example.medicalcalculatorapp.presentation.settings.AppPreferencesFragment"
+        android:label="@string/app_settings"
+        tools:layout="@layout/fragment_app_preferences" />
+
+    <!-- ✅ SETTINGS FRAGMENT WITH ACTIONS (DEFINED LAST) -->
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.medicalcalculatorapp.presentation.settings.SettingsFragment"
         android:label="@string/profile_settings"
         tools:layout="@layout/fragment_settings">
 
-<!--        <action-->
-<!--            android:id="@+id/action_settingsFragment_to_profileEditFragment"-->
-<!--            app:destination="@id/profileEditFragment" />-->
+        <!-- ✅ NOW THESE REFERENCES WORK -->
+        <action
+            android:id="@+id/action_settingsFragment_to_profileEditFragment"
+            app:destination="@id/profileEditFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
 
-<!--        <action-->
-<!--            android:id="@+id/action_settingsFragment_to_appPreferencesFragment"-->
-<!--            app:destination="@id/appPreferencesFragment" />-->
+        <action
+            android:id="@+id/action_settingsFragment_to_appPreferencesFragment"
+            app:destination="@id/appPreferencesFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
     </fragment>
-
-<!--    <fragment-->
-<!--        android:id="@+id/profileEditFragment"-->
-<!--        android:name="com.example.medicalcalculatorapp.presentation.settings.ProfileEditFragment"-->
-<!--        android:label="@string/edit_profile"-->
-<!--        tools:layout="@layout/fragment_profile_edit" />-->
-
-<!--    <fragment-->
-<!--        android:id="@+id/appPreferencesFragment"-->
-<!--        android:name="com.example.medicalcalculatorapp.presentation.settings.AppPreferencesFragment"-->
-<!--        android:label="@string/app_settings"-->
-<!--        tools:layout="@layout/fragment_app_preferences" />-->
-
 
 </navigation>

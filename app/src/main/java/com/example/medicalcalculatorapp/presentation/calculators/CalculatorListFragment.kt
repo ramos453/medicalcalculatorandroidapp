@@ -115,18 +115,6 @@ class CalculatorListFragment : Fragment() {
         }
     }
 
-//    private fun setupCategoryRecyclerView() {
-//        categoryAdapter = CategoryAdapter { selectedCategory ->
-//            // Handle category selection (null means "All Categories")
-//            viewModel.selectCategory(selectedCategory?.category?.id)
-//        }
-//
-//        binding.recyclerViewCategories.apply {
-//            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-//            adapter = categoryAdapter
-//        }
-//    }
-
     private fun setupCategoryRecyclerView() {
         println("🔍 DEBUG: Setting up category RecyclerView")
 
@@ -144,17 +132,27 @@ class CalculatorListFragment : Fragment() {
     }
 
     private fun setupFilterButtons() {
+        // ✅ FIXED: Proper navigation to settings
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.btnHome -> true
+                R.id.btnHome -> {
+                    // Already on home, do nothing
+                    true
+                }
                 R.id.btnSettings -> {
-                    Toast.makeText(requireContext(), "Configuración - Próximamente", Toast.LENGTH_SHORT).show()
+                    // ✅ Navigate to settings instead of showing toast
+                    try {
+                        findNavController().navigate(R.id.action_calculatorListFragment_to_settingsFragment)
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error navegando a configuración: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                     true
                 }
                 else -> false
             }
         }
 
+        // Filter buttons (Todo A-Z and Favoritos)
         binding.btnAll.setOnClickListener {
             viewModel.setFilterMode(CalculatorListViewModel.FilterMode.ALL)
         }
@@ -190,64 +188,6 @@ class CalculatorListFragment : Fragment() {
         binding.recyclerView.visibility = if (show) View.GONE else View.VISIBLE
     }
 
-//    private fun observeViewModel() {
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                launch {
-//                    viewModel.calculators.collectLatest { calculators ->
-//                        calculatorAdapter.submitList(calculators)
-//
-//                        if (calculators.isEmpty() && !viewModel.isLoading.value) {
-//                            showEmptyState()
-//                        } else {
-//                            hideEmptyState()
-//                        }
-//                    }
-//                }
-//
-//                launch {
-//                    viewModel.isLoading.collectLatest { isLoading ->
-//                        showLoading(isLoading)
-//                    }
-//                }
-//
-//                launch {
-//                    viewModel.error.collectLatest { errorMessage ->
-//                        errorMessage?.let {
-//                            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
-//                        }
-//                    }
-//                }
-//
-//                launch {
-//                    viewModel.currentFilterMode.collectLatest { mode ->
-//                        updateFilterButtonsUI(mode)
-//                    }
-//
-////                    launch {
-////                        viewModel.categories.collectLatest { categories ->
-////                            categoryAdapter.submitList(categories)
-////                        }
-////                    }
-//                    launch {
-//                        viewModel.categories.collectLatest { categories ->
-//                            println("🔍 DEBUG Fragment: Received ${categories.size} categories for adapter")
-//                            categoryAdapter.submitList(categories)
-//                        }
-//                    }
-//
-//                    launch {
-//                        viewModel.selectedCategoryId.collectLatest { selectedId ->
-//                            categoryAdapter.setSelectedCategory(selectedId)
-//                        }
-//                    }
-//
-//
-//                }
-//            }
-//        }
-//    }
-
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -264,7 +204,7 @@ class CalculatorListFragment : Fragment() {
                     }
                 }
 
-                // Observe categories - FIX HERE
+                // Observe categories
                 launch {
                     viewModel.categories.collectLatest { categories ->
                         println("🔍 DEBUG Fragment: Received ${categories.size} categories for adapter")
@@ -319,4 +259,3 @@ class CalculatorListFragment : Fragment() {
         _binding = null
     }
 }
-

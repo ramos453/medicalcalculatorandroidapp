@@ -10,6 +10,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.FragmentSettingsBinding
+import com.example.medicalcalculatorapp.presentation.settings.SettingsSectionAdapter
+
 
 class SettingsFragment : Fragment() {
 
@@ -69,13 +71,17 @@ class SettingsFragment : Fragment() {
 
     private fun setupQuickActions() {
         binding.cardEditProfile.setOnClickListener {
-            // TODO: Navigate to profile edit
-            Toast.makeText(requireContext(), "Editar Perfil - Próximamente", Toast.LENGTH_SHORT).show()
+            // 🔧 Navigate to profile edit
+            try {
+                findNavController().navigate(R.id.action_settingsFragment_to_profileEditFragment)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error de navegación: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.cardSignOut.setOnClickListener {
             // TODO: Show sign out confirmation dialog
-            Toast.makeText(requireContext(), "Cerrar Sesión - Próximamente", Toast.LENGTH_SHORT).show()
+            showSignOutDialog()
         }
     }
 
@@ -91,7 +97,7 @@ class SettingsFragment : Fragment() {
                 id = "app_preferences",
                 title = "Configuración de la App",
                 description = "Tema, idioma, notificaciones y preferencias",
-                iconRes = R.drawable.ic_settings,
+                iconRes = R.drawable.ic_launcher_foreground, // Using available icon for now
                 hasStatus = true,
                 statusText = "Configurado"
             ),
@@ -99,21 +105,21 @@ class SettingsFragment : Fragment() {
                 id = "account_settings",
                 title = "Configuración de Cuenta",
                 description = "Email, contraseña y seguridad",
-                iconRes = R.drawable.ic_account,
+                iconRes = R.drawable.ic_launcher_foreground,
                 hasStatus = false
             ),
             SettingsSection(
                 id = "privacy_settings",
                 title = "Privacidad y Datos",
                 description = "Control de datos personales y privacidad",
-                iconRes = R.drawable.ic_privacy,
+                iconRes = R.drawable.ic_launcher_foreground,
                 hasStatus = false
             ),
             SettingsSection(
                 id = "calculator_settings",
                 title = "Configuración de Calculadoras",
                 description = "Preferencias de cálculo y historial",
-                iconRes = R.drawable.ic_calculator,
+                iconRes = R.drawable.ic_launcher_foreground,
                 hasStatus = true,
                 statusText = "Por defecto"
             ),
@@ -121,14 +127,14 @@ class SettingsFragment : Fragment() {
                 id = "help_support",
                 title = "Ayuda y Soporte",
                 description = "Guías, contacto y reportar problemas",
-                iconRes = R.drawable.ic_help,
+                iconRes = R.drawable.ic_launcher_foreground,
                 hasStatus = false
             ),
             SettingsSection(
                 id = "about",
                 title = "Acerca de la App",
                 description = "Versión, licencias y información legal",
-                iconRes = R.drawable.ic_info,
+                iconRes = R.drawable.ic_launcher_foreground,
                 hasStatus = false
             )
         )
@@ -137,8 +143,12 @@ class SettingsFragment : Fragment() {
     private fun handleSectionClick(section: SettingsSection) {
         when (section.id) {
             "app_preferences" -> {
-                // TODO: Navigate to app preferences
-                Toast.makeText(requireContext(), "Navegando a ${section.title}", Toast.LENGTH_SHORT).show()
+                // 🔧 Navigate to app preferences
+                try {
+                    findNavController().navigate(R.id.action_settingsFragment_to_appPreferencesFragment)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Error de navegación: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
             "account_settings" -> {
                 Toast.makeText(requireContext(), "${section.title} - Próximamente", Toast.LENGTH_SHORT).show()
@@ -156,6 +166,20 @@ class SettingsFragment : Fragment() {
                 Toast.makeText(requireContext(), "${section.title} - Próximamente", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showSignOutDialog() {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Cerrar Sesión")
+            .setMessage(getString(R.string.sign_out_confirm))
+            .setPositiveButton("Cerrar Sesión") { _, _ ->
+                // TODO: Implement actual sign out logic
+                Toast.makeText(requireContext(), "Sesión cerrada", Toast.LENGTH_SHORT).show()
+                // Navigate back to login
+                findNavController().navigate(R.id.loginFragment)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     override fun onDestroyView() {
