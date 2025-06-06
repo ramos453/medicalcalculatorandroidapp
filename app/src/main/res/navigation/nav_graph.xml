@@ -11,6 +11,15 @@
         android:name="com.example.medicalcalculatorapp.presentation.splash.SplashFragment"
         android:label="Splash"
         tools:layout="@layout/fragment_splash">
+
+        <!-- ✅ NEW: Direct navigation to calculator list for session restoration -->
+        <action
+            android:id="@+id/action_splashFragment_to_calculatorListFragment"
+            app:destination="@id/calculatorListFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+
+        <!-- Existing navigation to login -->
         <action
             android:id="@+id/action_splashFragment_to_loginFragment"
             app:destination="@id/loginFragment"
@@ -60,6 +69,12 @@
         <action
             android:id="@+id/action_calculatorListFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <!-- ✅ NEW: Navigation back to login for guest upgrade or sign out -->
+        <action
+            android:id="@+id/action_calculatorListFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -72,7 +87,7 @@
             app:argType="string" />
     </fragment>
 
-    <!-- ✅ SETTINGS FRAGMENTS DEFINED FIRST -->
+    <!-- SETTINGS FRAGMENTS -->
     <fragment
         android:id="@+id/profileEditFragment"
         android:name="com.example.medicalcalculatorapp.presentation.settings.ProfileEditFragment"
@@ -85,14 +100,12 @@
         android:label="@string/app_settings"
         tools:layout="@layout/fragment_app_preferences" />
 
-    <!-- ✅ SETTINGS FRAGMENT WITH ACTIONS (DEFINED LAST) -->
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.medicalcalculatorapp.presentation.settings.SettingsFragment"
         android:label="@string/profile_settings"
         tools:layout="@layout/fragment_settings">
 
-        <!-- ✅ NOW THESE REFERENCES WORK -->
         <action
             android:id="@+id/action_settingsFragment_to_profileEditFragment"
             app:destination="@id/profileEditFragment"
@@ -108,6 +121,13 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+
+        <!-- ✅ NEW: Settings can navigate back to login for account management -->
+        <action
+            android:id="@+id/action_settingsFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
 
     </fragment>
 

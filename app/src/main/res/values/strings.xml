@@ -445,4 +445,73 @@ Al usar MediCálculos, confirmas que has leído y comprendido esta política de 
     <string name="medical_disclaimer_title">Aviso Médico Importante</string>
     <string name="gdpr_compliance">Cumplimiento GDPR/LGPD</string>
 
+    <!-- Add these strings to your existing app/src/main/res/values/strings.xml -->
+
+    <!-- Guest Mode Strings -->
+    <string name="continue_as_guest">Continuar como Invitado</string>
+    <string name="guest_mode">Modo Invitado</string>
+    <string name="guest_mode_description">Acceso rápido sin cuenta - Ideal para situaciones urgentes</string>
+
+    <!-- Guest Benefits -->
+    <string name="guest_benefit_quick_access">Acceso inmediato a todas las calculadoras</string>
+    <string name="guest_benefit_all_calculators">Sin restricciones en cálculos médicos</string>
+    <string name="guest_benefit_no_registration">No requiere registro ni datos personales</string>
+
+    <!-- Guest Limitations -->
+    <string name="guest_limitation_no_save">No se guarda historial ni favoritos</string>
+    <string name="guest_limitation_no_sync">Sin sincronización entre dispositivos</string>
+    <string name="guest_limitation_session_temporary">Sesión temporal - se restablece al cerrar la app</string>
+
+    <!-- Guest Session Messages -->
+    <string name="guest_session_started">Sesión de invitado iniciada</string>
+    <string name="guest_session_welcome">Bienvenido, Usuario Invitado</string>
+    <string name="guest_session_reminder">Recordatorio: Eres un usuario invitado. Crea una cuenta para guardar tu progreso.</string>
+
+    <!-- Medical Disclaimers for Guest Users -->
+    <string name="guest_medical_disclaimer_title">⚕️ Aviso Médico Importante para Usuarios Invitados</string>
+    <string name="guest_medical_disclaimer_text">Como usuario invitado, debes aceptar nuestros términos médicos:\n\n• Esta aplicación es SOLO para fines educativos\n• NO sustituye el criterio médico profesional\n• NO usar para diagnóstico directo de pacientes\n• En emergencias, contacta servicios médicos inmediatamente\n\n¿Aceptas estos términos como profesional de salud?</string>
+
+    <!-- Account Upgrade Prompts -->
+    <string name="upgrade_prompt_title">¿Crear una cuenta?</string>
+    <string name="upgrade_prompt_save_history">Crea una cuenta para guardar tu historial de cálculos</string>
+    <string name="upgrade_prompt_favorites">Crea una cuenta para guardar tus calculadoras favoritas</string>
+    <string name="upgrade_prompt_sync">Crea una cuenta para sincronizar entre dispositivos</string>
+    <string name="upgrade_prompt_export">Crea una cuenta para exportar tus datos</string>
+
+    <!-- Upgrade Actions -->
+    <string name="upgrade_create_account">Crear Cuenta</string>
+    <string name="upgrade_maybe_later">Tal vez después</string>
+    <string name="upgrade_continue_guest">Continuar como Invitado</string>
+
+    <!-- Guest Session Status -->
+    <string name="guest_calculations_count">Cálculos realizados en esta sesión: %d</string>
+    <string name="guest_session_time">Tiempo de sesión: %s</string>
+    <string name="guest_session_expires">La sesión expira en: %s</string>
+
+    <!-- Error Messages -->
+    <string name="guest_session_error">Error al iniciar sesión de invitado</string>
+    <string name="guest_disclaimer_required">Debes aceptar el aviso médico para continuar</string>
+    <string name="guest_session_limit_reached">Has alcanzado el límite de cálculos para esta sesión</string>
+
+    <!-- Professional Verification for Guests -->
+    <string name="guest_professional_verification_title">Verificación Profesional</string>
+    <string name="guest_professional_verification_message">Para usar esta aplicación médica, confirma que eres:\n\n• Profesional de salud licenciado\n• Estudiante de medicina bajo supervisión\n• Otro profesional sanitario autorizado\n\nEsta aplicación está diseñada exclusivamente para profesionales médicos.</string>
+    <string name="confirm_medical_professional">Sí, soy un profesional de salud</string>
+    <string name="not_medical_professional">No soy profesional médico</string>
+
+    <!-- Feature Limitations Messages -->
+    <string name="feature_requires_account">Esta función requiere una cuenta registrada</string>
+    <string name="guest_cannot_save_favorites">Los usuarios invitados no pueden guardar favoritos</string>
+    <string name="guest_cannot_save_history">Los usuarios invitados no pueden guardar historial</string>
+    <string name="guest_cannot_export">Los usuarios invitados no pueden exportar datos</string>
+
+    <!-- Session Management -->
+    <string name="guest_session_ending_soon">Tu sesión de invitado termina pronto. ¿Crear una cuenta?</string>
+    <string name="guest_session_ended">Sesión de invitado terminada</string>
+    <string name="start_new_guest_session">Iniciar nueva sesión de invitado</string>
+
+    <!-- Legal Compliance -->
+    <string name="guest_data_notice">Aviso de Datos: Como usuario invitado, no recopilamos información personal. Todos los cálculos son procesados localmente.</string>
+    <string name="guest_terms_acceptance">Al continuar como invitado, aceptas nuestros Términos de Uso y Aviso Médico.</string>
+
 </resources>

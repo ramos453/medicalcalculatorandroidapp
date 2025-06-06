@@ -11,6 +11,8 @@ import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 import com.example.medicalcalculatorapp.util.ValidationUtils
+import com.example.medicalcalculatorapp.data.user.UserManager
+import androidx.appcompat.app.AlertDialog
 
 class LoginFragment : Fragment() {
 
@@ -18,10 +20,12 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var secureStorageManager: SecureStorageManager
+    private lateinit var userManager: UserManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         secureStorageManager = SecureStorageManager(requireContext())
+        userManager = UserManager(requireContext())
     }
 
     override fun onCreateView(
@@ -35,67 +39,142 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         // Load any saved credentials
         loadSavedCredentials()
+
         // Setup click listeners
+        setupClickListeners()
+    }
+
+    private fun setupClickListeners() {
+        // Regular login button
         binding.btnLogin.setOnClickListener {
             if (validateInputs()) {
                 performLogin()
             }
         }
-//        binding.tvPrivacyPolicy.setOnClickListener {
-//            findNavController().navigate(R.id.action_loginFragment_to_privacyPolicyFragment)
-//        }
 
-        binding.tvPrivacyPolicy.setOnClickListener {
-            // Show Terms of Use dialog instead of separate privacy policy
-            val termsDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
-            termsDialog.setOnAcceptedListener {
-                // User viewed terms - no action needed
-            }
-            termsDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
+        // ✅ NEW: Guest login button
+        binding.btnContinueAsGuest.setOnClickListener {
+            showGuestMedicalDisclaimer()
         }
 
+        // Privacy policy
+        binding.tvPrivacyPolicy.setOnClickListener {
+            showTermsOfUseDialog()
+        }
+
+        // Register link
         binding.tvRegister.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-            //Toast.makeText(requireContext(), "Would navigate to registration", Toast.LENGTH_LONG).show()
         }
 
+        // Forgot password
         binding.tvForgotPassword.setOnClickListener {
-            // Will implement later
             Toast.makeText(context, "Forgot password clicked", Toast.LENGTH_SHORT).show()
         }
     }
-//private fun validateInputs(): Boolean {
-//    var isValid = true
-//
-//    val email = binding.etEmail.text.toString().trim()
-//    val password = binding.etPassword.text.toString().trim()
-//
-//    // Email validation
-//    if (email.isEmpty()) {
-//        binding.tilEmail.error = getString(R.string.email_required)
-//        isValid = false
-//    } else if (!isValidEmail(email)) {
-//        binding.tilEmail.error = getString(R.string.invalid_email)
-//        isValid = false
-//    } else {
-//        binding.tilEmail.error = null
-//    }
-//
-//    // Password validation
-//    if (password.isEmpty()) {
-//        binding.tilPassword.error = getString(R.string.password_required)
-//        isValid = false
-//    } else if (password.length < 6) {
-//        binding.tilPassword.error = getString(R.string.password_too_short)
-//        isValid = false
-//    } else {
-//        binding.tilPassword.error = null
-//    }
-//
-//    return isValid
-//}
+
+    private fun showGuestMedicalDisclaimer() {
+        // First verify they're a medical professional
+        showProfessionalVerificationDialog { isProfessional ->
+            if (isProfessional) {
+                showGuestTermsDialog()
+            } else {
+                showNonProfessionalMessage()
+            }
+        }
+    }
+
+    private fun showProfessionalVerificationDialog(callback: (Boolean) -> Unit) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.guest_professional_verification_title))
+            .setMessage(getString(R.string.guest_professional_verification_message))
+            .setPositiveButton(getString(R.string.confirm_medical_professional)) { _, _ ->
+                callback(true)
+            }
+            .setNegativeButton(getString(R.string.not_medical_professional)) { _, _ ->
+                callback(false)
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun showNonProfessionalMessage() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Acceso Restringido")
+            .setMessage("Esta aplicación está diseñada exclusivamente para profesionales de salud licenciados.\n\nSi eres un profesional médico, por favor verifica tu estatus. Si no lo eres, consulta con un profesional de salud calificado.")
+            .setPositiveButton("Entendido") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showGuestTermsDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.guest_medical_disclaimer_title))
+            .setMessage(getString(R.string.guest_medical_disclaimer_text))
+            .setPositiveButton("Acepto como Profesional de Salud") { _, _ ->
+                startGuestSession()
+            }
+            .setNegativeButton("No Acepto") { dialog, _ ->
+                dialog.dismiss()
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.guest_disclaimer_required),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun startGuestSession() {
+        try {
+            showLoading(true)
+
+            // Start guest session
+            val guestId = userManager.startGuestSession()
+
+            // Save guest disclaimer acceptance
+            secureStorageManager.saveGuestDisclaimerAccepted(true)
+            secureStorageManager.saveGuestSessionStart(System.currentTimeMillis())
+
+            // Track guest mode usage
+            secureStorageManager.incrementGuestModeUsage()
+
+            showLoading(false)
+
+            // Show welcome message
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.guest_session_started),
+                Toast.LENGTH_SHORT
+            ).show()
+
+            // Navigate to calculator list
+            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+
+        } catch (e: Exception) {
+            showLoading(false)
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.guest_session_error),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun showTermsOfUseDialog() {
+        val termsDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
+        termsDialog.setOnAcceptedListener {
+            // User viewed terms - no action needed for login screen
+        }
+        termsDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
+    }
+
+    // ✅ EXISTING LOGIN METHODS (unchanged)
 
     private fun validateInputs(): Boolean {
         var isValid = true
@@ -128,10 +207,6 @@ class LoginFragment : Fragment() {
         return isValid
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
     private fun loadSavedCredentials() {
         val rememberCredentials = secureStorageManager.getRememberMeFlag()
         if (rememberCredentials) {
@@ -154,69 +229,20 @@ class LoginFragment : Fragment() {
             secureStorageManager.clearCredentials()
         }
     }
-//    private fun saveCredentialsIfNeeded() {
-//        val email = binding.etEmail.text.toString().trim()
-//        val isChecked = binding.cbRememberMe.isChecked
-//
-//        val sharedPrefs = requireActivity().getSharedPreferences(
-//            "auth_prefs",
-//            Context.MODE_PRIVATE
-//        )
-//
-//        with(sharedPrefs.edit()) {
-//            putBoolean("remember_credentials", isChecked)
-//            if (isChecked) {
-//                putString("saved_email", email)
-//            } else {
-//                remove("saved_email")
-//            }
-//            apply()
-//        }
-//    }
-//
-//    private fun loadSavedCredentials() {
-//        val sharedPrefs = requireActivity().getSharedPreferences(
-//            "auth_prefs",
-//            Context.MODE_PRIVATE
-//        )
-//
-//        val rememberCredentials = sharedPrefs.getBoolean("remember_credentials", false)
-//        if (rememberCredentials) {
-//            val savedEmail = sharedPrefs.getString("saved_email", "")
-//            binding.etEmail.setText(savedEmail)
-//            binding.cbRememberMe.isChecked = true
-//        }
-//    }
 
-
-//    private fun performLogin() {
-//        binding.progressBar.visibility = View.VISIBLE
-//
-//        // Simulate network delay
-//        view?.postDelayed({
-//            binding.progressBar.visibility = View.GONE
-//
-//            // For now, simulate successful login
-//            Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
-//
-//            // Comment out navigation until fully implemented
-//            // findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-//
-//            // Instead, just show a message
-//            Toast.makeText(requireContext(), "Would navigate to calculator list", Toast.LENGTH_LONG).show()
-//        }, 1500)
-//    }
     private fun performLogin() {
-        binding.progressBar.visibility = View.VISIBLE
+        showLoading(true)
         binding.btnLogin.isEnabled = false
+        binding.btnContinueAsGuest.isEnabled = false
 
         // Save credentials if "Remember me" is checked
         saveCredentialsIfNeeded()
 
         // Simulate network delay
         view?.postDelayed({
-            binding.progressBar.visibility = View.GONE
+            showLoading(false)
             binding.btnLogin.isEnabled = true
+            binding.btnContinueAsGuest.isEnabled = true
 
             // For now, simulate successful login
             Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
@@ -226,6 +252,16 @@ class LoginFragment : Fragment() {
         }, 1500)
     }
 
+    private fun showLoading(show: Boolean) {
+        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
+
+        // Disable all interactive elements during loading
+        binding.btnLogin.isEnabled = !show
+        binding.btnContinueAsGuest.isEnabled = !show
+        binding.etEmail.isEnabled = !show
+        binding.etPassword.isEnabled = !show
+        binding.cbRememberMe.isEnabled = !show
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
