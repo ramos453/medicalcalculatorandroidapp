@@ -450,6 +450,7 @@ Al usar MediCálculos, confirmas que has leído y comprendido esta política de 
     <!-- Guest Mode Strings -->
     <string name="continue_as_guest">Continuar como Invitado</string>
     <string name="guest_mode">Modo Invitado</string>
+    <string name="guest_status_dismissed">Estado de invitado descartado</string>
     <string name="guest_mode_description">Acceso rápido sin cuenta - Ideal para situaciones urgentes</string>
 
     <!-- Guest Benefits -->
@@ -485,7 +486,8 @@ Al usar MediCálculos, confirmas que has leído y comprendido esta política de 
 
     <!-- Guest Session Status -->
     <string name="guest_calculations_count">Cálculos realizados en esta sesión: %d</string>
-    <string name="guest_session_time">Tiempo de sesión: %s</string>
+<!--    <string name="guest_session_time">Tiempo de sesión: %s</string>-->
+    <string name="guest_session_time">Session time: %d minutes</string>
     <string name="guest_session_expires">La sesión expira en: %s</string>
 
     <!-- Error Messages -->

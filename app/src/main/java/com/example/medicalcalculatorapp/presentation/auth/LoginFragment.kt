@@ -13,6 +13,7 @@ import com.example.medicalcalculatorapp.util.SecureStorageManager
 import com.example.medicalcalculatorapp.util.ValidationUtils
 import com.example.medicalcalculatorapp.data.user.UserManager
 import androidx.appcompat.app.AlertDialog
+import com.example.medicalcalculatorapp.di.AppDependencies
 
 class LoginFragment : Fragment() {
 
@@ -25,7 +26,7 @@ class LoginFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         secureStorageManager = SecureStorageManager(requireContext())
-        userManager = UserManager(requireContext())
+        userManager = AppDependencies.provideUserManager(requireContext())
     }
 
     override fun onCreateView(
@@ -55,7 +56,7 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // ✅ NEW: Guest login button
+        // Guest login button - simplified flow
         binding.btnContinueAsGuest.setOnClickListener {
             showGuestMedicalDisclaimer()
         }
@@ -76,55 +77,25 @@ class LoginFragment : Fragment() {
         }
     }
 
+    // SIMPLIFIED GUEST FLOW - Professional but streamlined
     private fun showGuestMedicalDisclaimer() {
-        // First verify they're a medical professional
-        showProfessionalVerificationDialog { isProfessional ->
-            if (isProfessional) {
-                showGuestTermsDialog()
-            } else {
-                showNonProfessionalMessage()
-            }
-        }
-    }
-
-    private fun showProfessionalVerificationDialog(callback: (Boolean) -> Unit) {
         AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.guest_professional_verification_title))
-            .setMessage(getString(R.string.guest_professional_verification_message))
-            .setPositiveButton(getString(R.string.confirm_medical_professional)) { _, _ ->
-                callback(true)
-            }
-            .setNegativeButton(getString(R.string.not_medical_professional)) { _, _ ->
-                callback(false)
-            }
-            .setCancelable(false)
-            .show()
-    }
-
-    private fun showNonProfessionalMessage() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Acceso Restringido")
-            .setMessage("Esta aplicación está diseñada exclusivamente para profesionales de salud licenciados.\n\nSi eres un profesional médico, por favor verifica tu estatus. Si no lo eres, consulta con un profesional de salud calificado.")
-            .setPositiveButton("Entendido") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }
-
-    private fun showGuestTermsDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.guest_medical_disclaimer_title))
-            .setMessage(getString(R.string.guest_medical_disclaimer_text))
-            .setPositiveButton("Acepto como Profesional de Salud") { _, _ ->
+            .setTitle("Acceso como Invitado")
+            .setMessage("""
+                Esta aplicación está diseñada para profesionales de salud.
+                
+                Al continuar como invitado:
+                • Confirmas que eres un profesional de salud licenciado
+                • Aceptas que los cálculos son solo para referencia
+                • Entiendes que no se guardará tu información
+                
+                ¿Deseas continuar?
+            """.trimIndent())
+            .setPositiveButton("Sí, Continuar") { _, _ ->
                 startGuestSession()
             }
-            .setNegativeButton("No Acepto") { dialog, _ ->
+            .setNegativeButton("Cancelar") { dialog, _ ->
                 dialog.dismiss()
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.guest_disclaimer_required),
-                    Toast.LENGTH_LONG
-                ).show()
             }
             .setCancelable(false)
             .show()
@@ -134,14 +105,17 @@ class LoginFragment : Fragment() {
         try {
             showLoading(true)
 
-            // Start guest session
+            println("🔍 DEBUG: Starting guest session...")
+
+            // Start guest session through UserManager
             val guestId = userManager.startGuestSession()
+            println("✅ DEBUG: Guest session started with ID: $guestId")
 
             // Save guest disclaimer acceptance
             secureStorageManager.saveGuestDisclaimerAccepted(true)
             secureStorageManager.saveGuestSessionStart(System.currentTimeMillis())
 
-            // Track guest mode usage
+            // Track guest mode usage for analytics
             secureStorageManager.incrementGuestModeUsage()
 
             showLoading(false)
@@ -149,21 +123,56 @@ class LoginFragment : Fragment() {
             // Show welcome message
             Toast.makeText(
                 requireContext(),
-                getString(R.string.guest_session_started),
+                "Sesión de invitado iniciada. Bienvenido a MediCálculos",
                 Toast.LENGTH_SHORT
             ).show()
 
             // Navigate to calculator list
-            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+            navigateToCalculatorList()
 
         } catch (e: Exception) {
+            println("❌ ERROR: Guest session creation failed: ${e.message}")
+            e.printStackTrace()
+
             showLoading(false)
+            showGuestSessionError(e.message)
+        }
+    }
+
+    private fun navigateToCalculatorList() {
+        try {
+            println("🚀 DEBUG: Navigating to calculator list from guest login")
+            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+        } catch (e: Exception) {
+            println("❌ ERROR: Navigation to calculator list failed: ${e.message}")
             Toast.makeText(
                 requireContext(),
-                getString(R.string.guest_session_error),
+                "Error de navegación. Por favor, intenta nuevamente.",
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    private fun showGuestSessionError(errorMessage: String?) {
+        val userFriendlyMessage = when {
+            errorMessage?.contains("storage", ignoreCase = true) == true ->
+                "Error de almacenamiento. Verifica el espacio disponible."
+            errorMessage?.contains("permission", ignoreCase = true) == true ->
+                "Error de permisos. Reinicia la aplicación."
+            else ->
+                "No se pudo iniciar la sesión de invitado. Intenta nuevamente."
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Error de Sesión")
+            .setMessage(userFriendlyMessage)
+            .setPositiveButton("Reintentar") { _, _ ->
+                // Allow user to try guest mode again
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun showTermsOfUseDialog() {
@@ -174,8 +183,7 @@ class LoginFragment : Fragment() {
         termsDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
     }
 
-    // ✅ EXISTING LOGIN METHODS (unchanged)
-
+    // EXISTING LOGIN METHODS (unchanged)
     private fun validateInputs(): Boolean {
         var isValid = true
 
@@ -232,23 +240,19 @@ class LoginFragment : Fragment() {
 
     private fun performLogin() {
         showLoading(true)
-        binding.btnLogin.isEnabled = false
-        binding.btnContinueAsGuest.isEnabled = false
 
         // Save credentials if "Remember me" is checked
         saveCredentialsIfNeeded()
 
-        // Simulate network delay
+        // Simulate network delay for authenticated login
         view?.postDelayed({
             showLoading(false)
-            binding.btnLogin.isEnabled = true
-            binding.btnContinueAsGuest.isEnabled = true
 
             // For now, simulate successful login
             Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
 
             // Navigate to main screen (calculator list)
-            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+            navigateToCalculatorList()
         }, 1500)
     }
 
@@ -261,6 +265,14 @@ class LoginFragment : Fragment() {
         binding.etEmail.isEnabled = !show
         binding.etPassword.isEnabled = !show
         binding.cbRememberMe.isEnabled = !show
+        binding.tvRegister.isEnabled = !show
+        binding.tvForgotPassword.isEnabled = !show
+        binding.tvPrivacyPolicy.isEnabled = !show
+
+        // Visual feedback for disabled state
+        val alpha = if (show) 0.5f else 1.0f
+        binding.loginFormContainer.alpha = alpha
+        binding.guestOptionCard.alpha = alpha
     }
 
     override fun onDestroyView() {
