@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.ksp) apply false // Add this line
     alias(libs.plugins.navigation.safeargs) apply false
     alias(libs.plugins.navigation.safeargs.kotlin) apply false
+    id("com.google.gms.google-services") version "4.4.0" apply false
 }

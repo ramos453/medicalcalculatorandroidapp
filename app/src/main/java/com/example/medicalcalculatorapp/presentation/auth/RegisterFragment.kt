@@ -10,11 +10,17 @@ import androidx.navigation.fragment.findNavController
 import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.FragmentRegisterBinding
 import com.example.medicalcalculatorapp.util.ValidationUtils
+import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
+import com.example.medicalcalculatorapp.data.auth.AuthResult
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+
 
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
+    private lateinit var firebaseAuthService: FirebaseAuthService
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -22,6 +28,7 @@ class RegisterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        firebaseAuthService = FirebaseAuthService()
         return binding.root
     }
 
@@ -154,22 +161,105 @@ class RegisterFragment : Fragment() {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
+//    private fun performRegistration() {
+//        binding.progressBar.visibility = View.VISIBLE
+//        binding.btnRegister.isEnabled = false
+//
+//        // Simulate network delay
+//        view?.postDelayed({
+//            binding.progressBar.visibility = View.GONE
+//            binding.btnRegister.isEnabled = true
+//
+//            // For now, simulate successful registration
+//            Toast.makeText(requireContext(), R.string.register_success, Toast.LENGTH_SHORT).show()
+//
+//            // Navigate back to login screen
+//            findNavController().popBackStack()
+//        }, 1500)
+//    }
+
     private fun performRegistration() {
         binding.progressBar.visibility = View.VISIBLE
         binding.btnRegister.isEnabled = false
 
-        // Simulate network delay
-        view?.postDelayed({
-            binding.progressBar.visibility = View.GONE
-            binding.btnRegister.isEnabled = true
+        val name = ValidationUtils.sanitizeInput(binding.etName.text.toString().trim())
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString()
 
-            // For now, simulate successful registration
-            Toast.makeText(requireContext(), R.string.register_success, Toast.LENGTH_SHORT).show()
+        // Use lifecycleScope for coroutines in Fragment
+        lifecycleScope.launch {
+            try {
+                // Create the user account with Firebase
+                val result = firebaseAuthService.createUserWithEmailAndPassword(email, password)
 
-            // Navigate back to login screen
-            findNavController().popBackStack()
-        }, 1500)
+                when (result) {
+                    is AuthResult.Success -> {
+                        // Update user profile with display name
+                        val profileResult = firebaseAuthService.updateUserProfile(name)
+
+                        when (profileResult) {
+                            is AuthResult.Success -> {
+                                // Send email verification
+                                val verificationResult = firebaseAuthService.sendEmailVerification()
+
+                                binding.progressBar.visibility = View.GONE
+                                binding.btnRegister.isEnabled = true
+
+                                when (verificationResult) {
+                                    is AuthResult.Success -> {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Account created! Please check your email to verify your account.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    is AuthResult.Error -> {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Account created, but verification email failed. You can request it later.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+
+                                // Navigate back to login screen
+                                findNavController().popBackStack()
+                            }
+                            is AuthResult.Error -> {
+                                binding.progressBar.visibility = View.GONE
+                                binding.btnRegister.isEnabled = true
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Account created but profile update failed: ${profileResult.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                    is AuthResult.Error -> {
+                        binding.progressBar.visibility = View.GONE
+                        binding.btnRegister.isEnabled = true
+
+                        // Show user-friendly error message
+                        val errorMessage = when {
+                            result.message.contains("email-already-in-use") -> "This email is already registered. Try logging in instead."
+                            result.message.contains("weak-password") -> "Password is too weak. Please use at least 6 characters."
+                            result.message.contains("invalid-email") -> "Please enter a valid email address."
+                            result.message.contains("network") -> "Network error. Check your connection."
+                            else -> "Registration failed: ${result.message}"
+                        }
+
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: Exception) {
+                binding.progressBar.visibility = View.GONE
+                binding.btnRegister.isEnabled = true
+                Toast.makeText(requireContext(), "Unexpected error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "863264779940",
+    "project_id": "medicalcalculatorapp-39631",
+    "storage_bucket": "medicalcalculatorapp-39631.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:863264779940:android:a5eec0921ae0d8a1724031",
+        "android_client_info": {
+          "package_name": "com.example.medicalcalculatorapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTn-IzoHYWX4VM6-iM561_YMbw1Jwb5Y0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
