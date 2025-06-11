@@ -794,5 +794,73 @@ Esta aplicación se proporciona "TAL COMO ESTÁ" sin garantías de ningún tipo.
 El uso de esta aplicación es bajo mi EXCLUSIVO riesgo y responsabilidad.\n\n
 © 2025 MediCálculos. Todos los derechos reservados.</string>
 
+    <string name="comprehensive_medical_disclaimer">
+AVISO MÉDICO Y TÉRMINOS DE USO
+
+ADVERTENCIA DE EMERGENCIAS MÉDICAS
+⚠️ NUNCA use esta aplicación en situaciones de emergencia médica.
+⚠️ En caso de emergencia, contacte inmediatamente los servicios de emergencia locales.
+⚠️ Esta aplicación NO debe usarse para diagnósticos o tratamientos urgentes.
+
+DECLARACIÓN REGULATORIA
+🏛️ IMPORTANTE: DECLARACIÓN REGULATORIA MULTI-JURISDICCIONAL
+
+🇺🇸 Estados Unidos: Esta aplicación NO ha sido evaluada ni aprobada por la FDA (Food and Drug Administration). NO es un dispositivo médico.
+
+🇪🇺 Unión Europea: Esta aplicación NO es un dispositivo médico según el Reglamento MDR 2017/745.
+
+🇨🇦 Canadá: Esta aplicación NO ha sido autorizada por Health Canada como dispositivo médico.
+
+🇲🇽 México: Esta aplicación NO está registrada ante COFEPRIS como dispositivo médico.
+
+REQUISITOS PROFESIONALES
+👨‍⚕️ Esta aplicación está diseñada exclusivamente para:
+- Médicos licenciados y certificados
+- Enfermeros registrados con formación clínica
+- Farmacéuticos certificados
+- Otros profesionales de salud con licencia válida
+- Estudiantes de medicina bajo supervisión directa
+
+RESPONSABILIDADES DEL PROFESIONAL:
+- Verificar independientemente todos los cálculos
+- Ejercer juicio clínico en todas las decisiones
+- Considerar el contexto clínico completo del paciente
+- Consultar fuentes adicionales cuando sea necesario
+- Mantener competencia profesional actualizada
+
+LIMITACIÓN DE RESPONSABILIDAD
+⚖️ IMPORTANTE: Al usar esta aplicación, usted acepta que:
+
+- Los desarrolladores NO asumen responsabilidad por decisiones médicas
+- Los cálculos son únicamente de referencia educativa
+- La responsabilidad clínica recae COMPLETAMENTE en el profesional
+- NO hay garantías sobre la precisión de los resultados
+- El uso de esta aplicación es bajo su propio riesgo profesional
+
+ADVERTENCIAS ESPECÍFICAS:
+- Los resultados pueden contener errores
+- Siempre verifique con métodos alternativos
+- NO reemplace el juicio clínico con cálculos automatizados
+- Considere las limitaciones de cada fórmula médica
+- Mantenga actualizada su formación profesional
+
+EDUCACIÓN Y REFERENCIA ÚNICAMENTE
+📚 Esta aplicación es una herramienta educativa y de referencia que:
+- Proporciona cálculos médicos comunes
+- Ayuda en la educación médica continua
+- Facilita verificaciones rápidas de fórmulas
+- NO diagnostica ni prescribe tratamientos
+- NO reemplaza el conocimiento médico profesional
+
+CUMPLIMIENTO LEGAL Y ÉTICO
+- Use solo dentro de su ámbito de práctica autorizado
+- Respete las regulaciones locales de su jurisdicción
+- Mantenga la confidencialidad del paciente
+- Documente adecuadamente las decisiones clínicas
+- Busque supervisión cuando sea apropiado
+
+Al continuar, usted confirma que comprende y acepta completamente estos términos y limitaciones.
+</string>
+
 
 </resources>

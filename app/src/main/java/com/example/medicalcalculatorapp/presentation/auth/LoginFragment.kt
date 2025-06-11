@@ -90,20 +90,20 @@ class LoginFragment : Fragment() {
     }
 
     /**
-     * Enhanced guest login with progressive compliance checking
+     * Enhanced guest login with streamlined compliance checking
      */
     private fun handleGuestLoginWithCompliance() {
         val complianceStatus = complianceManager.getComplianceStatus()
 
         when (complianceStatus.requiredFlow) {
             DisclaimerFlow.BASIC_INTRODUCTION -> {
-                // New user - show basic disclaimer first, then professional verification
-                showBasicDisclaimerThenEnhanced()
+                // Skip basic disclaimer - go directly to enhanced
+                showEnhancedMedicalDisclaimer()
             }
 
             DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED,
             DisclaimerFlow.PROFESSIONAL_VERIFICATION_REQUIRED -> {
-                // User needs enhanced verification
+                // Show enhanced disclaimer directly
                 showEnhancedMedicalDisclaimer()
             }
 
@@ -118,6 +118,7 @@ class LoginFragment : Fragment() {
             }
         }
     }
+
 
     /**
      * Show basic disclaimer first, then enhanced (progressive disclosure)

@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚕️ MediCálculos"
+            android:text="MediCálculos"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
             android:textColor="?attr/colorOnPrimary"
             android:textStyle="bold"
@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="🏛️ Cumplimiento Google Play Store 2024"
+            android:text="Cumplimiento Google Play Store 2024"
             android:textAppearance="?attr/textAppearanceBodySmall"
             android:textColor="?attr/colorOnPrimary"
             android:gravity="center"
@@ -60,245 +60,23 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 1. EMERGENCY WARNING SECTION -->
+            <!-- Single comprehensive medical disclaimer text -->
+            <TextView
+                android:id="@+id/tvMedicalDisclaimerText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:lineSpacingExtra="4dp"
+                android:padding="16dp"
+                android:background="?attr/colorSurfaceVariant"
+                android:textIsSelectable="true" />
+
+            <!-- Professional status confirmation -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="3dp"
-                app:cardBackgroundColor="@color/error"
-                app:strokeColor="@color/error"
-                app:strokeWidth="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="🚨 ADVERTENCIA DE EMERGENCIAS"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textStyle="bold"
-                            android:textColor="@color/white" />
-
-                        <ImageView
-                            android:id="@+id/iconEmergencyRead"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_dialog_info"
-                            android:visibility="gone"
-                            app:tint="@color/white"
-                            android:contentDescription="Leído" />
-
-                    </LinearLayout>
-
-                    <androidx.core.widget.NestedScrollView
-                        android:id="@+id/scrollViewEmergency"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:layout_marginTop="12dp">
-
-                        <TextView
-                            android:id="@+id/tvEmergencyWarning"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="@color/white"
-                            android:lineSpacingExtra="4dp"
-                            tools:text="Emergency warning text will be populated from strings.xml" />
-
-                    </androidx.core.widget.NestedScrollView>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 2. REGULATORY DISCLAIMER SECTION -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/primary"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="🏛️ DECLARACIÓN REGULATORIA"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorPrimary" />
-
-                    <androidx.core.widget.NestedScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:layout_marginTop="12dp">
-
-                        <TextView
-                            android:id="@+id/tvRegulatoryDisclaimer"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?attr/colorOnSurface"
-                            android:lineSpacingExtra="2dp"
-                            tools:text="Regulatory disclaimer text will be populated from strings.xml" />
-
-                    </androidx.core.widget.NestedScrollView>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 3. PROFESSIONAL REQUIREMENTS SECTION -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/accent"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="👨‍⚕️ REQUISITOS PROFESIONALES"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textStyle="bold"
-                            android:textColor="@color/accent" />
-
-                        <ImageView
-                            android:id="@+id/iconProfessionalRead"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_dialog_info"
-                            android:visibility="gone"
-                            app:tint="@color/accent"
-                            android:contentDescription="Leído" />
-
-                    </LinearLayout>
-
-                    <androidx.core.widget.NestedScrollView
-                        android:id="@+id/scrollViewProfessional"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:layout_marginTop="12dp">
-
-                        <TextView
-                            android:id="@+id/tvProfessionalRequirements"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?attr/colorOnSurface"
-                            android:lineSpacingExtra="2dp"
-                            tools:text="Professional requirements text will be populated from strings.xml" />
-
-                    </androidx.core.widget.NestedScrollView>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 4. LIABILITY LIMITATION SECTION -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/warning"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="⚖️ LIMITACIÓN DE RESPONSABILIDAD"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textStyle="bold"
-                            android:textColor="@color/warning" />
-
-                        <ImageView
-                            android:id="@+id/iconLiabilityRead"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_dialog_info"
-                            android:visibility="gone"
-                            app:tint="@color/warning"
-                            android:contentDescription="Leído" />
-
-                    </LinearLayout>
-
-                    <androidx.core.widget.NestedScrollView
-                        android:id="@+id/scrollViewLiability"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:layout_marginTop="12dp">
-
-                        <TextView
-                            android:id="@+id/tvLiabilityLimitation"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
-                            android:textColor="?attr/colorOnSurface"
-                            android:lineSpacingExtra="2dp"
-                            tools:text="Liability limitation text will be populated from strings.xml" />
-
-                    </androidx.core.widget.NestedScrollView>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 5. PROFESSIONAL STATUS CONFIRMATION -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="?attr/colorPrimaryContainer">
@@ -312,7 +90,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="✅ CONFIRMACIÓN PROFESIONAL REQUERIDA"
+                        android:text="CONFIRMACIÓN PROFESIONAL REQUERIDA"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnPrimaryContainer" />
@@ -330,20 +108,10 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 6. FINAL ACCEPTANCE TEXT -->
-            <TextView
-                android:id="@+id/tvFinalAcceptance"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:textAppearance="?attr/textAppearanceBodySmall"
-                android:textColor="?attr/colorOnSurface"
-                android:lineSpacingExtra="2dp"
-                tools:text="Final acceptance text will be populated from strings.xml" />
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
 
     <!-- Requirement Status Display -->
     <TextView
@@ -386,7 +154,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="No Acepto"
+            android:text="Rechazar"
             android:textColor="@color/error"
             app:strokeColor="@color/error" />
 
@@ -395,7 +163,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Acepto como Profesional"
+            android:text="Acepto y Confirmo"
             android:enabled="false"
             android:backgroundTint="@color/success" />
 

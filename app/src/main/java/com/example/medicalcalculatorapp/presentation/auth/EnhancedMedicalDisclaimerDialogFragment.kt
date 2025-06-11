@@ -32,9 +32,6 @@ class EnhancedMedicalDisclaimerDialogFragment : DialogFragment() {
     private var onRejectedListener: (() -> Unit)? = null
 
     // Track which sections have been read/acknowledged
-    private var hasReadEmergencyWarning = false
-    private var hasReadProfessionalRequirements = false
-    private var hasReadLiabilityLimitation = false
     private var hasConfirmedProfessionalStatus = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,56 +60,18 @@ class EnhancedMedicalDisclaimerDialogFragment : DialogFragment() {
     }
 
     private fun setupUI() {
-        // Set emergency warning with high visibility
-        binding.tvEmergencyWarning.apply {
-            text = getString(R.string.enhanced_emergency_warning)
-            setTextColor(ContextCompat.getColor(requireContext(), R.color.error))
-            setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.warning))
-        }
-
-        // Set regulatory disclaimer
-        binding.tvRegulatoryDisclaimer.text = getString(R.string.fda_anvisa_disclaimer)
-
-        // Set professional requirements
-        binding.tvProfessionalRequirements.text = getString(R.string.professional_license_requirement)
-
-        // Set liability limitation
-        binding.tvLiabilityLimitation.text = getString(R.string.enhanced_liability_limitation)
-
-        // Set final acceptance text
-        binding.tvFinalAcceptance.text = getString(R.string.final_acceptance_declaration)
+        // Set the comprehensive medical disclaimer text
+        binding.tvMedicalDisclaimerText.text = getString(R.string.comprehensive_medical_disclaimer)
 
         // Initially disable accept button
         binding.btnAcceptDisclaimer.isEnabled = false
     }
 
     private fun setupInteractionTracking() {
-        // Track scrolling through emergency warning
-        binding.scrollViewEmergency.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            if (scrollY > 0) {
-                hasReadEmergencyWarning = true
-                binding.iconEmergencyRead.visibility = View.VISIBLE
-                updateAcceptButtonState()
-            }
-        }
-
-        // Track scrolling through professional requirements
-        binding.scrollViewProfessional.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            if (scrollY > 0) {
-                hasReadProfessionalRequirements = true
-                binding.iconProfessionalRead.visibility = View.VISIBLE
-                updateAcceptButtonState()
-            }
-        }
-
-        // Track scrolling through liability section
-        binding.scrollViewLiability.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            if (scrollY > 0) {
-                hasReadLiabilityLimitation = true
-                binding.iconLiabilityRead.visibility = View.VISIBLE
-                updateAcceptButtonState()
-            }
-        }
+        // Track scrolling through the main disclaimer text
+        val parentScrollView = binding.root.findViewById<androidx.core.widget.NestedScrollView>(
+            binding.root.context.resources.getIdentifier("scrollView", "id", binding.root.context.packageName)
+        )
 
         // Professional status confirmation checkbox
         binding.checkboxProfessionalStatus.setOnCheckedChangeListener { _, isChecked ->
@@ -123,7 +82,7 @@ class EnhancedMedicalDisclaimerDialogFragment : DialogFragment() {
 
     private fun setupButtons() {
         binding.btnAcceptDisclaimer.setOnClickListener {
-            if (allRequirementsMet()) {
+            if (hasConfirmedProfessionalStatus) {
                 showFinalConfirmationDialog()
             }
         }
@@ -139,40 +98,17 @@ class EnhancedMedicalDisclaimerDialogFragment : DialogFragment() {
     }
 
     private fun updateAcceptButtonState() {
-        val allRead = hasReadEmergencyWarning &&
-                hasReadProfessionalRequirements &&
-                hasReadLiabilityLimitation &&
-                hasConfirmedProfessionalStatus
+        binding.btnAcceptDisclaimer.isEnabled = hasConfirmedProfessionalStatus
 
-        binding.btnAcceptDisclaimer.isEnabled = allRead
-
-        if (allRead) {
+        if (hasConfirmedProfessionalStatus) {
             binding.btnAcceptDisclaimer.setBackgroundColor(
                 ContextCompat.getColor(requireContext(), R.color.primary)
             )
             binding.tvAcceptanceRequirement.visibility = View.GONE
         } else {
             binding.tvAcceptanceRequirement.visibility = View.VISIBLE
-            binding.tvAcceptanceRequirement.text = getRequirementText()
+            binding.tvAcceptanceRequirement.text = "Debe confirmar su estado profesional para continuar"
         }
-    }
-
-    private fun getRequirementText(): String {
-        val missing = mutableListOf<String>()
-
-        if (!hasReadEmergencyWarning) missing.add("emergencia")
-        if (!hasReadProfessionalRequirements) missing.add("requisitos profesionales")
-        if (!hasReadLiabilityLimitation) missing.add("limitación de responsabilidad")
-        if (!hasConfirmedProfessionalStatus) missing.add("confirmar estado profesional")
-
-        return "Debe leer y confirmar: ${missing.joinToString(", ")}"
-    }
-
-    private fun allRequirementsMet(): Boolean {
-        return hasReadEmergencyWarning &&
-                hasReadProfessionalRequirements &&
-                hasReadLiabilityLimitation &&
-                hasConfirmedProfessionalStatus
     }
 
     private fun showFinalConfirmationDialog() {
