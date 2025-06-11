@@ -516,4 +516,283 @@ Al usar MediCálculos, confirmas que has leído y comprendido esta política de 
     <string name="guest_data_notice">Aviso de Datos: Como usuario invitado, no recopilamos información personal. Todos los cálculos son procesados localmente.</string>
     <string name="guest_terms_acceptance">Al continuar como invitado, aceptas nuestros Términos de Uso y Aviso Médico.</string>
 
+    <!-- =============================================
+     ENHANCED MULTI-JURISDICTIONAL COMPLIANCE
+     Google Play + Latin America + US Requirements
+     ============================================= -->
+
+    <!-- Multi-Jurisdictional Regulatory Disclaimers -->
+    <string name="fda_anvisa_disclaimer_title">⚠️ Declaración Regulatoria Multinacional</string>
+    <string name="fda_anvisa_disclaimer">⚠️ IMPORTANTE: DECLARACIÓN REGULATORIA MULTI-JURISDICCIONAL\n\n
+🇺🇸 Estados Unidos: Esta aplicación NO ha sido evaluada ni aprobada por la FDA (Food and Drug Administration). NO es un dispositivo médico según regulaciones FDA 21 CFR 820. NO sustituye equipos médicos certificados.\n\n
+🇧🇷 Brasil: Esta aplicação NÃO foi avaliada pela ANVISA (Agência Nacional de Vigilância Sanitária). NÃO é um dispositivo médico certificado conforme RDC brasileiro. NÃO substitui equipamentos médicos homologados.\n\n
+🇲🇽 México: Esta aplicación NO ha sido certificada por COFEPRIS (Comisión Federal para la Protección contra Riesgos Sanitarios). NO está registrada como dispositivo médico ante autoridades sanitarias mexicanas.\n\n
+🇨🇴 Colombia: Esta aplicación NO está registrada ante INVIMA (Instituto Nacional de Vigilancia de Medicamentos y Alimentos). NO constituye un dispositivo médico certificado.\n\n
+🇦🇷 Argentina: Esta aplicación NO ha sido aprobada por ANMAT (Administración Nacional de Medicamentos, Alimentos y Tecnología Médica). NO está registrada como dispositivo médico.\n\n
+🌎 DECLARACIÓN UNIVERSAL: Esta aplicación es una herramienta educativa y de referencia únicamente. NO reemplaza el criterio médico profesional.</string>
+
+    <!-- Enhanced Emergency Warnings -->
+    <string name="enhanced_emergency_warning_title">🚨 ADVERTENCIA CRÍTICA DE EMERGENCIAS</string>
+    <string name="enhanced_emergency_warning">🚨 ADVERTENCIA DE EMERGENCIAS MÉDICAS 🚨\n\n
+❌ NUNCA use esta aplicación en situaciones de emergencia médica.\n\n
+🆘 En caso de emergencia médica, contacte INMEDIATAMENTE:\n
+🇺🇸 USA: 911 (Emergencias generales)\n
+🇧🇷 Brasil: 192 (SAMU), 193 (Bombeiros)\n
+🇲🇽 México: 911 (Emergencias generales)\n
+🇨🇴 Colombia: 123 (Emergencias), 125 (Línea de la Vida)\n
+🇦🇷 Argentina: 107 (SAME), 911 (Emergencias)\n
+🇨🇱 Chile: 131 (SAMU)\n
+🇵🇪 Perú: 116 (SAMU)\n
+🇺🇾 Uruguay: 105 (SAMU)\n
+🇵🇦 Panamá: 911\n
+🇨🇷 Costa Rica: 911\n\n
+🏥 PROTOCOLO DE EMERGENCIA:\n
+1. Contacte servicios de emergencia inmediatamente\n
+2. Traslade al paciente al centro médico más cercano\n
+3. Utilice protocolos de emergencia establecidos\n
+4. NO dependa de aplicaciones móviles para decisiones críticas</string>
+
+    <!-- Professional License Requirements -->
+    <string name="professional_license_requirement_title">👨‍⚕️ Verificación de Licencia Profesional</string>
+    <string name="professional_license_requirement">👨‍⚕️ VERIFICACIÓN DE LICENCIA PROFESIONAL REQUERIDA\n\n
+Esta aplicación está destinada EXCLUSIVAMENTE para:\n\n
+✅ USUARIOS AUTORIZADOS:\n
+- Médicos con licencia válida y vigente\n
+- Enfermeros profesionales registrados\n
+- Farmacéuticos licenciados\n
+- Estudiantes de medicina/enfermería bajo supervisión directa\n
+- Residentes médicos en programas acreditados\n
+- Otros profesionales de salud con licencia válida\n\n
+🚫 USUARIOS NO AUTORIZADOS:\n
+❌ Público general sin formación médica\n
+❌ Estudiantes sin supervisión profesional directa\n
+❌ Uso comercial no autorizado\n
+❌ Aplicación directa en pacientes sin validación independiente\n
+❌ Personas sin licencia médica vigente\n\n
+📋 REQUISITOS POR PAÍS:\n
+🇺🇸 USA: State medical license o nursing license\n
+🇧🇷 Brasil: Registro no CFM, COREN, CRF según profesión\n
+🇲🇽 México: Cédula profesional SEP vigente\n
+🇨🇴 Colombia: Tarjeta profesional vigente\n
+🇦🇷 Argentina: Matrícula profesional vigente\n\n
+⚖️ Al continuar, confirma bajo pena de perjurio que posee la licencia profesional adecuada en su jurisdicción.</string>
+
+    <!-- Enhanced Liability Limitation -->
+    <string name="enhanced_liability_limitation_title">⚖️ Limitación Integral de Responsabilidad</string>
+    <string name="enhanced_liability_limitation">⚖️ LIMITACIÓN INTEGRAL DE RESPONSABILIDAD\n\n
+EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY DE CADA JURISDICCIÓN:\n\n
+🛡️ EXENCIÓN TOTAL DE RESPONSABILIDAD:\n
+Los desarrolladores, distribuidores, proveedores y partes asociadas NO son responsables por:\n\n
+🚨 DECISIONES MÉDICAS:\n
+- Decisiones clínicas basadas en cálculos de la aplicación\n
+- Tratamientos médicos derivados de resultados\n
+- Diagnósticos basados en información de la app\n
+- Prescripciones de medicamentos calculadas\n\n
+⚠️ ERRORES Y FALLAS:\n
+- Errores en fórmulas, cálculos o interpretaciones\n
+- Bugs de software o fallas técnicas\n
+- Interrupciones del servicio o pérdida de datos\n
+- Incompatibilidad con otros sistemas médicos\n\n
+👥 RESULTADOS EN PACIENTES:\n
+- Resultados adversos en pacientes\n
+- Complicaciones médicas de cualquier tipo\n
+- Muerte o lesiones de pacientes\n
+- Deterioro de condiciones médicas\n\n
+💰 DAÑOS ECONÓMICOS:\n
+- Pérdidas económicas de cualquier tipo\n
+- Costos de tratamientos médicos\n
+- Pérdida de ingresos profesionales\n
+- Costos legales o de seguros\n\n
+🏛️ RESPONSABILIDAD PROFESIONAL:\n
+- Demandas por negligencia médica\n
+- Pérdida de licencias profesionales\n
+- Sanciones de colegios médicos\n
+- Daños a reputación profesional\n\n
+💵 LÍMITE MÁXIMO ABSOLUTO:\n
+En ningún caso nuestra responsabilidad excederá $0.00 USD (CERO DÓLARES).\n\n
+👨‍⚕️ RESPONSABILIDAD TOTAL DEL USUARIO:\n
+El profesional médico asume COMPLETA responsabilidad por:\n
+- Todas las decisiones clínicas y tratamientos\n
+- Verificación independiente de todos los cálculos\n
+- Cumplimiento con regulaciones médicas locales\n
+- Atención y seguridad integral del paciente\n
+- Obtención de segundas opiniones cuando sea apropiado</string>
+
+    <!-- Multi-Jurisdictional Legal Compliance -->
+    <string name="multi_jurisdictional_compliance_title">🌎 Cumplimiento Legal Multinacional</string>
+    <string name="multi_jurisdictional_compliance">🌎 CUMPLIMIENTO REGULATORIO MULTINACIONAL\n\n
+Esta aplicación cumple con regulaciones específicas de múltiples jurisdicciones:\n\n
+🇺🇸 ESTADOS UNIDOS:\n
+- FDA Software as Medical Device (SaMD) Guidelines\n
+- HIPAA Privacy Rule (cuando aplicable)\n
+- State medical practice acts\n
+- Professional liability standards\n
+- Section 230 Communications Decency Act protections\n\n
+🇧🇷 BRASIL:\n
+- Resoluciones del CFM (Conselho Federal de Medicina)\n
+- LGPD (Lei Geral de Proteção de Dados) - Lei 13.709/2018\n
+- Regulaciones de ANVISA para software médico\n
+- Código de Ética Médica brasileiro\n
+- RDC ANVISA aplicables\n\n
+🇲🇽 MÉXICO:\n
+- Lineamientos de COFEPRIS\n
+- LOPD (Ley de Protección de Datos Personales)\n
+- Normas Oficiales Mexicanas (NOMs) de salud\n
+- Regulaciones de la Secretaría de Salud\n
+- Ley General de Salud mexicana\n\n
+🇨🇴 COLOMBIA:\n
+- Regulaciones de INVIMA\n
+- Ley 1581 de 2012 (Protección de Datos)\n
+- Normas del Ministerio de Salud y Protección Social\n
+- Decreto 1377 de 2013\n
+- Resoluciones de vigilancia sanitaria\n\n
+🇦🇷 ARGENTINA:\n
+- Regulaciones de ANMAT\n
+- Ley 25.326 (Protección de Datos Personales)\n
+- Normativas sanitarias provinciales\n
+- Regulaciones del Ministerio de Salud\n
+- Códigos de ética médica provinciales\n\n
+⚖️ OBLIGACIÓN DEL USUARIO:\n
+Los usuarios DEBEN cumplir con TODAS las regulaciones aplicables en su jurisdicción específica.</string>
+
+    <!-- Google Play Store Compliance -->
+    <string name="google_play_compliance_title">📱 Cumplimiento Google Play Store</string>
+    <string name="google_play_medical_category">📱 CUMPLIMIENTO GOOGLE PLAY STORE\n\n
+Esta aplicación está categorizada como "Médica" en Google Play Store y cumple estrictamente con:\n\n
+✅ Políticas específicas para aplicaciones de salud\n
+✅ Directrices para software médico educativo\n
+✅ Requisitos de contenido médico responsable\n
+✅ Estándares de privacidad para apps de salud\n
+✅ Políticas de seguridad para datos médicos\n\n
+🎯 CLASIFICACIÓN: Aplicación médica educativa para profesionales\n
+🔞 AUDIENCIA: Profesionales de salud licenciados (18+ años)\n
+📋 CATEGORÍA: Medicina/Educación Médica</string>
+
+    <string name="content_rating_notice_title">🔞 Restricción de Audiencia</string>
+    <string name="content_rating_notice">🔞 RESTRICCIÓN DE EDAD Y AUDIENCIA\n\n
+Esta aplicación está calificada y diseñada para:\n\n
+👨‍⚕️ AUDIENCIA OBJETIVO:\n
+- Profesionales médicos licenciados (18+ años)\n
+- Personal de enfermería registrado\n
+- Estudiantes de medicina en programas acreditados\n
+- Residentes médicos bajo supervisión\n
+- Otros profesionales de salud autorizados\n\n
+🚫 NO APROPIADA PARA:\n
+- Menores de 18 años sin supervisión\n
+- Público general sin formación médica\n
+- Uso de autodiagnóstico o automedicación\n
+- Aplicación directa por pacientes\n\n
+⚠️ Esta aplicación requiere conocimiento médico especializado para su uso seguro y apropiado.</string>
+
+    <!-- Enhanced Data Privacy Multi-Jurisdictional -->
+    <string name="enhanced_privacy_policy_title">🔒 Política de Privacidad Multinacional</string>
+    <string name="enhanced_privacy_policy_header">🔒 POLÍTICA DE PRIVACIDAD MULTINACIONAL - MediCálculos\n\n
+Última actualización: Diciembre 2024\n
+Aplicable en: Estados Unidos, Brasil, México, Colombia, Argentina y países latinoamericanos\n\n
+🏛️ CUMPLIMIENTO REGULATORIO INTEGRAL:\n
+🇺🇸 USA: HIPAA, COPPA, CCPA, GDPR (cuando aplicable)\n
+🇧🇷 Brasil: LGPD (Lei Geral de Proteção de Dados)\n
+🇲🇽 México: LOPD (Ley de Protección de Datos)\n
+🇨🇴 Colombia: Ley 1581 de Protección de Datos\n
+🇦🇷 Argentina: PDPA (Ley de Protección de Datos Personales)\n
+🇪🇺 Europa: GDPR (para usuarios europeos)\n\n
+[Su política de privacidad existente continúa aquí...]</string>
+
+    <!-- Professional Medical Ethics -->
+    <string name="medical_ethics_compliance_title">⚕️ Cumplimiento de Ética Médica</string>
+    <string name="medical_ethics_compliance">⚕️ CUMPLIMIENTO DE ÉTICA MÉDICA PROFESIONAL\n\n
+Esta aplicación debe usarse en conformidad con:\n\n
+📋 CÓDIGOS DE ÉTICA MÉDICA:\n
+🇺🇸 USA: AMA Code of Medical Ethics\n
+🇧🇷 Brasil: Código de Ética Médica do CFM\n
+🇲🇽 México: Código de Ética del Colegio Médico\n
+🇨🇴 Colombia: Código de Ética Médica\n
+🇦🇷 Argentina: Código de Ética provincial aplicable\n\n
+🤝 PRINCIPIOS FUNDAMENTALES:\n
+- Primero no hacer daño (Primum non nocere)\n
+- Beneficencia y no maleficencia\n
+- Autonomía del paciente\n
+- Justicia en el acceso a la atención\n
+- Confidencialidad médico-paciente\n
+- Competencia profesional continua\n\n
+⚖️ Los usuarios deben adherirse a estos principios éticos en todo momento.</string>
+
+    <!-- Medication Safety Warnings -->
+    <string name="medication_safety_warning_title">💊 Advertencias de Seguridad de Medicamentos</string>
+    <string name="medication_safety_warning">💊 ADVERTENCIAS CRÍTICAS DE SEGURIDAD DE MEDICAMENTOS\n\n
+⚠️ VERIFICACIÓN OBLIGATORIA:\n
+TODOS los cálculos de medicamentos DEBEN ser verificados independientemente antes de la administración.\n\n
+🔍 FACTORES A CONSIDERAR:\n
+- Peso corporal y superficie corporal del paciente\n
+- Edad y estado de desarrollo\n
+- Función renal y hepática\n
+- Alergias y contraindicaciones conocidas\n
+- Interacciones medicamentosas\n
+- Condiciones médicas concomitantes\n
+- Embarazo y lactancia\n\n
+📚 FUENTES DE VERIFICACIÓN:\n
+- Vademécum actualizado\n
+- Guías institucionales\n
+- Literatura médica reciente\n
+- Farmacéutico clínico\n
+- Segunda opinión médica\n\n
+🚨 EN CASO DE DUDA:\n
+- Consulte con farmacéutico clínico\n
+- Obtenga segunda opinión médica\n
+- Verifique con múltiples fuentes\n
+- Use la dosis más conservadora\n\n
+⚖️ La responsabilidad final de la prescripción y administración recae EXCLUSIVAMENTE en el profesional médico.</string>
+
+    <!-- Legal Contact Information -->
+    <string name="legal_contact_info_title">📞 Información de Contacto Legal</string>
+    <string name="legal_contact_info">📞 INFORMACIÓN DE CONTACTO LEGAL\n\n
+Para consultas relacionadas con:\n\n
+⚖️ ASUNTOS LEGALES:\n
+Email: legal@medicalcalculatorapp.com\n
+Respuesta garantizada: 5 días hábiles\n\n
+🔒 PRIVACIDAD Y DATOS:\n
+Email: privacy@medicalcalculatorapp.com\n
+Respuesta garantizada: 72 horas\n\n
+🏥 CONTENIDO MÉDICO:\n
+Email: medical@medicalcalculatorapp.com\n
+Respuesta garantizada: 3 días hábiles\n\n
+🆘 EMERGENCIAS DE SEGURIDAD:\n
+Email: security@medicalcalculatorapp.com\n
+Respuesta inmediata: 24 horas\n\n
+📋 Incluya en su mensaje:\n
+- Nombre completo y credenciales\n
+- País/jurisdicción\n
+- Descripción detallada del asunto\n
+- Documentación relevante (si aplica)</string>
+
+    <!-- Final Acceptance Declaration -->
+    <string name="final_acceptance_declaration_title">✅ Declaración Final de Aceptación</string>
+    <string name="final_acceptance_declaration">✅ DECLARACIÓN FINAL DE ACEPTACIÓN INTEGRAL\n\n
+Al usar MediCálculos, DECLARO SOLEMNEMENTE que:\n\n
+📋 QUALIFICACIONES PROFESIONALES:\n
+✓ Soy un profesional de salud licenciado y calificado\n
+✓ Poseo la formación médica necesaria para usar esta aplicación\n
+✓ Mantengo licencias profesionales vigentes en mi jurisdicción\n
+✓ Tengo autorización para tomar decisiones médicas\n\n
+📚 COMPRENSIÓN TOTAL:\n
+✓ He leído y comprendido COMPLETAMENTE todos los términos\n
+✓ Entiendo las limitaciones y restricciones de la aplicación\n
+✓ Acepto todas las responsabilidades descritas\n
+✓ Comprendo los riesgos asociados con el uso médico\n\n
+⚖️ COMPROMISO LEGAL:\n
+✓ Utilizaré la aplicación de manera ética y profesional\n
+✓ Cumpliré con todas las regulaciones médicas aplicables\n
+✓ Verificaré independientemente todos los cálculos\n
+✓ No responsabilizaré a los desarrolladores por mis decisiones médicas\n\n
+🌎 CUMPLIMIENTO JURISDICCIONAL:\n
+✓ Cumpliré con las leyes de mi país/estado/provincia\n
+✓ Respetaré los códigos de ética médica locales\n
+✓ Mantendré la confidencialidad del paciente\n
+✓ Buscaré supervisión cuando sea necesario\n\n
+🚨 ADVERTENCIA FINAL:\n
+Esta aplicación se proporciona "TAL COMO ESTÁ" sin garantías de ningún tipo.\n
+El uso de esta aplicación es bajo mi EXCLUSIVO riesgo y responsabilidad.\n\n
+© 2025 MediCálculos. Todos los derechos reservados.</string>
+
+
 </resources>

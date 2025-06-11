@@ -13,4 +13,19 @@
     <color name="success">#4CAF50</color>
     <color name="warning">#FFC107</color>
     <color name="error">#F44336</color>
+
+    <!-- Color aliases for consistency -->
+    <color name="compliance_error">#F44336</color>
+    <color name="compliance_warning">#FFC107</color>
+    <color name="compliance_success">#4CAF50</color>
+
+    <!-- Medical disclaimer specific colors -->
+    <color name="emergency_red">#D32F2F</color>
+    <color name="professional_blue">#1976D2</color>
+    <color name="liability_orange">#F57C00</color>
+
+    <!-- Background tints -->
+    <color name="emergency_background">#FFEBEE</color>
+    <color name="warning_background">#FFF8E1</color>
+    <color name="success_background">#E8F5E8</color>
 </resources>
