@@ -3,6 +3,8 @@ package com.example.medicalcalculatorapp.data.user
 import android.content.Context
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 import java.util.UUID
+import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
+import com.google.firebase.auth.FirebaseUser
 
 /**
  * Enhanced UserManager that supports both authenticated users and guest sessions.
@@ -11,17 +13,33 @@ import java.util.UUID
 class UserManager(context: Context) {
 
     private val secureStorageManager = SecureStorageManager(context)
-
+    private val firebaseAuthService = FirebaseAuthService()
     // In-memory guest session storage (cleared on app restart)
     private var currentGuestSession: GuestSession? = null
 
     /**
      * Get the current user ID - could be authenticated user or guest session
      */
+//    fun getCurrentUserId(): String {
+//        return when {
+//            isGuestMode() -> currentGuestSession?.guestId ?: createGuestSession()
+//            else -> getAuthenticatedUserId()
+//        }
+//    }
+
+    /**
+     * Get the current user ID - Firebase user ID for authenticated users, guest ID for guests
+     */
     fun getCurrentUserId(): String {
         return when {
+            // Priority 1: Firebase authenticated user
+            firebaseAuthService.isUserLoggedIn() -> {
+                firebaseAuthService.getCurrentUserId() ?: createGuestSession()
+            }
+            // Priority 2: Guest session
             isGuestMode() -> currentGuestSession?.guestId ?: createGuestSession()
-            else -> getAuthenticatedUserId()
+            // Fallback: Create new guest session
+            else -> createGuestSession()
         }
     }
 
@@ -43,8 +61,7 @@ class UserManager(context: Context) {
      * Check if user is authenticated (has valid credentials)
      */
     fun hasAuthenticatedUser(): Boolean {
-        val email = secureStorageManager.getEmail()
-        return !email.isNullOrBlank()
+        return firebaseAuthService.isUserLoggedIn()
     }
 
     /**
@@ -98,7 +115,13 @@ class UserManager(context: Context) {
      * Clear all user data (for sign out)
      */
     fun signOut() {
+        // Sign out from Firebase
+        firebaseAuthService.signOut()
+
+        // Clear local storage
         secureStorageManager.clearCredentials()
+
+        // End guest session
         endGuestSession()
     }
 
@@ -107,8 +130,8 @@ class UserManager(context: Context) {
      */
     fun getUserType(): UserType {
         return when {
+            firebaseAuthService.isUserLoggedIn() -> UserType.AUTHENTICATED
             isGuestMode() -> UserType.GUEST
-            hasAuthenticatedUser() -> UserType.AUTHENTICATED
             else -> UserType.ANONYMOUS
         }
     }
@@ -132,11 +155,13 @@ class UserManager(context: Context) {
      */
     fun getUserDisplayName(): String {
         return when (getUserType()) {
-            UserType.GUEST -> "Usuario Invitado"
             UserType.AUTHENTICATED -> {
-                val email = secureStorageManager.getEmail()
-                email?.substringBefore("@") ?: "Usuario"
+                val firebaseUser = firebaseAuthService.getCurrentUser()
+                firebaseUser?.displayName
+                    ?: firebaseUser?.email?.substringBefore("@")
+                    ?: "Usuario"
             }
+            UserType.GUEST -> "Usuario Invitado"
             UserType.ANONYMOUS -> "Usuario"
         }
     }
@@ -182,6 +207,24 @@ class UserManager(context: Context) {
         ANONYMOUS,      // No session started
         GUEST,          // Guest session active
         AUTHENTICATED   // Logged in user
+    }
+
+    /**
+     * Get Firebase user object (for authenticated users only)
+     */
+    fun getFirebaseUser(): FirebaseUser? {
+        return if (hasAuthenticatedUser()) {
+            firebaseAuthService.getCurrentUser()
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Check if current user's email is verified
+     */
+    fun isEmailVerified(): Boolean {
+        return firebaseAuthService.isEmailVerified()
     }
 
     companion object {

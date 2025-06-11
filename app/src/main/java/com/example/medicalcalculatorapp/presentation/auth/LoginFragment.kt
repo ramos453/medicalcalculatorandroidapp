@@ -18,6 +18,7 @@ import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
 import com.example.medicalcalculatorapp.data.auth.AuthResult
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import com.example.medicalcalculatorapp.domain.model.UserProfile
 
 
 class LoginFragment : Fragment() {
@@ -278,14 +279,59 @@ class LoginFragment : Fragment() {
 
                 when (result) {
                     is AuthResult.Success -> {
-                        // Save credentials if "Remember me" is checked
-                        saveCredentialsIfNeeded()
+                        try {
+                            // Get the Firebase user
+                            val firebaseUser = result.user
+                            if (firebaseUser != null) {
 
-                        showLoading(false)
-                        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                                // Save credentials if "Remember me" is checked
+                                saveCredentialsIfNeeded()
 
-                        // Navigate to main screen
-                        findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+                                // Create or update user profile in local database
+                                val userRepository = AppDependencies.provideUserRepository(requireContext())
+                                val userProfile = UserProfile(
+                                    id = firebaseUser.uid,
+                                    email = firebaseUser.email ?: email,
+                                    fullName = firebaseUser.displayName,
+                                    createdAt = System.currentTimeMillis(),
+                                    updatedAt = System.currentTimeMillis()
+                                )
+
+                                // Create profile if it doesn't exist, update if it does
+                                lifecycleScope.launch {
+                                    try {
+                                        userRepository.createUserProfile(userProfile)
+                                    } catch (e: Exception) {
+                                        // Profile might already exist, try to update
+                                        userRepository.updateUserProfile(userProfile)
+                                    }
+                                }
+
+                                // Check email verification status
+                                if (firebaseUser.isEmailVerified) {
+                                    showLoading(false)
+                                    Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+
+                                    // Navigate to main screen
+                                    findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+                                } else {
+                                    showLoading(false)
+
+                                    // Show email verification prompt
+                                    showEmailVerificationDialog(firebaseUser.email ?: email)
+                                }
+                            } else {
+                                showLoading(false)
+                                binding.btnLogin.isEnabled = true
+                                binding.btnContinueAsGuest.isEnabled = true
+                                Toast.makeText(requireContext(), "Login failed - no user data", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            showLoading(false)
+                            binding.btnLogin.isEnabled = true
+                            binding.btnContinueAsGuest.isEnabled = true
+                            Toast.makeText(requireContext(), "Error setting up user profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
                     is AuthResult.Error -> {
                         showLoading(false)
@@ -331,6 +377,55 @@ class LoginFragment : Fragment() {
         val alpha = if (show) 0.5f else 1.0f
         binding.loginFormContainer.alpha = alpha
         binding.guestOptionCard.alpha = alpha
+    }
+
+    private fun showEmailVerificationDialog(email: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Email Verification Required")
+            .setMessage("Your email ($email) is not verified. Please check your email and click the verification link, or we can send a new verification email.")
+            .setPositiveButton("Resend Verification") { _, _ ->
+                resendVerificationEmail()
+            }
+            .setNeutralButton("Continue Anyway") { _, _ ->
+                // Allow unverified users to continue (for development)
+                findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+            }
+            .setNegativeButton("Sign Out") { _, _ ->
+                firebaseAuthService.signOut()
+                userManager.signOut()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun resendVerificationEmail() {
+        lifecycleScope.launch {
+            try {
+                val result = firebaseAuthService.sendEmailVerification()
+                when (result) {
+                    is AuthResult.Success -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Verification email sent! Please check your inbox.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    is AuthResult.Error -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to send verification email: ${result.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Error sending verification: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     override fun onDestroyView() {
