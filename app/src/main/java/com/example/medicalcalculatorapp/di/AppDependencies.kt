@@ -33,6 +33,9 @@ import com.example.medicalcalculatorapp.domain.calculator.impl.BradenScaleCalcul
 import com.example.medicalcalculatorapp.domain.calculator.impl.GlasgowComaScaleCalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.PediatricDosageCalculator
 import com.example.medicalcalculatorapp.domain.calculator.impl.ApgarScoreCalculator
+import com.example.medicalcalculatorapp.data.db.mapper.UserComplianceMapper
+import com.example.medicalcalculatorapp.data.repository.UserComplianceRepository
+import com.example.medicalcalculatorapp.domain.repository.IUserComplianceRepository
 
 /**
  * A simple dependency provider for the application.
@@ -48,6 +51,8 @@ object AppDependencies {
     private var userManager: UserManager? = null
     private val gson = Gson()
     private var calculatorService: CalculatorService? = null
+    private var userComplianceRepository: IUserComplianceRepository? = null
+
 
     fun provideDatabase(context: Context): MedicalCalculatorDatabase {
         return database ?: synchronized(this) {
@@ -55,6 +60,20 @@ object AppDependencies {
                 database = it
             }
         }
+    }
+
+    fun provideUserComplianceRepository(context: Context): IUserComplianceRepository {
+        return userComplianceRepository ?: synchronized(this) {
+            userComplianceRepository ?: createUserComplianceRepository(context).also {
+                userComplianceRepository = it
+            }
+        }
+    }
+
+    private fun createUserComplianceRepository(context: Context): UserComplianceRepository {
+        val database = provideDatabase(context)
+        val userComplianceMapper = UserComplianceMapper()
+        return UserComplianceRepository(database, userComplianceMapper)
     }
 
     fun provideUserManager(context: Context): UserManager {

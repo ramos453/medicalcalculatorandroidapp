@@ -1,5 +1,3 @@
-// Replace your existing app/src/main/java/com/example/medicalcalculatorapp/presentation/auth/LoginFragment.kt
-
 package com.example.medicalcalculatorapp.presentation.auth
 
 import android.os.Bundle
@@ -14,13 +12,14 @@ import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 import com.example.medicalcalculatorapp.util.ValidationUtils
 import com.example.medicalcalculatorapp.data.user.UserManager
-import com.example.medicalcalculatorapp.util.MedicalComplianceManager
-import com.example.medicalcalculatorapp.util.DisclaimerFlow
 import androidx.appcompat.app.AlertDialog
 import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
 import com.example.medicalcalculatorapp.data.auth.AuthResult
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import com.example.medicalcalculatorapp.domain.service.ComplianceManagerService
+import com.example.medicalcalculatorapp.di.AppDependencies
+import com.example.medicalcalculatorapp.domain.model.DisclaimerFlow
 
 class LoginFragment : Fragment() {
 
@@ -29,17 +28,20 @@ class LoginFragment : Fragment() {
 
     private lateinit var secureStorageManager: SecureStorageManager
     private lateinit var userManager: UserManager
-    private lateinit var complianceManager: MedicalComplianceManager
+    private lateinit var complianceManagerService: ComplianceManagerService
+    private lateinit var firebaseAuthService: FirebaseAuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         secureStorageManager = SecureStorageManager(requireContext())
         userManager = UserManager(requireContext())
-        complianceManager = MedicalComplianceManager(
+        complianceManagerService = ComplianceManagerService(
             requireContext(),
-            secureStorageManager,
-            userManager
+            userManager,
+            AppDependencies.provideUserComplianceRepository(requireContext()),
+            secureStorageManager
         )
+        firebaseAuthService = FirebaseAuthService()
     }
 
     override fun onCreateView(
@@ -97,65 +99,37 @@ class LoginFragment : Fragment() {
      * Enhanced guest login with streamlined compliance checking
      */
     private fun handleGuestLoginWithCompliance() {
-        val complianceStatus = complianceManager.getComplianceStatus()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val complianceStatus = complianceManagerService.getComplianceStatus()
+                val requiredFlow = complianceManagerService.getRequiredDisclaimerFlow()
 
-        when (complianceStatus.requiredFlow) {
-            DisclaimerFlow.BASIC_INTRODUCTION -> {
-                // Skip basic disclaimer - go directly to enhanced
+                when (requiredFlow) {
+                    DisclaimerFlow.BASIC_INTRODUCTION -> {
+                        // Skip basic disclaimer - go directly to enhanced
+                        showEnhancedMedicalDisclaimer()
+                    }
+
+                    DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED,
+                    DisclaimerFlow.PROFESSIONAL_VERIFICATION_REQUIRED -> {
+                        // Show enhanced disclaimer directly
+                        showEnhancedMedicalDisclaimer()
+                    }
+
+                    DisclaimerFlow.COMPLIANCE_UPDATE_REQUIRED -> {
+                        // Show compliance update
+                        showComplianceUpdateDialog()
+                    }
+
+                    DisclaimerFlow.FULLY_COMPLIANT -> {
+                        // User is already compliant - direct guest access
+                        startGuestSessionDirectly()
+                    }
+                }
+            } catch (e: Exception) {
+                println("❌ Error in guest compliance check: ${e.message}")
+                // Fallback to showing enhanced disclaimer
                 showEnhancedMedicalDisclaimer()
-            }
-
-            DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED,
-            DisclaimerFlow.PROFESSIONAL_VERIFICATION_REQUIRED -> {
-                // Show enhanced disclaimer directly
-                showEnhancedMedicalDisclaimer()
-            }
-
-            DisclaimerFlow.COMPLIANCE_UPDATE_REQUIRED -> {
-                // Show compliance update
-                showComplianceUpdateDialog()
-            }
-
-            DisclaimerFlow.FULLY_COMPLIANT -> {
-                // User is already compliant - direct guest access
-                startGuestSessionDirectly()
-            }
-        }
-    }
-
-
-    /**
-     * Show basic disclaimer first, then enhanced (progressive disclosure)
-     */
-    private fun showBasicDisclaimerThenEnhanced() {
-        // First show your existing privacy dialog
-        val basicDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
-        basicDialog.setOnAcceptedListener {
-            // Mark basic disclaimer accepted
-            complianceManager.markBasicDisclaimerAccepted()
-
-            // Now show enhanced medical disclaimer
-            showProfessionalVerificationFlow()
-        }
-
-        try {
-            basicDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
-        } catch (e: Exception) {
-            println("❌ Error showing basic disclaimer: ${e.message}")
-            // Fallback directly to enhanced
-            showEnhancedMedicalDisclaimer()
-        }
-    }
-
-    /**
-     * Show professional verification with enhanced disclaimer
-     */
-    private fun showProfessionalVerificationFlow() {
-        showProfessionalVerificationDialog { isProfessional ->
-            if (isProfessional) {
-                showEnhancedMedicalDisclaimer()
-            } else {
-                showNonProfessionalMessage()
             }
         }
     }
@@ -168,12 +142,25 @@ class LoginFragment : Fragment() {
             val enhancedDialog = EnhancedMedicalDisclaimerDialogFragment.newInstance()
 
             enhancedDialog.setOnAcceptedListener {
-                // Mark all compliance requirements as met
-                complianceManager.markEnhancedDisclaimerAccepted()
-                complianceManager.markProfessionalVerified()
+                // User accepted - record compliance using new service
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        val success = complianceManagerService.recordCompleteCompliance(
+                            professionalType = com.example.medicalcalculatorapp.domain.model.ProfessionalType.DOCTOR,
+                            licenseInfo = null,
+                            method = com.example.medicalcalculatorapp.domain.model.ConsentMethod.APP_DIALOG
+                        )
 
-                // Start guest session
-                startGuestSessionDirectly()
+                        if (success) {
+                            startGuestSessionDirectly()
+                        } else {
+                            Toast.makeText(requireContext(), "Error saving compliance", Toast.LENGTH_LONG).show()
+                        }
+                    } catch (e: Exception) {
+                        println("❌ Error recording guest compliance: ${e.message}")
+                        Toast.makeText(requireContext(), "Error saving compliance: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
 
             enhancedDialog.setOnRejectedListener {
@@ -190,36 +177,6 @@ class LoginFragment : Fragment() {
                 Toast.LENGTH_LONG
             ).show()
         }
-    }
-
-    /**
-     * Professional verification dialog (existing logic preserved)
-     */
-    private fun showProfessionalVerificationDialog(callback: (Boolean) -> Unit) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.guest_professional_verification_title))
-            .setMessage(getString(R.string.guest_professional_verification_message))
-            .setPositiveButton(getString(R.string.confirm_medical_professional)) { _, _ ->
-                callback(true)
-            }
-            .setNegativeButton(getString(R.string.not_medical_professional)) { _, _ ->
-                callback(false)
-            }
-            .setCancelable(false)
-            .show()
-    }
-
-    /**
-     * Handle non-professional users (existing logic)
-     */
-    private fun showNonProfessionalMessage() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Acceso Restringido")
-            .setMessage("Esta aplicación está diseñada exclusivamente para profesionales de salud licenciados.\n\nSi eres un profesional médico, por favor verifica tu estatus. Si no lo eres, consulta con un profesional de salud calificado.")
-            .setPositiveButton("Entendido") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
     }
 
     /**
@@ -282,19 +239,28 @@ class LoginFragment : Fragment() {
      * Show appropriate terms dialog based on compliance status
      */
     private fun showAppropriateTermsDialog() {
-        val complianceStatus = complianceManager.getComplianceStatus()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val complianceStatus = complianceManagerService.getComplianceStatus()
 
-        if (complianceStatus.hasEnhancedDisclaimer || complianceStatus.isProfessionalVerified) {
-            // Show enhanced terms for professionals
-            val fullTermsDialog = FullTermsDialogFragment.newInstance()
-            fullTermsDialog.show(parentFragmentManager, FullTermsDialogFragment.TAG)
-        } else {
-            // Show basic terms for general users
-            val basicDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
-            basicDialog.setOnAcceptedListener {
-                // Optional: Mark basic terms viewed
+                if (complianceStatus.hasPrivacyPolicy || complianceStatus.isProfessionalVerified) {
+                    // Show enhanced terms for professionals
+                    val fullTermsDialog = FullTermsDialogFragment.newInstance()
+                    fullTermsDialog.show(parentFragmentManager, FullTermsDialogFragment.TAG)
+                } else {
+                    // Show basic terms for general users
+                    val basicDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
+                    basicDialog.setOnAcceptedListener {
+                        // Optional: Mark basic terms viewed
+                    }
+                    basicDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
+                }
+            } catch (e: Exception) {
+                println("❌ Error showing terms dialog: ${e.message}")
+                // Fallback to basic dialog
+                val basicDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
+                basicDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
             }
-            basicDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
         }
     }
 
@@ -327,44 +293,24 @@ class LoginFragment : Fragment() {
      * Show compliance status if it helps user understand requirements
      */
     private fun showComplianceStatusIfNeeded() {
-        val complianceStatus = complianceManager.getComplianceStatus()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val complianceStatus = complianceManagerService.getComplianceStatus()
 
-        // Only show for users who have partial compliance (debugging/transparency)
-        if (complianceStatus.hasBasicDisclaimer && !complianceStatus.hasEnhancedDisclaimer) {
-            // Could show a small info badge about compliance status
-            // For now, just log it for debugging
-            println("ℹ️ User has partial compliance: ${complianceStatus.requiredFlow}")
+                // Only show for users who have partial compliance (debugging/transparency)
+                if (complianceStatus.hasBasicTerms && !complianceStatus.hasMedicalDisclaimer) {
+                    // Could show a small info badge about compliance status
+                    // For now, just log it for debugging
+                    println("ℹ️ User has partial compliance: ${complianceStatus.getStatusSummary()}")
+                }
+            } catch (e: Exception) {
+                // Silent fail for status check
+                println("❌ Error checking compliance status: ${e.message}")
+            }
         }
     }
 
-    // ✅ EXISTING METHODS (unchanged - keeping all your current login logic)
-
-//    private fun performAuthenticatedLogin() {
-//        showLoading(true)
-//        binding.btnLogin.isEnabled = false
-//        binding.btnContinueAsGuest.isEnabled = false
-//
-//        // Save credentials if "Remember me" is checked (existing logic)
-//        saveCredentialsIfNeeded()
-//
-//        // Simulate network delay (existing logic)
-//        view?.postDelayed({
-//            showLoading(false)
-//            binding.btnLogin.isEnabled = true
-//            binding.btnContinueAsGuest.isEnabled = true
-//
-//            // Mark user as authenticated and compliant
-//            complianceManager.markBasicDisclaimerAccepted()
-//            complianceManager.markEnhancedDisclaimerAccepted()
-//            complianceManager.markProfessionalVerified()
-//
-//            // For now, simulate successful login (existing logic)
-//            Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
-//
-//            // Navigate to main screen (existing logic)
-//            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-//        }, 1500)
-//    }
+    // ==== AUTHENTICATED USER LOGIN FLOW ====
 
     private fun performAuthenticatedLogin() {
         println("🔍 DEBUG: performAuthenticatedLogin() called")
@@ -377,10 +323,8 @@ class LoginFragment : Fragment() {
 
         println("🔍 DEBUG: About to call Firebase signInWithEmailAndPassword")
 
-        // Use lifecycleScope for coroutines in Fragment
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val firebaseAuthService = FirebaseAuthService() // Add this import
                 val result = firebaseAuthService.signInWithEmailAndPassword(email, password)
 
                 println("🔍 DEBUG: Firebase result: $result")
@@ -392,17 +336,8 @@ class LoginFragment : Fragment() {
                             // Save credentials if "Remember me" is checked
                             saveCredentialsIfNeeded()
 
-                            // Mark user as authenticated and compliant
-                            complianceManager.markBasicDisclaimerAccepted()
-                            complianceManager.markEnhancedDisclaimerAccepted()
-                            complianceManager.markProfessionalVerified()
-
-                            showLoading(false)
-                            binding.btnLogin.isEnabled = true
-                            binding.btnContinueAsGuest.isEnabled = true
-
-                            Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
-                            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+                            // Check compliance status for this authenticated user
+                            checkAuthenticatedUserCompliance(firebaseUser.uid)
                         } else {
                             handleAuthenticationError("Login failed - no user data")
                         }
@@ -418,6 +353,181 @@ class LoginFragment : Fragment() {
             }
         }
     }
+
+    /**
+     * Check compliance status for authenticated user and handle accordingly
+     */
+    private fun checkAuthenticatedUserCompliance(authenticatedUserId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                println("🔍 DEBUG: Checking compliance for authenticated user: $authenticatedUserId")
+
+                // Check if user has compliance record
+                val hasComplianceRecord = AppDependencies.provideUserComplianceRepository(requireContext())
+                    .hasComplianceRecord(authenticatedUserId)
+
+                println("🔍 DEBUG: User has compliance record: $hasComplianceRecord")
+
+                if (!hasComplianceRecord) {
+                    // First time login - show enhanced medical disclaimer
+                    showFirstTimeUserCompliance(authenticatedUserId)
+                } else {
+                    // Check if compliance is complete and up-to-date
+                    val complianceStatus = complianceManagerService.getComplianceStatus()
+                    val requiredFlow = complianceManagerService.getRequiredDisclaimerFlow()
+
+                    println("🔍 DEBUG: Compliance status: ${complianceStatus.getStatusSummary()}")
+                    println("🔍 DEBUG: Required flow: $requiredFlow")
+
+                    when (requiredFlow) {
+                        DisclaimerFlow.FULLY_COMPLIANT -> {
+                            // User is fully compliant - proceed to app
+                            proceedToCalculatorList("Authenticated user fully compliant")
+                        }
+                        DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED -> {
+                            // User needs enhanced disclaimer
+                            showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
+                        }
+                        DisclaimerFlow.COMPLIANCE_UPDATE_REQUIRED -> {
+                            // User needs compliance update
+                            showComplianceUpdateForAuthenticatedUser(authenticatedUserId)
+                        }
+                        else -> {
+                            // Default to enhanced disclaimer
+                            showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                println("❌ DEBUG: Error checking compliance: ${e.message}")
+                e.printStackTrace()
+                handleAuthenticationError("Error checking compliance: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Show compliance flow for first-time authenticated users
+     */
+    private fun showFirstTimeUserCompliance(authenticatedUserId: String) {
+        println("🔍 DEBUG: Showing first-time user compliance for: $authenticatedUserId")
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Bienvenido a MediCálculos")
+            .setMessage(
+                "Como usuario registrado, necesitas completar la verificación médica profesional.\n\n" +
+                        "Este proceso solo se realiza una vez y tus preferencias se guardarán de forma segura."
+            )
+            .setPositiveButton("Continuar") { _, _ ->
+                showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
+            }
+            .setNegativeButton("Más Tarde") { _, _ ->
+                // User can postpone, but sign them out
+                firebaseAuthService.signOut()
+                userManager.signOut()
+                showLoading(false)
+                binding.btnLogin.isEnabled = true
+                binding.btnContinueAsGuest.isEnabled = true
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * Show enhanced disclaimer specifically for authenticated users
+     */
+    private fun showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId: String) {
+        try {
+            val enhancedDialog = EnhancedMedicalDisclaimerDialogFragment.newInstance()
+
+            enhancedDialog.setOnAcceptedListener {
+                // User accepted - record compliance in database
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        val success = complianceManagerService.recordCompleteCompliance(
+                            professionalType = com.example.medicalcalculatorapp.domain.model.ProfessionalType.DOCTOR, // Default, could be made selectable
+                            licenseInfo = null,
+                            method = com.example.medicalcalculatorapp.domain.model.ConsentMethod.APP_DIALOG
+                        )
+
+                        if (success) {
+                            println("✅ DEBUG: Compliance recorded successfully for authenticated user")
+                            proceedToCalculatorList("Authenticated user compliance completed")
+                        } else {
+                            handleAuthenticationError("Failed to save compliance data")
+                        }
+                    } catch (e: Exception) {
+                        println("❌ DEBUG: Error recording compliance: ${e.message}")
+                        handleAuthenticationError("Error saving compliance: ${e.message}")
+                    }
+                }
+            }
+
+            enhancedDialog.setOnRejectedListener {
+                // User rejected - sign them out
+                firebaseAuthService.signOut()
+                userManager.signOut()
+                showLoading(false)
+                binding.btnLogin.isEnabled = true
+                binding.btnContinueAsGuest.isEnabled = true
+
+                Toast.makeText(
+                    requireContext(),
+                    "La aceptación de los términos médicos es requerida para usar la aplicación",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            enhancedDialog.show(parentFragmentManager, EnhancedMedicalDisclaimerDialogFragment.TAG)
+
+        } catch (e: Exception) {
+            println("❌ ERROR: Error showing enhanced disclaimer: ${e.message}")
+            handleAuthenticationError("Error showing compliance dialog")
+        }
+    }
+
+    /**
+     * Show compliance update dialog for existing users
+     */
+    private fun showComplianceUpdateForAuthenticatedUser(authenticatedUserId: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("📋 Actualización de Políticas")
+            .setMessage(
+                "Hemos actualizado nuestras políticas médicas para cumplir con los nuevos requisitos.\n\n" +
+                        "Por favor, revisa y acepta los términos actualizados para continuar."
+            )
+            .setPositiveButton("Revisar Términos") { _, _ ->
+                showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
+            }
+            .setNegativeButton("Más Tarde") { _, _ ->
+                // Allow postponing for existing users
+                proceedToCalculatorList("Authenticated user postponed compliance update")
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * Proceed to calculator list after successful authentication and compliance
+     */
+    private fun proceedToCalculatorList(reason: String) {
+        println("🚀 DEBUG: Proceeding to calculator list: $reason")
+
+        showLoading(false)
+        binding.btnLogin.isEnabled = true
+        binding.btnContinueAsGuest.isEnabled = true
+
+        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+
+        try {
+            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+        } catch (e: Exception) {
+            println("❌ DEBUG: Navigation error: ${e.message}")
+            Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // ==== UTILITY METHODS ====
 
     private fun handleAuthenticationError(errorMessage: String) {
         showLoading(false)
@@ -492,17 +602,6 @@ class LoginFragment : Fragment() {
         }
     }
 
-//    private fun showLoading(show: Boolean) {
-//        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
-//
-//        // Disable all interactive elements during loading
-//        binding.btnLogin.isEnabled = !show
-//        binding.btnContinueAsGuest.isEnabled = !show
-//        binding.etEmail.isEnabled = !show
-//        binding.etPassword.isEnabled = !show
-//        binding.cbRememberMe.isEnabled = !show
-//    }
-
     private fun showLoading(show: Boolean) {
         binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
 
@@ -524,439 +623,3 @@ class LoginFragment : Fragment() {
         _binding = null
     }
 }
-
-//package com.example.medicalcalculatorapp.presentation.auth
-//
-//import android.os.Bundle
-//import android.view.LayoutInflater
-//import android.view.View
-//import android.view.ViewGroup
-//import android.widget.Toast
-//import androidx.fragment.app.Fragment
-//import androidx.navigation.fragment.findNavController
-//import com.example.medicalcalculatorapp.R
-//import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
-//import com.example.medicalcalculatorapp.util.SecureStorageManager
-//import com.example.medicalcalculatorapp.util.ValidationUtils
-//import com.example.medicalcalculatorapp.data.user.UserManager
-//import androidx.appcompat.app.AlertDialog
-//import com.example.medicalcalculatorapp.di.AppDependencies
-//import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
-//import com.example.medicalcalculatorapp.data.auth.AuthResult
-//import kotlinx.coroutines.launch
-//import androidx.lifecycle.lifecycleScope
-//import com.example.medicalcalculatorapp.domain.model.UserProfile
-//
-//
-//class LoginFragment : Fragment() {
-//
-//    private var _binding: FragmentLoginBinding? = null
-//    private val binding get() = _binding!!
-//
-//    private lateinit var secureStorageManager: SecureStorageManager
-//    private lateinit var userManager: UserManager
-//    private lateinit var firebaseAuthService: FirebaseAuthService  // ← ADD THIS LINE
-//
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        secureStorageManager = SecureStorageManager(requireContext())
-//        userManager = AppDependencies.provideUserManager(requireContext())
-//        firebaseAuthService = FirebaseAuthService()
-//    }
-//
-//    override fun onCreateView(
-//        inflater: LayoutInflater,
-//        container: ViewGroup?,
-//        savedInstanceState: Bundle?
-//    ): View {
-//        _binding = FragmentLoginBinding.inflate(inflater, container, false)
-//        return binding.root
-//    }
-//
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//
-//        // Load any saved credentials
-//        loadSavedCredentials()
-//
-//        // Setup click listeners
-//        setupClickListeners()
-//    }
-//
-//    private fun setupClickListeners() {
-//        // Regular login button
-//        binding.btnLogin.setOnClickListener {
-//            if (validateInputs()) {
-//                performLogin()
-//            }
-//        }
-//
-//        // Guest login button - simplified flow
-//        binding.btnContinueAsGuest.setOnClickListener {
-//            showGuestMedicalDisclaimer()
-//        }
-//
-//        // Privacy policy
-//        binding.tvPrivacyPolicy.setOnClickListener {
-//            showTermsOfUseDialog()
-//        }
-//
-//        // Register link
-//        binding.tvRegister.setOnClickListener {
-//            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-//        }
-//
-//        // Forgot password
-//        binding.tvForgotPassword.setOnClickListener {
-//            Toast.makeText(context, "Forgot password clicked", Toast.LENGTH_SHORT).show()
-//        }
-//    }
-//
-//    // SIMPLIFIED GUEST FLOW - Professional but streamlined
-//    private fun showGuestMedicalDisclaimer() {
-//        AlertDialog.Builder(requireContext())
-//            .setTitle("Acceso como Invitado")
-//            .setMessage("""
-//                Esta aplicación está diseñada para profesionales de salud.
-//
-//                Al continuar como invitado:
-//                • Confirmas que eres un profesional de salud licenciado
-//                • Aceptas que los cálculos son solo para referencia
-//                • Entiendes que no se guardará tu información
-//
-//                ¿Deseas continuar?
-//            """.trimIndent())
-//            .setPositiveButton("Sí, Continuar") { _, _ ->
-//                startGuestSession()
-//            }
-//            .setNegativeButton("Cancelar") { dialog, _ ->
-//                dialog.dismiss()
-//            }
-//            .setCancelable(false)
-//            .show()
-//    }
-//
-//    private fun startGuestSession() {
-//        try {
-//            showLoading(true)
-//
-//            println("🔍 DEBUG: Starting guest session...")
-//
-//            // Start guest session through UserManager
-//            val guestId = userManager.startGuestSession()
-//            println("✅ DEBUG: Guest session started with ID: $guestId")
-//
-//            // Save guest disclaimer acceptance
-//            secureStorageManager.saveGuestDisclaimerAccepted(true)
-//            secureStorageManager.saveGuestSessionStart(System.currentTimeMillis())
-//
-//            // Track guest mode usage for analytics
-//            secureStorageManager.incrementGuestModeUsage()
-//
-//            showLoading(false)
-//
-//            // Show welcome message
-//            Toast.makeText(
-//                requireContext(),
-//                "Sesión de invitado iniciada. Bienvenido a MediCálculos",
-//                Toast.LENGTH_SHORT
-//            ).show()
-//
-//            // Navigate to calculator list
-//            navigateToCalculatorList()
-//
-//        } catch (e: Exception) {
-//            println("❌ ERROR: Guest session creation failed: ${e.message}")
-//            e.printStackTrace()
-//
-//            showLoading(false)
-//            showGuestSessionError(e.message)
-//        }
-//    }
-//
-//    private fun navigateToCalculatorList() {
-//        try {
-//            println("🚀 DEBUG: Navigating to calculator list from guest login")
-//            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-//        } catch (e: Exception) {
-//            println("❌ ERROR: Navigation to calculator list failed: ${e.message}")
-//            Toast.makeText(
-//                requireContext(),
-//                "Error de navegación. Por favor, intenta nuevamente.",
-//                Toast.LENGTH_LONG
-//            ).show()
-//        }
-//    }
-//
-//    private fun showGuestSessionError(errorMessage: String?) {
-//        val userFriendlyMessage = when {
-//            errorMessage?.contains("storage", ignoreCase = true) == true ->
-//                "Error de almacenamiento. Verifica el espacio disponible."
-//            errorMessage?.contains("permission", ignoreCase = true) == true ->
-//                "Error de permisos. Reinicia la aplicación."
-//            else ->
-//                "No se pudo iniciar la sesión de invitado. Intenta nuevamente."
-//        }
-//
-//        AlertDialog.Builder(requireContext())
-//            .setTitle("Error de Sesión")
-//            .setMessage(userFriendlyMessage)
-//            .setPositiveButton("Reintentar") { _, _ ->
-//                // Allow user to try guest mode again
-//            }
-//            .setNegativeButton("Cancelar") { dialog, _ ->
-//                dialog.dismiss()
-//            }
-//            .show()
-//    }
-//
-//    private fun showTermsOfUseDialog() {
-//        val termsDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
-//        termsDialog.setOnAcceptedListener {
-//            // User viewed terms - no action needed for login screen
-//        }
-//        termsDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
-//    }
-//
-//    // EXISTING LOGIN METHODS (unchanged)
-//    private fun validateInputs(): Boolean {
-//        var isValid = true
-//
-//        val email = binding.etEmail.text.toString().trim()
-//        val password = binding.etPassword.text.toString()
-//
-//        // Email validation
-//        if (email.isEmpty()) {
-//            binding.tilEmail.error = getString(R.string.email_required)
-//            isValid = false
-//        } else if (!ValidationUtils.isValidEmail(email)) {
-//            binding.tilEmail.error = getString(R.string.invalid_email)
-//            isValid = false
-//        } else if (ValidationUtils.containsSuspiciousPatterns(email)) {
-//            binding.tilEmail.error = getString(R.string.invalid_input)
-//            isValid = false
-//        } else {
-//            binding.tilEmail.error = null
-//        }
-//
-//        // Password validation - simplified for login
-//        if (password.isEmpty()) {
-//            binding.tilPassword.error = getString(R.string.password_required)
-//            isValid = false
-//        } else {
-//            binding.tilPassword.error = null
-//        }
-//
-//        return isValid
-//    }
-//
-//    private fun loadSavedCredentials() {
-//        val rememberCredentials = secureStorageManager.getRememberMeFlag()
-//        if (rememberCredentials) {
-//            val savedEmail = secureStorageManager.getEmail()
-//            savedEmail?.let {
-//                binding.etEmail.setText(it)
-//                binding.cbRememberMe.isChecked = true
-//            }
-//        }
-//    }
-//
-//    private fun saveCredentialsIfNeeded() {
-//        val email = binding.etEmail.text.toString().trim()
-//        val isChecked = binding.cbRememberMe.isChecked
-//
-//        secureStorageManager.saveRememberMeFlag(isChecked)
-//        if (isChecked) {
-//            secureStorageManager.saveEmail(email)
-//        } else {
-//            secureStorageManager.clearCredentials()
-//        }
-//    }
-//
-////    private fun performLogin() {
-////        showLoading(true)
-////
-////        // Save credentials if "Remember me" is checked
-////        saveCredentialsIfNeeded()
-////
-////        // Simulate network delay for authenticated login
-////        view?.postDelayed({
-////            showLoading(false)
-////
-////            // For now, simulate successful login
-////            Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
-////
-////            // Navigate to main screen (calculator list)
-////            navigateToCalculatorList()
-////        }, 1500)
-////    }
-//
-//    private fun performLogin() {
-//        showLoading(true)
-//        binding.btnLogin.isEnabled = false
-//        binding.btnContinueAsGuest.isEnabled = false
-//
-//        val email = binding.etEmail.text.toString().trim()
-//        val password = binding.etPassword.text.toString()
-//
-//        // Use lifecycleScope for coroutines in Fragment
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            try {
-//                val result = firebaseAuthService.signInWithEmailAndPassword(email, password)
-//
-//                when (result) {
-//                    is AuthResult.Success -> {
-//                        try {
-//                            // Get the Firebase user
-//                            val firebaseUser = result.user
-//                            if (firebaseUser != null) {
-//
-//                                // Save credentials if "Remember me" is checked
-//                                saveCredentialsIfNeeded()
-//
-//                                // Create or update user profile in local database
-//                                val userRepository = AppDependencies.provideUserRepository(requireContext())
-//                                val userProfile = UserProfile(
-//                                    id = firebaseUser.uid,
-//                                    email = firebaseUser.email ?: email,
-//                                    fullName = firebaseUser.displayName,
-//                                    createdAt = System.currentTimeMillis(),
-//                                    updatedAt = System.currentTimeMillis()
-//                                )
-//
-//                                // Create profile if it doesn't exist, update if it does
-//                                lifecycleScope.launch {
-//                                    try {
-//                                        userRepository.createUserProfile(userProfile)
-//                                    } catch (e: Exception) {
-//                                        // Profile might already exist, try to update
-//                                        userRepository.updateUserProfile(userProfile)
-//                                    }
-//                                }
-//
-//                                // Check email verification status
-//                                if (firebaseUser.isEmailVerified) {
-//                                    showLoading(false)
-//                                    Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
-//
-//                                    // Navigate to main screen
-//                                    findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-//                                } else {
-//                                    showLoading(false)
-//
-//                                    // Show email verification prompt
-//                                    showEmailVerificationDialog(firebaseUser.email ?: email)
-//                                }
-//                            } else {
-//                                showLoading(false)
-//                                binding.btnLogin.isEnabled = true
-//                                binding.btnContinueAsGuest.isEnabled = true
-//                                Toast.makeText(requireContext(), "Login failed - no user data", Toast.LENGTH_SHORT).show()
-//                            }
-//                        } catch (e: Exception) {
-//                            showLoading(false)
-//                            binding.btnLogin.isEnabled = true
-//                            binding.btnContinueAsGuest.isEnabled = true
-//                            Toast.makeText(requireContext(), "Error setting up user profile: ${e.message}", Toast.LENGTH_SHORT).show()
-//                        }
-//                    }
-//                    is AuthResult.Error -> {
-//                        showLoading(false)
-//                        binding.btnLogin.isEnabled = true
-//                        binding.btnContinueAsGuest.isEnabled = true
-//
-//                        // Show user-friendly error message
-//                        val errorMessage = when {
-//                            result.message.contains("password") -> "Invalid password. Please try again."
-//                            result.message.contains("email") -> "Invalid email address."
-//                            result.message.contains("user") -> "No account found with this email."
-//                            result.message.contains("network") -> "Network error. Check your connection."
-//                            else -> "Login failed. Please try again."
-//                        }
-//
-//                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                showLoading(false)
-//                binding.btnLogin.isEnabled = true
-//                binding.btnContinueAsGuest.isEnabled = true
-//                Toast.makeText(requireContext(), "Unexpected error: ${e.message}", Toast.LENGTH_LONG).show()
-//            }
-//        }
-//    }
-//
-//
-//    private fun showLoading(show: Boolean) {
-//        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
-//
-//        // Disable all interactive elements during loading
-//        binding.btnLogin.isEnabled = !show
-//        binding.btnContinueAsGuest.isEnabled = !show
-//        binding.etEmail.isEnabled = !show
-//        binding.etPassword.isEnabled = !show
-//        binding.cbRememberMe.isEnabled = !show
-//        binding.tvRegister.isEnabled = !show
-//        binding.tvForgotPassword.isEnabled = !show
-//        binding.tvPrivacyPolicy.isEnabled = !show
-//
-//        // Visual feedback for disabled state
-//        val alpha = if (show) 0.5f else 1.0f
-//        binding.loginFormContainer.alpha = alpha
-//        binding.guestOptionCard.alpha = alpha
-//    }
-//
-//    private fun showEmailVerificationDialog(email: String) {
-//        AlertDialog.Builder(requireContext())
-//            .setTitle("Email Verification Required")
-//            .setMessage("Your email ($email) is not verified. Please check your email and click the verification link, or we can send a new verification email.")
-//            .setPositiveButton("Resend Verification") { _, _ ->
-//                resendVerificationEmail()
-//            }
-//            .setNeutralButton("Continue Anyway") { _, _ ->
-//                // Allow unverified users to continue (for development)
-//                findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-//            }
-//            .setNegativeButton("Sign Out") { _, _ ->
-//                firebaseAuthService.signOut()
-//                userManager.signOut()
-//            }
-//            .setCancelable(false)
-//            .show()
-//    }
-//
-//    private fun resendVerificationEmail() {
-//        lifecycleScope.launch {
-//            try {
-//                val result = firebaseAuthService.sendEmailVerification()
-//                when (result) {
-//                    is AuthResult.Success -> {
-//                        Toast.makeText(
-//                            requireContext(),
-//                            "Verification email sent! Please check your inbox.",
-//                            Toast.LENGTH_LONG
-//                        ).show()
-//                    }
-//                    is AuthResult.Error -> {
-//                        Toast.makeText(
-//                            requireContext(),
-//                            "Failed to send verification email: ${result.message}",
-//                            Toast.LENGTH_LONG
-//                        ).show()
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Toast.makeText(
-//                    requireContext(),
-//                    "Error sending verification: ${e.message}",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
-//        }
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
-//}
