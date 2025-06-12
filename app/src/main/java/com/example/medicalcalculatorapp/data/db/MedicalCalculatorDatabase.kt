@@ -27,10 +27,6 @@ import com.example.medicalcalculatorapp.data.db.entity.UserProfileEntity
 import com.example.medicalcalculatorapp.data.db.entity.UserSettingsEntity
 import com.example.medicalcalculatorapp.data.db.dao.UserComplianceDao
 import com.example.medicalcalculatorapp.data.db.entity.UserComplianceEntity
-import com.example.medicalcalculatorapp.data.db.util.DatabasePrepopulateUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Database(
     entities = [
@@ -40,9 +36,10 @@ import kotlinx.coroutines.launch
         FavoriteEntity::class,
         HistoryEntity::class,
         UserProfileEntity::class,
-        UserSettingsEntity::class
+        UserSettingsEntity::class,
+        UserComplianceEntity::class  // ✅ ADDED: Include compliance entity
     ],
-    version = 2, // Incremented for new user tables
+    version = 3, // ✅ FIXED: Updated to version 3 for compliance table
     exportSchema = true
 )
 @TypeConverters(
@@ -59,10 +56,10 @@ abstract class MedicalCalculatorDatabase : RoomDatabase() {
     abstract fun favoriteDao(): FavoriteDao
     abstract fun historyDao(): HistoryDao
 
-    // New User DAOs
+    // User DAOs
     abstract fun userProfileDao(): UserProfileDao
     abstract fun userSettingsDao(): UserSettingsDao
-    abstract fun userComplianceDao(): UserComplianceDao
+    abstract fun userComplianceDao(): UserComplianceDao  // ✅ ADDED: Compliance DAO
 
     companion object {
         @Volatile
@@ -109,39 +106,39 @@ abstract class MedicalCalculatorDatabase : RoomDatabase() {
             }
         }
 
-        // Migration from version 2 to 3 (adding compliance table)
+        // ✅ NEW: Migration from version 2 to 3 (adding compliance table)
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 // Create user_compliance table
                 database.execSQL("""
-            CREATE TABLE IF NOT EXISTS user_compliance (
-                userId TEXT NOT NULL PRIMARY KEY,
-                hasAcceptedBasicTerms INTEGER NOT NULL DEFAULT 0,
-                basicTermsAcceptedAt INTEGER,
-                basicTermsVersion TEXT,
-                hasAcceptedMedicalDisclaimer INTEGER NOT NULL DEFAULT 0,
-                medicalDisclaimerAcceptedAt INTEGER,
-                medicalDisclaimerVersion TEXT,
-                isProfessionalVerified INTEGER NOT NULL DEFAULT 0,
-                professionalVerifiedAt INTEGER,
-                professionalType TEXT,
-                professionalLicenseInfo TEXT,
-                hasAcceptedPrivacyPolicy INTEGER NOT NULL DEFAULT 0,
-                privacyPolicyAcceptedAt INTEGER,
-                privacyPolicyVersion TEXT,
-                complianceVersion TEXT NOT NULL DEFAULT '2024.1',
-                lastUpdated INTEGER NOT NULL,
-                createdAt INTEGER NOT NULL,
-                ipAddress TEXT,
-                userAgent TEXT,
-                consentMethod TEXT NOT NULL DEFAULT 'APP_DIALOG',
-                isCompliant INTEGER NOT NULL DEFAULT 0,
-                needsReview INTEGER NOT NULL DEFAULT 0,
-                complianceNotes TEXT
-            )
-        """.trimIndent())
+                    CREATE TABLE IF NOT EXISTS user_compliance (
+                        userId TEXT NOT NULL PRIMARY KEY,
+                        hasAcceptedBasicTerms INTEGER NOT NULL DEFAULT 0,
+                        basicTermsAcceptedAt INTEGER,
+                        basicTermsVersion TEXT,
+                        hasAcceptedMedicalDisclaimer INTEGER NOT NULL DEFAULT 0,
+                        medicalDisclaimerAcceptedAt INTEGER,
+                        medicalDisclaimerVersion TEXT,
+                        isProfessionalVerified INTEGER NOT NULL DEFAULT 0,
+                        professionalVerifiedAt INTEGER,
+                        professionalType TEXT,
+                        professionalLicenseInfo TEXT,
+                        hasAcceptedPrivacyPolicy INTEGER NOT NULL DEFAULT 0,
+                        privacyPolicyAcceptedAt INTEGER,
+                        privacyPolicyVersion TEXT,
+                        complianceVersion TEXT NOT NULL DEFAULT '2024.1',
+                        lastUpdated INTEGER NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        ipAddress TEXT,
+                        userAgent TEXT,
+                        consentMethod TEXT NOT NULL DEFAULT 'APP_DIALOG',
+                        isCompliant INTEGER NOT NULL DEFAULT 0,
+                        needsReview INTEGER NOT NULL DEFAULT 0,
+                        complianceNotes TEXT
+                    )
+                """.trimIndent())
 
-                // Create indices
+                // Create indices for better query performance
                 database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_user_compliance_userId ON user_compliance(userId)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_user_compliance_complianceVersion ON user_compliance(complianceVersion)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_user_compliance_lastUpdated ON user_compliance(lastUpdated)")
@@ -155,12 +152,13 @@ abstract class MedicalCalculatorDatabase : RoomDatabase() {
                     MedicalCalculatorDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // Add migration instead of destructive
-                    // Keep fallback for development only - remove for production
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // ✅ FIXED: Add both migrations
+                    // ✅ REMOVE THIS FOR PRODUCTION - Only for development
                     .fallbackToDestructiveMigration()
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
+                            println("🔥 Database created with version 3")
                         }
                     })
                     .build()

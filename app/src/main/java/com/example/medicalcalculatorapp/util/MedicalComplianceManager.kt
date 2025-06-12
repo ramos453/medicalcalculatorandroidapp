@@ -1,9 +1,10 @@
-// Create this file: app/src/main/java/com/example/medicalcalculatorapp/util/MedicalComplianceManager.kt
+// Update this file: app/src/main/java/com/example/medicalcalculatorapp/util/MedicalComplianceManager.kt
 
 package com.example.medicalcalculatorapp.util
 
 import android.content.Context
 import com.example.medicalcalculatorapp.data.user.UserManager
+import com.example.medicalcalculatorapp.domain.model.DisclaimerFlow
 
 /**
  * Medical Compliance Manager
@@ -201,17 +202,6 @@ class MedicalComplianceManager(
 }
 
 /**
- * Represents different disclaimer flows based on user status and compliance requirements
- */
-enum class DisclaimerFlow {
-    BASIC_INTRODUCTION,                    // Show existing simple disclaimer
-    ENHANCED_MEDICAL_REQUIRED,             // Show enhanced disclaimer for medical access
-    PROFESSIONAL_VERIFICATION_REQUIRED,    // Show professional verification process
-    COMPLIANCE_UPDATE_REQUIRED,            // Show updated compliance requirements
-    FULLY_COMPLIANT                       // User has completed all requirements
-}
-
-/**
  * Comprehensive compliance status for reporting and debugging
  */
 data class ComplianceStatus(
@@ -240,7 +230,7 @@ data class ComplianceStatus(
             • Professional Verification: ${if (isProfessionalVerified) "✓ VERIFIED" else "✗ PENDING"}
             • Google Play Compliance Version: $complianceVersion
             
-            🎯 CURRENT STATUS: ${requiredFlow}
+            🎯 CURRENT STATUS: ${requiredFlow.getDescription()}
             🏥 Medical Calculator Access: ${if (canAccessCalculators) "GRANTED" else "RESTRICTED"}
             
             📋 GOOGLE PLAY STORE COMPLIANCE:
