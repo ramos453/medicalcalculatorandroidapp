@@ -17,6 +17,10 @@ import com.example.medicalcalculatorapp.data.user.UserManager
 import com.example.medicalcalculatorapp.util.MedicalComplianceManager
 import com.example.medicalcalculatorapp.util.DisclaimerFlow
 import androidx.appcompat.app.AlertDialog
+import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
+import com.example.medicalcalculatorapp.data.auth.AuthResult
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -335,31 +339,103 @@ class LoginFragment : Fragment() {
 
     // ✅ EXISTING METHODS (unchanged - keeping all your current login logic)
 
+//    private fun performAuthenticatedLogin() {
+//        showLoading(true)
+//        binding.btnLogin.isEnabled = false
+//        binding.btnContinueAsGuest.isEnabled = false
+//
+//        // Save credentials if "Remember me" is checked (existing logic)
+//        saveCredentialsIfNeeded()
+//
+//        // Simulate network delay (existing logic)
+//        view?.postDelayed({
+//            showLoading(false)
+//            binding.btnLogin.isEnabled = true
+//            binding.btnContinueAsGuest.isEnabled = true
+//
+//            // Mark user as authenticated and compliant
+//            complianceManager.markBasicDisclaimerAccepted()
+//            complianceManager.markEnhancedDisclaimerAccepted()
+//            complianceManager.markProfessionalVerified()
+//
+//            // For now, simulate successful login (existing logic)
+//            Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
+//
+//            // Navigate to main screen (existing logic)
+//            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+//        }, 1500)
+//    }
+
     private fun performAuthenticatedLogin() {
+        println("🔍 DEBUG: performAuthenticatedLogin() called")
         showLoading(true)
         binding.btnLogin.isEnabled = false
         binding.btnContinueAsGuest.isEnabled = false
 
-        // Save credentials if "Remember me" is checked (existing logic)
-        saveCredentialsIfNeeded()
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString()
 
-        // Simulate network delay (existing logic)
-        view?.postDelayed({
-            showLoading(false)
-            binding.btnLogin.isEnabled = true
-            binding.btnContinueAsGuest.isEnabled = true
+        println("🔍 DEBUG: About to call Firebase signInWithEmailAndPassword")
 
-            // Mark user as authenticated and compliant
-            complianceManager.markBasicDisclaimerAccepted()
-            complianceManager.markEnhancedDisclaimerAccepted()
-            complianceManager.markProfessionalVerified()
+        // Use lifecycleScope for coroutines in Fragment
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val firebaseAuthService = FirebaseAuthService() // Add this import
+                val result = firebaseAuthService.signInWithEmailAndPassword(email, password)
 
-            // For now, simulate successful login (existing logic)
-            Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
+                println("🔍 DEBUG: Firebase result: $result")
 
-            // Navigate to main screen (existing logic)
-            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-        }, 1500)
+                when (result) {
+                    is AuthResult.Success -> {
+                        val firebaseUser = result.user
+                        if (firebaseUser != null) {
+                            // Save credentials if "Remember me" is checked
+                            saveCredentialsIfNeeded()
+
+                            // Mark user as authenticated and compliant
+                            complianceManager.markBasicDisclaimerAccepted()
+                            complianceManager.markEnhancedDisclaimerAccepted()
+                            complianceManager.markProfessionalVerified()
+
+                            showLoading(false)
+                            binding.btnLogin.isEnabled = true
+                            binding.btnContinueAsGuest.isEnabled = true
+
+                            Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
+                        } else {
+                            handleAuthenticationError("Login failed - no user data")
+                        }
+                    }
+                    is AuthResult.Error -> {
+                        handleAuthenticationError(result.message)
+                    }
+                }
+            } catch (e: Exception) {
+                println("❌ DEBUG: Exception in performAuthenticatedLogin: ${e.message}")
+                e.printStackTrace()
+                handleAuthenticationError("Unexpected error: ${e.message}")
+            }
+        }
+    }
+
+    private fun handleAuthenticationError(errorMessage: String) {
+        showLoading(false)
+        binding.btnLogin.isEnabled = true
+        binding.btnContinueAsGuest.isEnabled = true
+
+        println("❌ DEBUG: Authentication error: $errorMessage")
+
+        // Show user-friendly error message
+        val userFriendlyMessage = when {
+            errorMessage.contains("password", ignoreCase = true) -> "Invalid password. Please try again."
+            errorMessage.contains("email", ignoreCase = true) -> "Invalid email address."
+            errorMessage.contains("user", ignoreCase = true) -> "No account found with this email."
+            errorMessage.contains("network", ignoreCase = true) -> "Network error. Check your connection."
+            else -> "Login failed. Please try again."
+        }
+
+        Toast.makeText(requireContext(), userFriendlyMessage, Toast.LENGTH_LONG).show()
     }
 
     private fun validateInputs(): Boolean {
@@ -416,6 +492,17 @@ class LoginFragment : Fragment() {
         }
     }
 
+//    private fun showLoading(show: Boolean) {
+//        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
+//
+//        // Disable all interactive elements during loading
+//        binding.btnLogin.isEnabled = !show
+//        binding.btnContinueAsGuest.isEnabled = !show
+//        binding.etEmail.isEnabled = !show
+//        binding.etPassword.isEnabled = !show
+//        binding.cbRememberMe.isEnabled = !show
+//    }
+
     private fun showLoading(show: Boolean) {
         binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
 
@@ -425,6 +512,11 @@ class LoginFragment : Fragment() {
         binding.etEmail.isEnabled = !show
         binding.etPassword.isEnabled = !show
         binding.cbRememberMe.isEnabled = !show
+
+        // Optional: Visual feedback for disabled state
+        val alpha = if (show) 0.5f else 1.0f
+        binding.loginFormContainer?.alpha = alpha
+        binding.guestOptionCard?.alpha = alpha
     }
 
     override fun onDestroyView() {
