@@ -1,10 +1,9 @@
-// Create this file: app/src/main/java/com/example/medicalcalculatorapp/domain/model/DisclaimerFlow.kt
-
 package com.example.medicalcalculatorapp.domain.model
 
 /**
- * Represents different disclaimer flows based on user status and compliance requirements
+ * Disclaimer Flow Control - Google Play Health App Policy Compliance
  *
+ * Represents different disclaimer flows based on user status and compliance requirements.
  * This follows Google Play Health App Policy 2024 requirements for progressive disclosure
  * and ensures users understand medical liability at appropriate points in the app flow.
  */
@@ -98,23 +97,49 @@ enum class DisclaimerFlow {
             ENHANCED_MEDICAL_REQUIRED -> PROFESSIONAL_VERIFICATION_REQUIRED
             PROFESSIONAL_VERIFICATION_REQUIRED -> FULLY_COMPLIANT
             COMPLIANCE_UPDATE_REQUIRED -> FULLY_COMPLIANT
-            FULLY_COMPLIANT -> null
+            FULLY_COMPLIANT -> null // No next step
         }
     }
 
-    companion object {
-        /**
-         * Get the appropriate flow for a new user
-         */
-        fun getInitialFlow(): DisclaimerFlow {
-            return BASIC_INTRODUCTION
+    /**
+     * Check if this flow should block app access
+     */
+    fun blocksAppAccess(): Boolean {
+        return when (this) {
+            BASIC_INTRODUCTION -> true
+            ENHANCED_MEDICAL_REQUIRED -> true
+            PROFESSIONAL_VERIFICATION_REQUIRED -> false // Can use app but with limitations
+            COMPLIANCE_UPDATE_REQUIRED -> true
+            FULLY_COMPLIANT -> false
         }
+    }
 
-        /**
-         * Get the flow that requires the highest priority action
-         */
-        fun getHighestPriorityFlow(flows: List<DisclaimerFlow>): DisclaimerFlow? {
-            return flows.maxByOrNull { it.getPriority() }
+    /**
+     * Get recommended action for this flow
+     */
+    fun getRecommendedAction(): String {
+        return when (this) {
+            BASIC_INTRODUCTION -> "Mostrar términos básicos y introducción"
+            ENHANCED_MEDICAL_REQUIRED -> "Mostrar aviso médico profesional"
+            PROFESSIONAL_VERIFICATION_REQUIRED -> "Solicitar verificación profesional"
+            COMPLIANCE_UPDATE_REQUIRED -> "Mostrar actualización de políticas"
+            FULLY_COMPLIANT -> "Permitir acceso completo a la aplicación"
         }
+    }
+
+    /**
+     * Get flow status for logging/debugging
+     */
+    fun getDebugInfo(): String {
+        return """
+            DisclaimerFlow: $name
+            Description: ${getDescription()}
+            Priority: ${getPriority()}
+            Requires Interaction: ${requiresUserInteraction()}
+            Allows Access: ${allowsAppAccess()}
+            Blocks Access: ${blocksAppAccess()}
+            Next Step: ${getNextFlow()?.name ?: "None"}
+            Action: ${getRecommendedAction()}
+        """.trimIndent()
     }
 }

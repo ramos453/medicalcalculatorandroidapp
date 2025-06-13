@@ -1,626 +1,607 @@
-package com.example.medicalcalculatorapp.presentation.auth
+package com.example.medicalcalculatorapp.data.repository
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.example.medicalcalculatorapp.R
-import com.example.medicalcalculatorapp.databinding.FragmentLoginBinding
-import com.example.medicalcalculatorapp.util.SecureStorageManager
-import com.example.medicalcalculatorapp.util.ValidationUtils
-import com.example.medicalcalculatorapp.data.user.UserManager
-import androidx.appcompat.app.AlertDialog
-import com.example.medicalcalculatorapp.data.auth.FirebaseAuthService
-import com.example.medicalcalculatorapp.data.auth.AuthResult
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import com.example.medicalcalculatorapp.domain.service.ComplianceManagerService
-import com.example.medicalcalculatorapp.di.AppDependencies
-// ✅ FIXED: Correct import for DisclaimerFlow from domain model
-import com.example.medicalcalculatorapp.domain.model.DisclaimerFlow
+import com.example.medicalcalculatorapp.data.db.MedicalCalculatorDatabase
+import com.example.medicalcalculatorapp.data.db.entity.UserComplianceEntity
+import com.example.medicalcalculatorapp.data.db.mapper.UserComplianceMapper
+import com.example.medicalcalculatorapp.domain.model.*
+import com.example.medicalcalculatorapp.domain.repository.IUserComplianceRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.catch
 
-class LoginFragment : Fragment() {
+/**
+ * User Compliance Repository Implementation
+ *
+ * Concrete implementation of IUserComplianceRepository that handles:
+ * - Google Play Health App Policy compliance data
+ * - Database operations with proper error handling
+ * - Domain model mapping and validation
+ * - GDPR-compliant data management
+ */
+class UserComplianceRepository(
+    private val database: MedicalCalculatorDatabase,
+    private val mapper: UserComplianceMapper
+) : IUserComplianceRepository {
 
-    private var _binding: FragmentLoginBinding? = null
-    private val binding get() = _binding!!
+    private val dao = database.userComplianceDao()
 
-    private lateinit var secureStorageManager: SecureStorageManager
-    private lateinit var userManager: UserManager
-    private lateinit var complianceManagerService: ComplianceManagerService
-    private lateinit var firebaseAuthService: FirebaseAuthService
+    // ==== BASIC COMPLIANCE OPERATIONS ====
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        secureStorageManager = SecureStorageManager(requireContext())
-        userManager = UserManager(requireContext())
-        complianceManagerService = ComplianceManagerService(
-            requireContext(),
-            userManager,
-            AppDependencies.provideUserComplianceRepository(requireContext()),
-            secureStorageManager
+    override fun getUserCompliance(userId: String): Flow<UserCompliance?> {
+        return dao.getUserCompliance(userId)
+            .map { entity ->
+                entity?.let { mapper.mapEntityToDomain(it) }
+            }
+            .catch { exception ->
+                println("❌ Error getting user compliance for $userId: ${exception.message}")
+                emit(null)
+            }
+    }
+
+    override suspend fun getUserComplianceSync(userId: String): UserCompliance? {
+        return try {
+            val entity = dao.getUserComplianceSync(userId)
+            entity?.let { mapper.mapEntityToDomain(it) }
+        } catch (e: Exception) {
+            println("❌ Error getting user compliance sync for $userId: ${e.message}")
+            null
+        }
+    }
+
+    override suspend fun createUserCompliance(userId: String): UserCompliance {
+        return try {
+            // Create default compliance record
+            val defaultCompliance = createDefaultCompliance(userId)
+            val entity = mapper.mapDomainToEntity(defaultCompliance)
+
+            dao.insertUserCompliance(entity)
+            println("✅ Created compliance record for user: $userId")
+
+            defaultCompliance
+        } catch (e: Exception) {
+            println("❌ Error creating user compliance for $userId: ${e.message}")
+            throw e
+        }
+    }
+
+    override suspend fun updateUserCompliance(compliance: UserCompliance): Boolean {
+        return try {
+            // Validate domain model before saving
+            val validationErrors = mapper.validateDomainModel(compliance)
+            if (validationErrors.isNotEmpty()) {
+                println("❌ Validation errors for compliance update: $validationErrors")
+                return false
+            }
+
+            // Update timestamp and map to entity
+            val updatedCompliance = compliance.copy(lastUpdated = System.currentTimeMillis())
+            val entity = mapper.mapDomainToEntity(updatedCompliance)
+
+            dao.updateUserCompliance(entity)
+            println("✅ Updated compliance record for user: ${compliance.userId}")
+
+            true
+        } catch (e: Exception) {
+            println("❌ Error updating user compliance: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun deleteUserCompliance(userId: String): Boolean {
+        return try {
+            dao.deleteUserComplianceById(userId)
+            println("✅ Deleted compliance record for user: $userId")
+            true
+        } catch (e: Exception) {
+            println("❌ Error deleting user compliance for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun hasComplianceRecord(userId: String): Boolean {
+        return try {
+            dao.hasComplianceRecord(userId)
+        } catch (e: Exception) {
+            println("❌ Error checking compliance record for $userId: ${e.message}")
+            false
+        }
+    }
+
+    // ==== COMPLIANCE STATUS OPERATIONS ====
+
+    override suspend fun isUserCompliant(userId: String): Boolean {
+        return try {
+            dao.isUserCompliant(userId) ?: false
+        } catch (e: Exception) {
+            println("❌ Error checking user compliance for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override fun getUsersNeedingReview(): Flow<List<UserCompliance>> {
+        return dao.getUsersNeedingReview()
+            .map { entities ->
+                entities.map { mapper.mapEntityToDomain(it) }
+            }
+            .catch { exception ->
+                println("❌ Error getting users needing review: ${exception.message}")
+                emit(emptyList())
+            }
+    }
+
+    override suspend fun markUserForReview(userId: String, reason: String): Boolean {
+        return try {
+            val entity = dao.getUserComplianceSync(userId)
+            if (entity != null) {
+                val updatedEntity = entity.copy(
+                    needsReview = true,
+                    complianceNotes = reason,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                dao.updateUserCompliance(updatedEntity)
+                println("✅ Marked user $userId for review: $reason")
+                true
+            } else {
+                println("❌ Cannot mark user $userId for review - no compliance record found")
+                false
+            }
+        } catch (e: Exception) {
+            println("❌ Error marking user $userId for review: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun clearReviewFlag(userId: String): Boolean {
+        return try {
+            val entity = dao.getUserComplianceSync(userId)
+            if (entity != null) {
+                val updatedEntity = entity.copy(
+                    needsReview = false,
+                    complianceNotes = null,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                dao.updateUserCompliance(updatedEntity)
+                println("✅ Cleared review flag for user: $userId")
+                true
+            } else {
+                println("❌ Cannot clear review flag for $userId - no compliance record found")
+                false
+            }
+        } catch (e: Exception) {
+            println("❌ Error clearing review flag for $userId: ${e.message}")
+            false
+        }
+    }
+
+    // ==== CONSENT MANAGEMENT ====
+
+    override suspend fun recordBasicTermsConsent(
+        userId: String,
+        accepted: Boolean,
+        version: String,
+        method: ConsentMethod
+    ): Boolean {
+        return try {
+            val timestamp = System.currentTimeMillis()
+            dao.updateBasicTermsConsent(userId, accepted, timestamp, version)
+            println("✅ Recorded basic terms consent for $userId: accepted=$accepted")
+            true
+        } catch (e: Exception) {
+            println("❌ Error recording basic terms consent for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun recordMedicalDisclaimerConsent(
+        userId: String,
+        accepted: Boolean,
+        version: String,
+        method: ConsentMethod
+    ): Boolean {
+        return try {
+            val timestamp = System.currentTimeMillis()
+            dao.updateMedicalDisclaimerConsent(userId, accepted, timestamp, version)
+            println("✅ Recorded medical disclaimer consent for $userId: accepted=$accepted")
+            true
+        } catch (e: Exception) {
+            println("❌ Error recording medical disclaimer consent for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun recordProfessionalVerification(
+        userId: String,
+        verified: Boolean,
+        professionalType: ProfessionalType?,
+        licenseInfo: String?
+    ): Boolean {
+        return try {
+            val timestamp = System.currentTimeMillis()
+            dao.updateProfessionalVerification(
+                userId,
+                verified,
+                timestamp,
+                professionalType?.code,
+                licenseInfo
+            )
+            println("✅ Recorded professional verification for $userId: verified=$verified")
+            true
+        } catch (e: Exception) {
+            println("❌ Error recording professional verification for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun recordPrivacyPolicyConsent(
+        userId: String,
+        accepted: Boolean,
+        version: String,
+        method: ConsentMethod
+    ): Boolean {
+        return try {
+            // For privacy policy, we need to update the entity manually since there's no specific DAO method
+            val entity = dao.getUserComplianceSync(userId)
+            if (entity != null) {
+                val timestamp = System.currentTimeMillis()
+                val updatedEntity = entity.copy(
+                    hasAcceptedPrivacyPolicy = accepted,
+                    privacyPolicyAcceptedAt = if (accepted) timestamp else null,
+                    privacyPolicyVersion = if (accepted) version else null,
+                    lastUpdated = timestamp
+                )
+                dao.updateUserCompliance(updatedEntity)
+                println("✅ Recorded privacy policy consent for $userId: accepted=$accepted")
+                true
+            } else {
+                println("❌ Cannot record privacy policy consent for $userId - no compliance record found")
+                false
+            }
+        } catch (e: Exception) {
+            println("❌ Error recording privacy policy consent for $userId: ${e.message}")
+            false
+        }
+    }
+
+    // ==== PROFESSIONAL VERIFICATION OPERATIONS ====
+
+    override suspend fun isProfessionalVerified(userId: String): Boolean {
+        return try {
+            dao.isProfessionalVerified(userId) ?: false
+        } catch (e: Exception) {
+            println("❌ Error checking professional verification for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun getUserProfessionalType(userId: String): ProfessionalType? {
+        return try {
+            val typeCode = dao.getProfessionalType(userId)
+            typeCode?.let { ProfessionalType.fromCode(it) }
+        } catch (e: Exception) {
+            println("❌ Error getting professional type for $userId: ${e.message}")
+            null
+        }
+    }
+
+    override suspend fun getVerifiedProfessionalCount(type: ProfessionalType): Int {
+        return try {
+            dao.getVerifiedProfessionalCount(type.code)
+        } catch (e: Exception) {
+            println("❌ Error getting verified professional count: ${e.message}")
+            0
+        }
+    }
+
+    override fun getVerifiedProfessionals(): Flow<List<UserCompliance>> {
+        return dao.getAllVerifiedProfessionals()
+            .map { entities ->
+                entities.map { mapper.mapEntityToDomain(it) }
+            }
+            .catch { exception ->
+                println("❌ Error getting verified professionals: ${exception.message}")
+                emit(emptyList())
+            }
+    }
+
+    // ==== VERSION MANAGEMENT ====
+
+    override fun getUsersWithOutdatedCompliance(currentVersion: String): Flow<List<UserCompliance>> {
+        return dao.getUsersWithOutdatedCompliance(currentVersion)
+            .map { entities ->
+                entities.map { mapper.mapEntityToDomain(it) }
+            }
+            .catch { exception ->
+                println("❌ Error getting users with outdated compliance: ${exception.message}")
+                emit(emptyList())
+            }
+    }
+
+    override suspend fun updateComplianceVersion(userId: String, newVersion: String): Boolean {
+        return try {
+            val entity = dao.getUserComplianceSync(userId)
+            if (entity != null) {
+                val updatedEntity = entity.copy(
+                    complianceVersion = newVersion,
+                    lastUpdated = System.currentTimeMillis()
+                )
+                dao.updateUserCompliance(updatedEntity)
+                println("✅ Updated compliance version for $userId to $newVersion")
+                true
+            } else {
+                println("❌ Cannot update compliance version for $userId - no compliance record found")
+                false
+            }
+        } catch (e: Exception) {
+            println("❌ Error updating compliance version for $userId: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun batchUpdateComplianceVersion(
+        oldVersion: String,
+        newVersion: String
+    ): Int {
+        return try {
+            // Get all users with the old version
+            var updatedCount = 0
+            val usersFlow = dao.getUsersWithOutdatedCompliance(newVersion)
+
+            // Note: In a real implementation, you'd want to handle this more efficiently
+            // This is a simplified approach for demonstration
+            usersFlow.collect { userEntities ->
+                userEntities.forEach { entity ->
+                    if (entity.complianceVersion == oldVersion) {
+                        val updatedEntity = entity.copy(
+                            complianceVersion = newVersion,
+                            lastUpdated = System.currentTimeMillis()
+                        )
+                        dao.updateUserCompliance(updatedEntity)
+                        updatedCount++
+                    }
+                }
+            }
+
+            println("✅ Batch updated $updatedCount users from version $oldVersion to $newVersion")
+            updatedCount
+        } catch (e: Exception) {
+            println("❌ Error batch updating compliance version: ${e.message}")
+            0
+        }
+    }
+
+    override suspend fun needsComplianceUpdate(userId: String, currentVersion: String): Boolean {
+        return try {
+            val entity = dao.getUserComplianceSync(userId)
+            entity?.complianceVersion != currentVersion
+        } catch (e: Exception) {
+            println("❌ Error checking compliance update need for $userId: ${e.message}")
+            false
+        }
+    }
+
+    // ==== GOOGLE PLAY COMPLIANCE REPORTING ====
+
+    override suspend fun getComplianceStatistics(): ComplianceStatistics {
+        return try {
+            // For a complete implementation, you'd need additional DAO methods
+            // This is a basic implementation that can be expanded
+            val allCompliantUsers = dao.getAllCompliantUsers()
+            val allVerifiedProfessionals = dao.getAllVerifiedProfessionals()
+
+            var compliantCount = 0
+            var verifiedCount = 0
+            val professionalTypeCounts = mutableMapOf<ProfessionalType, Int>()
+            val versionCounts = mutableMapOf<String, Int>()
+
+            // Count compliant users
+            allCompliantUsers.collect { entities ->
+                compliantCount = entities.size
+                entities.forEach { entity ->
+                    versionCounts[entity.complianceVersion] =
+                        versionCounts.getOrDefault(entity.complianceVersion, 0) + 1
+                }
+            }
+
+            // Count verified professionals
+            allVerifiedProfessionals.collect { entities ->
+                verifiedCount = entities.size
+                entities.forEach { entity ->
+                    entity.professionalType?.let { typeCode ->
+                        ProfessionalType.fromCode(typeCode)?.let { type ->
+                            professionalTypeCounts[type] =
+                                professionalTypeCounts.getOrDefault(type, 0) + 1
+                        }
+                    }
+                }
+            }
+
+            ComplianceStatistics(
+                totalUsers = compliantCount + verifiedCount, // Simplified calculation
+                compliantUsers = compliantCount,
+                verifiedProfessionals = verifiedCount,
+                pendingReviews = 0, // Would need additional DAO method
+                byProfessionalType = professionalTypeCounts,
+                byComplianceVersion = versionCounts,
+                lastUpdated = System.currentTimeMillis()
+            )
+        } catch (e: Exception) {
+            println("❌ Error getting compliance statistics: ${e.message}")
+            ComplianceStatistics(
+                totalUsers = 0,
+                compliantUsers = 0,
+                verifiedProfessionals = 0,
+                pendingReviews = 0,
+                byProfessionalType = emptyMap(),
+                byComplianceVersion = emptyMap(),
+                lastUpdated = System.currentTimeMillis()
+            )
+        }
+    }
+
+    override suspend fun getComplianceAuditTrail(userId: String): ComplianceAuditTrail {
+        return try {
+            val compliance = getUserComplianceSync(userId)
+            if (compliance != null) {
+                // For a full implementation, you'd track actual events
+                // This is a simplified version that shows the current status
+                val events = listOf<ComplianceEvent>() // Would be populated from event tracking
+
+                ComplianceAuditTrail(
+                    userId = userId,
+                    events = events,
+                    currentStatus = compliance,
+                    generatedAt = System.currentTimeMillis()
+                )
+            } else {
+                throw Exception("No compliance record found for user $userId")
+            }
+        } catch (e: Exception) {
+            println("❌ Error getting compliance audit trail for $userId: ${e.message}")
+            throw e
+        }
+    }
+
+    override suspend fun exportUserComplianceData(userId: String): UserComplianceExport? {
+        return try {
+            val compliance = getUserComplianceSync(userId)
+            if (compliance != null) {
+                val auditTrail = getComplianceAuditTrail(userId)
+                UserComplianceExport(
+                    userId = userId,
+                    compliance = compliance,
+                    auditTrail = auditTrail,
+                    exportedAt = System.currentTimeMillis()
+                )
+            } else {
+                println("❌ No compliance data found for user $userId")
+                null
+            }
+        } catch (e: Exception) {
+            println("❌ Error exporting compliance data for $userId: ${e.message}")
+            null
+        }
+    }
+
+    // ==== ADDITIONAL INTERFACE METHODS ====
+
+    override suspend fun getConsentAcceptanceReport(
+        consentType: ComplianceRequirement,
+        startDate: Long,
+        endDate: Long
+    ): List<UserCompliance> {
+        return try {
+            // This would need specific DAO methods to implement properly
+            // For now, returning empty list as a placeholder
+            println("⚠️ getConsentAcceptanceReport not fully implemented yet")
+            emptyList()
+        } catch (e: Exception) {
+            println("❌ Error getting consent acceptance report: ${e.message}")
+            emptyList()
+        }
+    }
+
+    override suspend fun createBulkCompliance(userIds: List<String>): List<UserCompliance> {
+        return try {
+            val complianceList = mutableListOf<UserCompliance>()
+            userIds.forEach { userId ->
+                val compliance = createUserCompliance(userId)
+                complianceList.add(compliance)
+            }
+            println("✅ Created bulk compliance for ${userIds.size} users")
+            complianceList
+        } catch (e: Exception) {
+            println("❌ Error creating bulk compliance: ${e.message}")
+            emptyList()
+        }
+    }
+
+    override suspend fun updateBulkCompliance(complianceList: List<UserCompliance>): Boolean {
+        return try {
+            var successCount = 0
+            complianceList.forEach { compliance ->
+                if (updateUserCompliance(compliance)) {
+                    successCount++
+                }
+            }
+            println("✅ Updated $successCount/${complianceList.size} compliance records")
+            successCount == complianceList.size
+        } catch (e: Exception) {
+            println("❌ Error updating bulk compliance: ${e.message}")
+            false
+        }
+    }
+
+    override suspend fun cleanupOldRecords(cutoffDate: Long): Int {
+        return try {
+            // This would need specific DAO methods to implement properly
+            println("⚠️ cleanupOldRecords not fully implemented yet")
+            0
+        } catch (e: Exception) {
+            println("❌ Error cleaning up old records: ${e.message}")
+            0
+        }
+    }
+
+    override suspend fun validateComplianceIntegrity(userId: String): ComplianceValidationResult {
+        return try {
+            val compliance = getUserComplianceSync(userId)
+            if (compliance != null) {
+                val errors = mapper.validateDomainModel(compliance)
+                ComplianceValidationResult(
+                    isValid = errors.isEmpty(),
+                    errors = errors,
+                    warnings = emptyList(),
+                    checkedAt = System.currentTimeMillis()
+                )
+            } else {
+                ComplianceValidationResult(
+                    isValid = false,
+                    errors = listOf("No compliance record found for user $userId"),
+                    warnings = emptyList(),
+                    checkedAt = System.currentTimeMillis()
+                )
+            }
+        } catch (e: Exception) {
+            println("❌ Error validating compliance integrity for $userId: ${e.message}")
+            ComplianceValidationResult(
+                isValid = false,
+                errors = listOf("Validation failed: ${e.message}"),
+                warnings = emptyList(),
+                checkedAt = System.currentTimeMillis()
+            )
+        }
+    }
+
+    override suspend fun checkDataCorruption(): List<String> {
+        return try {
+            // This would need specific checks to implement properly
+            println("⚠️ checkDataCorruption not fully implemented yet")
+            emptyList()
+        } catch (e: Exception) {
+            println("❌ Error checking data corruption: ${e.message}")
+            listOf("Error checking corruption: ${e.message}")
+        }
+    }
+
+    // ==== PRIVATE HELPER METHODS ====
+
+    private fun createDefaultCompliance(userId: String): UserCompliance {
+        val currentTime = System.currentTimeMillis()
+        return UserCompliance(
+            userId = userId,
+            basicTermsConsent = null,
+            medicalDisclaimerConsent = null,
+            professionalVerification = null,
+            privacyPolicyConsent = null,
+            complianceStatus = ComplianceStatus(
+                isCompliant = false,
+                needsReview = false,
+                notes = "Newly created compliance record"
+            ),
+            complianceVersion = "2024.1",
+            lastUpdated = currentTime,
+            createdAt = currentTime,
+            auditInfo = null
         )
-        firebaseAuthService = FirebaseAuthService()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // Load any saved credentials (existing functionality)
-        loadSavedCredentials()
-
-        // Setup click listeners with enhanced compliance
-        setupClickListeners()
-
-        // Show compliance information if helpful
-        showComplianceStatusIfNeeded()
-    }
-
-    private fun setupClickListeners() {
-        // ✅ EXISTING: Regular login button (unchanged)
-        binding.btnLogin.setOnClickListener {
-            if (validateInputs()) {
-                performAuthenticatedLogin()
-            }
-        }
-
-        // 🆕 ENHANCED: Guest login with progressive compliance
-        binding.btnContinueAsGuest.setOnClickListener {
-            handleGuestLoginWithCompliance()
-        }
-
-        // ✅ EXISTING: Privacy policy (enhanced to show appropriate version)
-        binding.tvPrivacyPolicy.setOnClickListener {
-            showAppropriateTermsDialog()
-        }
-
-        // ✅ EXISTING: Register link (unchanged)
-        binding.tvRegister.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-        }
-
-        // ✅ EXISTING: Forgot password (unchanged)
-        binding.tvForgotPassword.setOnClickListener {
-            Toast.makeText(context, "Forgot password clicked", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    /**
-     * Enhanced guest login with streamlined compliance checking
-     */
-    private fun handleGuestLoginWithCompliance() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val complianceStatus = complianceManagerService.getComplianceStatus()
-                val requiredFlow = complianceManagerService.getRequiredDisclaimerFlow()
-
-                when (requiredFlow) {
-                    DisclaimerFlow.BASIC_INTRODUCTION -> {
-                        // Skip basic disclaimer - go directly to enhanced
-                        showEnhancedMedicalDisclaimer()
-                    }
-
-                    DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED,
-                    DisclaimerFlow.PROFESSIONAL_VERIFICATION_REQUIRED -> {
-                        // Show enhanced disclaimer directly
-                        showEnhancedMedicalDisclaimer()
-                    }
-
-                    DisclaimerFlow.COMPLIANCE_UPDATE_REQUIRED -> {
-                        // Show compliance update
-                        showComplianceUpdateDialog()
-                    }
-
-                    DisclaimerFlow.FULLY_COMPLIANT -> {
-                        // User is already compliant - direct guest access
-                        startGuestSessionDirectly()
-                    }
-                }
-            } catch (e: Exception) {
-                println("❌ Error in guest compliance check: ${e.message}")
-                // Fallback to showing enhanced disclaimer
-                showEnhancedMedicalDisclaimer()
-            }
-        }
-    }
-
-    /**
-     * Show enhanced medical disclaimer for professional users
-     */
-    private fun showEnhancedMedicalDisclaimer() {
-        try {
-            val enhancedDialog = EnhancedMedicalDisclaimerDialogFragment.newInstance()
-
-            enhancedDialog.setOnAcceptedListener {
-                // User accepted - record compliance using new service
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        val success = complianceManagerService.recordCompleteCompliance(
-                            professionalType = com.example.medicalcalculatorapp.domain.service.SimpleProfessionalType.DOCTOR,
-                            licenseInfo = null,
-                            method = com.example.medicalcalculatorapp.domain.service.SimpleConsentMethod.APP_DIALOG
-                        )
-
-                        if (success) {
-                            startGuestSessionDirectly()
-                        } else {
-                            Toast.makeText(requireContext(), "Error saving compliance", Toast.LENGTH_LONG).show()
-                        }
-                    } catch (e: Exception) {
-                        println("❌ Error recording guest compliance: ${e.message}")
-                        Toast.makeText(requireContext(), "Error saving compliance: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-
-            enhancedDialog.setOnRejectedListener {
-                showRejectionOptions()
-            }
-
-            enhancedDialog.show(parentFragmentManager, EnhancedMedicalDisclaimerDialogFragment.TAG)
-
-        } catch (e: Exception) {
-            println("❌ Error showing enhanced disclaimer: ${e.message}")
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.guest_session_error),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    /**
-     * Show compliance update dialog
-     */
-    private fun showComplianceUpdateDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("📋 Actualización de Políticas")
-            .setMessage(
-                "Hemos actualizado nuestras políticas médicas para cumplir con los nuevos requisitos de Google Play Store 2024.\n\n" +
-                        "Por favor, revise y acepte los términos actualizados."
-            )
-            .setPositiveButton("Revisar Términos") { _, _ ->
-                showEnhancedMedicalDisclaimer()
-            }
-            .setNegativeButton("Más Tarde") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .setCancelable(false)
-            .show()
-    }
-
-    /**
-     * Start guest session directly (existing logic enhanced)
-     */
-    private fun startGuestSessionDirectly() {
-        try {
-            showLoading(true)
-
-            // Start guest session (existing logic)
-            val guestId = userManager.startGuestSession()
-
-            // Save compliance status (enhanced)
-            secureStorageManager.saveGuestSessionStart(System.currentTimeMillis())
-            secureStorageManager.incrementGuestModeUsage()
-
-            showLoading(false)
-
-            // Show welcome message
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.guest_session_started),
-                Toast.LENGTH_SHORT
-            ).show()
-
-            // Navigate to calculator list
-            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-
-        } catch (e: Exception) {
-            showLoading(false)
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.guest_session_error),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    /**
-     * Show appropriate terms dialog based on compliance status
-     */
-    private fun showAppropriateTermsDialog() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val complianceStatus = complianceManagerService.getComplianceStatus()
-
-                if (complianceStatus.hasPrivacyPolicy || complianceStatus.isProfessionalVerified) {
-                    // Show enhanced terms for professionals
-                    val fullTermsDialog = FullTermsDialogFragment.newInstance()
-                    fullTermsDialog.show(parentFragmentManager, FullTermsDialogFragment.TAG)
-                } else {
-                    // Show basic terms for general users
-                    val basicDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
-                    basicDialog.setOnAcceptedListener {
-                        // Optional: Mark basic terms viewed
-                    }
-                    basicDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
-                }
-            } catch (e: Exception) {
-                println("❌ Error showing terms dialog: ${e.message}")
-                // Fallback to basic dialog
-                val basicDialog = PrivacyAndDisclaimerDialogFragment.newInstance()
-                basicDialog.show(parentFragmentManager, PrivacyAndDisclaimerDialogFragment.TAG)
-            }
-        }
-    }
-
-    /**
-     * Show rejection options when user declines enhanced disclaimer
-     */
-    private fun showRejectionOptions() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Opciones Disponibles")
-            .setMessage(
-                "Entendemos que las políticas médicas pueden ser extensas. Tienes estas opciones:\n\n" +
-                        "• Crear una cuenta para acceso completo\n" +
-                        "• Revisar los términos nuevamente\n" +
-                        "• Contactar soporte para preguntas"
-            )
-            .setPositiveButton("Crear Cuenta") { _, _ ->
-                findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-            }
-            .setNeutralButton("Revisar Términos") { _, _ ->
-                showEnhancedMedicalDisclaimer()
-            }
-            .setNegativeButton("Contactar Soporte") { _, _ ->
-                // TODO: Implement support contact
-                Toast.makeText(requireContext(), "Contacto: legal@medicalcalculatorapp.com", Toast.LENGTH_LONG).show()
-            }
-            .show()
-    }
-
-    /**
-     * Show compliance status if it helps user understand requirements
-     */
-    private fun showComplianceStatusIfNeeded() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val complianceStatus = complianceManagerService.getComplianceStatus()
-
-                // Only show for users who have partial compliance (debugging/transparency)
-                if (complianceStatus.hasBasicTerms && !complianceStatus.hasMedicalDisclaimer) {
-                    // Could show a small info badge about compliance status
-                    // For now, just log it for debugging
-                    println("ℹ️ User has partial compliance: ${complianceStatus.getStatusSummary()}")
-                }
-            } catch (e: Exception) {
-                // Silent fail for status check
-                println("❌ Error checking compliance status: ${e.message}")
-            }
-        }
-    }
-
-    // ==== AUTHENTICATED USER LOGIN FLOW ====
-
-    private fun performAuthenticatedLogin() {
-        println("🔍 DEBUG: performAuthenticatedLogin() called")
-        showLoading(true)
-        binding.btnLogin.isEnabled = false
-        binding.btnContinueAsGuest.isEnabled = false
-
-        val email = binding.etEmail.text.toString().trim()
-        val password = binding.etPassword.text.toString()
-
-        println("🔍 DEBUG: About to call Firebase signInWithEmailAndPassword")
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val result = firebaseAuthService.signInWithEmailAndPassword(email, password)
-
-                println("🔍 DEBUG: Firebase result: $result")
-
-                when (result) {
-                    is AuthResult.Success -> {
-                        val firebaseUser = result.user
-                        if (firebaseUser != null) {
-                            // Save credentials if "Remember me" is checked
-                            saveCredentialsIfNeeded()
-
-                            // Check compliance status for this authenticated user
-                            checkAuthenticatedUserCompliance(firebaseUser.uid)
-                        } else {
-                            handleAuthenticationError("Login failed - no user data")
-                        }
-                    }
-                    is AuthResult.Error -> {
-                        handleAuthenticationError(result.message)
-                    }
-                }
-            } catch (e: Exception) {
-                println("❌ DEBUG: Exception in performAuthenticatedLogin: ${e.message}")
-                e.printStackTrace()
-                handleAuthenticationError("Unexpected error: ${e.message}")
-            }
-        }
-    }
-
-    /**
-     * Check compliance status for authenticated user and handle accordingly
-     */
-    private fun checkAuthenticatedUserCompliance(authenticatedUserId: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                println("🔍 DEBUG: Checking compliance for authenticated user: $authenticatedUserId")
-
-                // Check if user has compliance record
-                val hasComplianceRecord = AppDependencies.provideUserComplianceRepository(requireContext())
-                    .hasComplianceRecord(authenticatedUserId)
-
-                println("🔍 DEBUG: User has compliance record: $hasComplianceRecord")
-
-                if (!hasComplianceRecord) {
-                    // First time login - show enhanced medical disclaimer
-                    showFirstTimeUserCompliance(authenticatedUserId)
-                } else {
-                    // Check if compliance is complete and up-to-date
-                    val complianceStatus = complianceManagerService.getComplianceStatus()
-                    val requiredFlow = complianceManagerService.getRequiredDisclaimerFlow()
-
-                    println("🔍 DEBUG: Compliance status: ${complianceStatus.getStatusSummary()}")
-                    println("🔍 DEBUG: Required flow: $requiredFlow")
-
-                    when (requiredFlow) {
-                        DisclaimerFlow.FULLY_COMPLIANT -> {
-                            // User is fully compliant - proceed to app
-                            proceedToCalculatorList("Authenticated user fully compliant")
-                        }
-                        DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED -> {
-                            // User needs enhanced disclaimer
-                            showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
-                        }
-                        DisclaimerFlow.COMPLIANCE_UPDATE_REQUIRED -> {
-                            // User needs compliance update
-                            showComplianceUpdateForAuthenticatedUser(authenticatedUserId)
-                        }
-                        else -> {
-                            // Default to enhanced disclaimer
-                            showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                println("❌ DEBUG: Error checking compliance: ${e.message}")
-                e.printStackTrace()
-                handleAuthenticationError("Error checking compliance: ${e.message}")
-            }
-        }
-    }
-
-    /**
-     * Show compliance flow for first-time authenticated users
-     */
-    private fun showFirstTimeUserCompliance(authenticatedUserId: String) {
-        println("🔍 DEBUG: Showing first-time user compliance for: $authenticatedUserId")
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Bienvenido a MediCálculos")
-            .setMessage(
-                "Como usuario registrado, necesitas completar la verificación médica profesional.\n\n" +
-                        "Este proceso solo se realiza una vez y tus preferencias se guardarán de forma segura."
-            )
-            .setPositiveButton("Continuar") { _, _ ->
-                showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
-            }
-            .setNegativeButton("Más Tarde") { _, _ ->
-                // User can postpone, but sign them out
-                firebaseAuthService.signOut()
-                userManager.signOut()
-                showLoading(false)
-                binding.btnLogin.isEnabled = true
-                binding.btnContinueAsGuest.isEnabled = true
-            }
-            .setCancelable(false)
-            .show()
-    }
-
-    /**
-     * Show enhanced disclaimer specifically for authenticated users
-     */
-    private fun showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId: String) {
-        try {
-            val enhancedDialog = EnhancedMedicalDisclaimerDialogFragment.newInstance()
-
-            enhancedDialog.setOnAcceptedListener {
-                // User accepted - record compliance in database
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        val success = complianceManagerService.recordCompleteCompliance(
-                            professionalType = com.example.medicalcalculatorapp.domain.service.SimpleProfessionalType.DOCTOR, // Default, could be made selectable
-                            licenseInfo = null,
-                            method = com.example.medicalcalculatorapp.domain.service.SimpleConsentMethod.APP_DIALOG
-                        )
-
-                        if (success) {
-                            println("✅ DEBUG: Compliance recorded successfully for authenticated user")
-                            proceedToCalculatorList("Authenticated user compliance completed")
-                        } else {
-                            handleAuthenticationError("Failed to save compliance data")
-                        }
-                    } catch (e: Exception) {
-                        println("❌ DEBUG: Error recording compliance: ${e.message}")
-                        handleAuthenticationError("Error saving compliance: ${e.message}")
-                    }
-                }
-            }
-
-            enhancedDialog.setOnRejectedListener {
-                // User rejected - sign them out
-                firebaseAuthService.signOut()
-                userManager.signOut()
-                showLoading(false)
-                binding.btnLogin.isEnabled = true
-                binding.btnContinueAsGuest.isEnabled = true
-
-                Toast.makeText(
-                    requireContext(),
-                    "La aceptación de los términos médicos es requerida para usar la aplicación",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-
-            enhancedDialog.show(parentFragmentManager, EnhancedMedicalDisclaimerDialogFragment.TAG)
-
-        } catch (e: Exception) {
-            println("❌ ERROR: Error showing enhanced disclaimer: ${e.message}")
-            handleAuthenticationError("Error showing compliance dialog")
-        }
-    }
-
-    /**
-     * Show compliance update dialog for existing users
-     */
-    private fun showComplianceUpdateForAuthenticatedUser(authenticatedUserId: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("📋 Actualización de Políticas")
-            .setMessage(
-                "Hemos actualizado nuestras políticas médicas para cumplir con los nuevos requisitos.\n\n" +
-                        "Por favor, revisa y acepta los términos actualizados para continuar."
-            )
-            .setPositiveButton("Revisar Términos") { _, _ ->
-                showEnhancedDisclaimerForAuthenticatedUser(authenticatedUserId)
-            }
-            .setNegativeButton("Más Tarde") { _, _ ->
-                // Allow postponing for existing users
-                proceedToCalculatorList("Authenticated user postponed compliance update")
-            }
-            .setCancelable(false)
-            .show()
-    }
-
-    /**
-     * Proceed to calculator list after successful authentication and compliance
-     */
-    private fun proceedToCalculatorList(reason: String) {
-        println("🚀 DEBUG: Proceeding to calculator list: $reason")
-
-        showLoading(false)
-        binding.btnLogin.isEnabled = true
-        binding.btnContinueAsGuest.isEnabled = true
-
-        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
-
-        try {
-            findNavController().navigate(R.id.action_loginFragment_to_calculatorListFragment)
-        } catch (e: Exception) {
-            println("❌ DEBUG: Navigation error: ${e.message}")
-            Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // ==== UTILITY METHODS ====
-
-    private fun handleAuthenticationError(errorMessage: String) {
-        showLoading(false)
-        binding.btnLogin.isEnabled = true
-        binding.btnContinueAsGuest.isEnabled = true
-
-        println("❌ DEBUG: Authentication error: $errorMessage")
-
-        // Show user-friendly error message
-        val userFriendlyMessage = when {
-            errorMessage.contains("password", ignoreCase = true) -> "Invalid password. Please try again."
-            errorMessage.contains("email", ignoreCase = true) -> "Invalid email address."
-            errorMessage.contains("user", ignoreCase = true) -> "No account found with this email."
-            errorMessage.contains("network", ignoreCase = true) -> "Network error. Check your connection."
-            else -> "Login failed. Please try again."
-        }
-
-        Toast.makeText(requireContext(), userFriendlyMessage, Toast.LENGTH_LONG).show()
-    }
-
-    private fun validateInputs(): Boolean {
-        var isValid = true
-
-        val email = binding.etEmail.text.toString().trim()
-        val password = binding.etPassword.text.toString()
-
-        // Email validation (existing logic)
-        if (email.isEmpty()) {
-            binding.tilEmail.error = getString(R.string.email_required)
-            isValid = false
-        } else if (!ValidationUtils.isValidEmail(email)) {
-            binding.tilEmail.error = getString(R.string.invalid_email)
-            isValid = false
-        } else if (ValidationUtils.containsSuspiciousPatterns(email)) {
-            binding.tilEmail.error = getString(R.string.invalid_input)
-            isValid = false
-        } else {
-            binding.tilEmail.error = null
-        }
-
-        // Password validation - simplified for login (existing logic)
-        if (password.isEmpty()) {
-            binding.tilPassword.error = getString(R.string.password_required)
-            isValid = false
-        } else {
-            binding.tilPassword.error = null
-        }
-
-        return isValid
-    }
-
-    private fun loadSavedCredentials() {
-        val rememberCredentials = secureStorageManager.getRememberMeFlag()
-        if (rememberCredentials) {
-            val savedEmail = secureStorageManager.getEmail()
-            savedEmail?.let {
-                binding.etEmail.setText(it)
-                binding.cbRememberMe.isChecked = true
-            }
-        }
-    }
-
-    private fun saveCredentialsIfNeeded() {
-        val email = binding.etEmail.text.toString().trim()
-        val isChecked = binding.cbRememberMe.isChecked
-
-        secureStorageManager.saveRememberMeFlag(isChecked)
-        if (isChecked) {
-            secureStorageManager.saveEmail(email)
-        } else {
-            secureStorageManager.clearCredentials()
-        }
-    }
-
-    private fun showLoading(show: Boolean) {
-        binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
-
-        // Disable all interactive elements during loading
-        binding.btnLogin.isEnabled = !show
-        binding.btnContinueAsGuest.isEnabled = !show
-        binding.etEmail.isEnabled = !show
-        binding.etPassword.isEnabled = !show
-        binding.cbRememberMe.isEnabled = !show
-
-        // Optional: Visual feedback for disabled state
-        val alpha = if (show) 0.5f else 1.0f
-        binding.loginFormContainer?.alpha = alpha
-        binding.guestOptionCard?.alpha = alpha
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

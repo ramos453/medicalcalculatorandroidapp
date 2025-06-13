@@ -2,6 +2,7 @@ package com.example.medicalcalculatorapp.domain.repository
 
 import com.example.medicalcalculatorapp.domain.model.*
 import kotlinx.coroutines.flow.Flow
+import com.example.medicalcalculatorapp.domain.model.*
 
 /**
  * User Compliance Repository Interface - Clean Architecture
@@ -210,109 +211,3 @@ interface IUserComplianceRepository {
     suspend fun checkDataCorruption(): List<String>
 }
 
-/**
- * Compliance statistics for reporting
- */
-data class ComplianceStatistics(
-    val totalUsers: Int,
-    val compliantUsers: Int,
-    val verifiedProfessionals: Int,
-    val pendingReviews: Int,
-    val byProfessionalType: Map<ProfessionalType, Int>,
-    val byComplianceVersion: Map<String, Int>,
-    val lastUpdated: Long
-) {
-    fun getComplianceRate(): Float {
-        return if (totalUsers > 0) compliantUsers.toFloat() / totalUsers else 0f
-    }
-
-    fun getProfessionalVerificationRate(): Float {
-        return if (totalUsers > 0) verifiedProfessionals.toFloat() / totalUsers else 0f
-    }
-}
-
-/**
- * Compliance audit trail for individual users
- */
-data class ComplianceAuditTrail(
-    val userId: String,
-    val events: List<ComplianceEvent>,
-    val currentStatus: UserCompliance,
-    val generatedAt: Long
-)
-
-/**
- * Individual compliance events for audit
- */
-data class ComplianceEvent(
-    val eventType: ComplianceEventType,
-    val timestamp: Long,
-    val details: String,
-    val version: String?,
-    val method: ConsentMethod
-)
-
-/**
- * Types of compliance events
- */
-enum class ComplianceEventType(val description: String) {
-    BASIC_TERMS_ACCEPTED("Basic terms accepted"),
-    MEDICAL_DISCLAIMER_ACCEPTED("Medical disclaimer accepted"),
-    PROFESSIONAL_VERIFIED("Professional status verified"),
-    PRIVACY_POLICY_ACCEPTED("Privacy policy accepted"),
-    COMPLIANCE_UPDATED("Compliance status updated"),
-    REVIEW_REQUIRED("Marked for review"),
-    REVIEW_CLEARED("Review flag cleared"),
-    VERSION_UPDATED("Compliance version updated")
-}
-
-/**
- * User compliance data export for GDPR
- */
-data class UserComplianceExport(
-    val userId: String,
-    val compliance: UserCompliance,
-    val auditTrail: ComplianceAuditTrail,
-    val exportedAt: Long,
-    val exportFormat: String = "JSON"
-) {
-    fun toJsonString(): String {
-        // This would typically use a JSON serialization library
-        return """
-        {
-            "userId": "$userId",
-            "exportedAt": $exportedAt,
-            "compliance": {
-                "isFullyCompliant": ${compliance.isFullyCompliant()},
-                "complianceVersion": "${compliance.complianceVersion}",
-                "basicTermsAccepted": ${compliance.basicTermsConsent?.isAccepted ?: false},
-                "medicalDisclaimerAccepted": ${compliance.medicalDisclaimerConsent?.isAccepted ?: false},
-                "professionalVerified": ${compliance.professionalVerification?.isVerified ?: false},
-                "privacyPolicyAccepted": ${compliance.privacyPolicyConsent?.isAccepted ?: false}
-            },
-            "auditEvents": ${auditTrail.events.size}
-        }
-        """.trimIndent()
-    }
-}
-
-/**
- * Compliance validation result
- */
-data class ComplianceValidationResult(
-    val isValid: Boolean,
-    val errors: List<String>,
-    val warnings: List<String>,
-    val checkedAt: Long
-) {
-    fun hasErrors(): Boolean = errors.isNotEmpty()
-    fun hasWarnings(): Boolean = warnings.isNotEmpty()
-
-    fun getSummary(): String {
-        return when {
-            hasErrors() -> "❌ Validation Failed: ${errors.size} errors, ${warnings.size} warnings"
-            hasWarnings() -> "⚠️ Validation Passed with Warnings: ${warnings.size} warnings"
-            else -> "✅ Validation Passed"
-        }
-    }
-}

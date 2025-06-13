@@ -1,11 +1,16 @@
 package com.example.medicalcalculatorapp.domain.model
 
 /**
- * User Compliance Domain Model - Clean Architecture
+ * Complete User Compliance Domain Models
  *
- * Represents user compliance status in the domain layer,
- * independent of database implementation details.
- * Follows Google Play Health App Policy requirements.
+ * Contains all compliance-related domain models for Google Play Health App Policy compliance.
+ * Represents user compliance status in the domain layer, independent of database implementation.
+ */
+
+// ==== MAIN DOMAIN MODEL ====
+
+/**
+ * User Compliance Domain Model - Clean Architecture
  */
 data class UserCompliance(
     val userId: String,
@@ -98,6 +103,8 @@ data class UserCompliance(
     }
 }
 
+// ==== CORE DATA CLASSES ====
+
 /**
  * Represents a single consent record
  */
@@ -109,6 +116,15 @@ data class ConsentRecord(
 ) {
     fun isValidForVersion(requiredVersion: String): Boolean {
         return isAccepted && version == requiredVersion
+    }
+
+    fun getAcceptedDate(): String {
+        return if (acceptedAt != null) {
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+                .format(java.util.Date(acceptedAt))
+        } else {
+            "Not accepted"
+        }
     }
 }
 
@@ -130,6 +146,23 @@ data class ProfessionalVerification(
             ProfessionalType.RESEARCHER -> "Investigador Médico"
             ProfessionalType.OTHER_HEALTHCARE -> "Profesional de Salud"
             null -> "No Verificado"
+        }
+    }
+
+    fun isValid(): Boolean {
+        return if (isVerified) {
+            verifiedAt != null && professionalType != null
+        } else {
+            true // Not verified is valid state
+        }
+    }
+
+    fun getVerifiedDate(): String {
+        return if (verifiedAt != null) {
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+                .format(java.util.Date(verifiedAt))
+        } else {
+            "Not verified"
         }
     }
 }
@@ -157,8 +190,12 @@ data class ComplianceStatus(
 data class AuditInfo(
     val ipAddress: String?,
     val userAgent: String?,
-    val consentMethod: ConsentMethod
+    val consentMethod: ConsentMethod,
+    val sessionId: String? = null,
+    val deviceInfo: String? = null
 )
+
+// ==== ENUMS ====
 
 /**
  * Types of compliance requirements
@@ -217,94 +254,185 @@ enum class ConsentMethod(val code: String, val displayName: String) {
     }
 }
 
+// ==== REPORTING AND AUDIT MODELS ====
+
 /**
- * Compliance builder for easy creation
+ * Compliance statistics for reporting and admin dashboards
  */
-class UserComplianceBuilder(private val userId: String) {
-    private var basicTermsConsent: ConsentRecord? = null
-    private var medicalDisclaimerConsent: ConsentRecord? = null
-    private var professionalVerification: ProfessionalVerification? = null
-    private var privacyPolicyConsent: ConsentRecord? = null
-    private var complianceStatus = ComplianceStatus(false, false, null)
-    private var complianceVersion = "2024.1"
-    private var auditInfo: AuditInfo? = null
-
-    fun withBasicTerms(accepted: Boolean, version: String, method: ConsentMethod = ConsentMethod.APP_DIALOG): UserComplianceBuilder {
-        basicTermsConsent = ConsentRecord(
-            isAccepted = accepted,
-            acceptedAt = if (accepted) System.currentTimeMillis() else null,
-            version = if (accepted) version else null,
-            consentMethod = method
-        )
-        return this
+data class ComplianceStatistics(
+    val totalUsers: Int,
+    val compliantUsers: Int,
+    val verifiedProfessionals: Int,
+    val pendingReviews: Int,
+    val byProfessionalType: Map<ProfessionalType, Int>,
+    val byComplianceVersion: Map<String, Int>,
+    val lastUpdated: Long
+) {
+    fun getComplianceRate(): Float {
+        return if (totalUsers > 0) compliantUsers.toFloat() / totalUsers else 0f
     }
 
-    fun withMedicalDisclaimer(accepted: Boolean, version: String, method: ConsentMethod = ConsentMethod.APP_DIALOG): UserComplianceBuilder {
-        medicalDisclaimerConsent = ConsentRecord(
-            isAccepted = accepted,
-            acceptedAt = if (accepted) System.currentTimeMillis() else null,
-            version = if (accepted) version else null,
-            consentMethod = method
-        )
-        return this
+    fun getProfessionalVerificationRate(): Float {
+        return if (totalUsers > 0) verifiedProfessionals.toFloat() / totalUsers else 0f
     }
 
-    fun withProfessionalVerification(verified: Boolean, type: ProfessionalType?, licenseInfo: String? = null): UserComplianceBuilder {
-        professionalVerification = ProfessionalVerification(
-            isVerified = verified,
-            verifiedAt = if (verified) System.currentTimeMillis() else null,
-            professionalType = if (verified) type else null,
-            licenseInfo = licenseInfo
-        )
-        return this
+    fun getCompliancePercentage(): String {
+        return "${(getComplianceRate() * 100).toInt()}%"
     }
 
-    fun withPrivacyPolicy(accepted: Boolean, version: String, method: ConsentMethod = ConsentMethod.APP_DIALOG): UserComplianceBuilder {
-        privacyPolicyConsent = ConsentRecord(
-            isAccepted = accepted,
-            acceptedAt = if (accepted) System.currentTimeMillis() else null,
-            version = if (accepted) version else null,
-            consentMethod = method
-        )
-        return this
+    fun getProfessionalPercentage(): String {
+        return "${(getProfessionalVerificationRate() * 100).toInt()}%"
+    }
+}
+
+/**
+ * Individual compliance events for audit trail
+ */
+data class ComplianceEvent(
+    val eventType: ComplianceEventType,
+    val timestamp: Long,
+    val details: String,
+    val version: String?,
+    val method: ConsentMethod,
+    val userId: String,
+    val sessionId: String? = null
+) {
+    fun getEventDate(): String {
+        return java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            .format(java.util.Date(timestamp))
+    }
+}
+
+/**
+ * Types of compliance events for audit trail
+ */
+enum class ComplianceEventType(val description: String) {
+    BASIC_TERMS_ACCEPTED("Basic terms accepted"),
+    MEDICAL_DISCLAIMER_ACCEPTED("Medical disclaimer accepted"),
+    PROFESSIONAL_VERIFIED("Professional status verified"),
+    PRIVACY_POLICY_ACCEPTED("Privacy policy accepted"),
+    COMPLIANCE_UPDATED("Compliance status updated"),
+    REVIEW_REQUIRED("Marked for review"),
+    REVIEW_CLEARED("Review flag cleared"),
+    VERSION_UPDATED("Compliance version updated"),
+    DATA_EXPORTED("Compliance data exported"),
+    CONSENT_WITHDRAWN("Consent withdrawn");
+
+    fun getEventDescription(): String = description
+}
+
+/**
+ * Compliance audit trail for individual users
+ */
+data class ComplianceAuditTrail(
+    val userId: String,
+    val events: List<ComplianceEvent>,
+    val currentStatus: UserCompliance,
+    val generatedAt: Long
+) {
+    fun getEventCount(): Int = events.size
+
+    fun getLatestEvent(): ComplianceEvent? = events.maxByOrNull { it.timestamp }
+
+    fun getEventsByType(type: ComplianceEventType): List<ComplianceEvent> {
+        return events.filter { it.eventType == type }
     }
 
-    fun withComplianceVersion(version: String): UserComplianceBuilder {
-        complianceVersion = version
-        return this
+    fun getEventsInDateRange(startDate: Long, endDate: Long): List<ComplianceEvent> {
+        return events.filter { it.timestamp in startDate..endDate }
+    }
+}
+
+/**
+ * User compliance data export for GDPR compliance
+ */
+data class UserComplianceExport(
+    val userId: String,
+    val compliance: UserCompliance,
+    val auditTrail: ComplianceAuditTrail,
+    val exportedAt: Long,
+    val exportFormat: String = "JSON"
+) {
+    fun toJsonString(): String {
+        return """
+        {
+            "userId": "$userId",
+            "exportedAt": $exportedAt,
+            "exportFormat": "$exportFormat",
+            "compliance": {
+                "isFullyCompliant": ${compliance.isFullyCompliant()},
+                "complianceVersion": "${compliance.complianceVersion}",
+                "basicTermsAccepted": ${compliance.basicTermsConsent?.isAccepted ?: false},
+                "medicalDisclaimerAccepted": ${compliance.medicalDisclaimerConsent?.isAccepted ?: false},
+                "professionalVerified": ${compliance.professionalVerification?.isVerified ?: false},
+                "privacyPolicyAccepted": ${compliance.privacyPolicyConsent?.isAccepted ?: false},
+                "lastUpdated": ${compliance.lastUpdated},
+                "createdAt": ${compliance.createdAt}
+            },
+            "auditTrail": {
+                "eventCount": ${auditTrail.events.size},
+                "generatedAt": ${auditTrail.generatedAt}
+            }
+        }
+        """.trimIndent()
     }
 
-    fun withAuditInfo(ipAddress: String?, userAgent: String?, method: ConsentMethod): UserComplianceBuilder {
-        auditInfo = AuditInfo(ipAddress, userAgent, method)
-        return this
+    fun getExportSize(): String {
+        val jsonString = toJsonString()
+        val sizeInBytes = jsonString.toByteArray().size
+        return when {
+            sizeInBytes < 1024 -> "$sizeInBytes bytes"
+            sizeInBytes < 1024 * 1024 -> "${sizeInBytes / 1024} KB"
+            else -> "${sizeInBytes / (1024 * 1024)} MB"
+        }
+    }
+}
+
+/**
+ * Compliance validation result
+ */
+data class ComplianceValidationResult(
+    val isValid: Boolean,
+    val errors: List<String>,
+    val warnings: List<String>,
+    val checkedAt: Long
+) {
+    fun hasErrors(): Boolean = errors.isNotEmpty()
+
+    fun hasWarnings(): Boolean = warnings.isNotEmpty()
+
+    fun getErrorCount(): Int = errors.size
+
+    fun getWarningCount(): Int = warnings.size
+
+    fun getSummary(): String {
+        return when {
+            hasErrors() -> "❌ Validation Failed: ${errors.size} errors, ${warnings.size} warnings"
+            hasWarnings() -> "⚠️ Validation Passed with Warnings: ${warnings.size} warnings"
+            else -> "✅ Validation Passed"
+        }
     }
 
-    fun build(): UserCompliance {
-        val now = System.currentTimeMillis()
+    fun getDetailedReport(): String {
+        val report = StringBuilder()
+        report.appendLine("Compliance Validation Report")
+        report.appendLine("Checked at: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(checkedAt))}")
+        report.appendLine("Status: ${getSummary()}")
 
-        // Auto-calculate compliance status
-        val isCompliant = basicTermsConsent?.isAccepted == true &&
-                medicalDisclaimerConsent?.isAccepted == true &&
-                professionalVerification?.isVerified == true &&
-                privacyPolicyConsent?.isAccepted == true
+        if (hasErrors()) {
+            report.appendLine("\nErrors:")
+            errors.forEach { error ->
+                report.appendLine("  - $error")
+            }
+        }
 
-        val finalComplianceStatus = ComplianceStatus(
-            isCompliant = isCompliant,
-            needsReview = complianceStatus.needsReview,
-            notes = complianceStatus.notes
-        )
+        if (hasWarnings()) {
+            report.appendLine("\nWarnings:")
+            warnings.forEach { warning ->
+                report.appendLine("  - $warning")
+            }
+        }
 
-        return UserCompliance(
-            userId = userId,
-            basicTermsConsent = basicTermsConsent,
-            medicalDisclaimerConsent = medicalDisclaimerConsent,
-            professionalVerification = professionalVerification,
-            privacyPolicyConsent = privacyPolicyConsent,
-            complianceStatus = finalComplianceStatus,
-            complianceVersion = complianceVersion,
-            lastUpdated = now,
-            createdAt = now,
-            auditInfo = auditInfo
-        )
+        return report.toString()
     }
 }
