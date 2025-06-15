@@ -16,6 +16,10 @@ import com.example.medicalcalculatorapp.data.user.UserManager
 import com.example.medicalcalculatorapp.util.SecureStorageManager
 import com.example.medicalcalculatorapp.util.MedicalComplianceManager
 import com.example.medicalcalculatorapp.domain.model.DisclaimerFlow  // ✅ Correct location
+import com.example.medicalcalculatorapp.presentation.auth.ProfessionalVerificationDialogFragment
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
+import com.example.medicalcalculatorapp.presentation.auth.EnhancedMedicalDisclaimerDialogFragment
 
 class SplashFragment : Fragment() {
 
@@ -76,7 +80,8 @@ class SplashFragment : Fragment() {
                 // Case 2: User needs basic introduction (new user)
                 requiredFlow == DisclaimerFlow.BASIC_INTRODUCTION -> {
                     println("🆕 New user - showing basic introduction")
-                    navigateToLogin("New user needs basic introduction")
+                    //navigateToLogin("New user needs basic introduction")
+                    showEnhancedDisclaimerForMedicalAccess()
                 }
 
                 // Case 3: User has basic disclaimer but needs enhanced for medical access
@@ -146,17 +151,16 @@ class SplashFragment : Fragment() {
     /**
      * Show enhanced medical disclaimer for users who need medical calculator access
      */
+    /**
+     * Show enhanced medical disclaimer for professional verification
+     */
     private fun showEnhancedDisclaimerForMedicalAccess() {
         try {
-            val enhancedDisclaimer = com.example.medicalcalculatorapp.presentation.auth.EnhancedMedicalDisclaimerDialogFragment.newInstance()
+            val enhancedDisclaimer = EnhancedMedicalDisclaimerDialogFragment.newInstance()
 
             enhancedDisclaimer.setOnAcceptedListener {
-                // User accepted enhanced disclaimer
-                complianceManager.markEnhancedDisclaimerAccepted()
-                complianceManager.markProfessionalVerified() // Combined verification
-
-                println("✅ Enhanced disclaimer accepted")
-                navigateToCalculatorList("Enhanced disclaimer accepted")
+                // User accepted enhanced disclaimer - now show professional verification
+                showProfessionalVerificationDialog()
             }
 
             enhancedDisclaimer.setOnRejectedListener {
@@ -165,7 +169,7 @@ class SplashFragment : Fragment() {
                 navigateToLogin("Enhanced disclaimer rejected")
             }
 
-            enhancedDisclaimer.show(parentFragmentManager, com.example.medicalcalculatorapp.presentation.auth.EnhancedMedicalDisclaimerDialogFragment.TAG)
+            enhancedDisclaimer.show(parentFragmentManager, EnhancedMedicalDisclaimerDialogFragment.TAG)
 
         } catch (e: Exception) {
             println("❌ Error showing enhanced disclaimer: ${e.message}")
@@ -312,6 +316,46 @@ class SplashFragment : Fragment() {
             println("❌ Critical navigation error to login: ${e.message}")
             requireActivity().finish()
         }
+    }
+
+    private fun showProfessionalVerificationDialog() {
+        val professionalDialog = ProfessionalVerificationDialogFragment.newInstance()
+
+        professionalDialog.setOnVerifiedListener { professionalType, licenseInfo ->
+            // User verified as professional
+            lifecycleScope.launch {
+                try {
+                    // Mark compliance as completed
+                    complianceManager.markEnhancedDisclaimerAccepted()
+                    complianceManager.markProfessionalVerified()
+
+                    println("✅ Professional verification completed: $professionalType")
+                    navigateToCalculatorList("Professional verification completed")
+                } catch (e: Exception) {
+                    println("❌ Error in professional verification: ${e.message}")
+                    navigateToLogin("Error in professional verification")
+                }
+            }
+        }
+
+        professionalDialog.setOnSkippedListener {
+            // User chose general access
+            lifecycleScope.launch {
+                try {
+                    // Mark basic compliance only
+                    complianceManager.markEnhancedDisclaimerAccepted()
+                    // Don't mark as professionally verified
+
+                    println("✅ General user access granted")
+                    navigateToCalculatorList("General user access granted")
+                } catch (e: Exception) {
+                    println("❌ Error in general access: ${e.message}")
+                    navigateToLogin("Error in general access")
+                }
+            }
+        }
+
+        professionalDialog.show(parentFragmentManager, ProfessionalVerificationDialogFragment.TAG)
     }
 
     override fun onDestroyView() {

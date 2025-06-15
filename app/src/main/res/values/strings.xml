@@ -862,6 +862,16 @@ CUMPLIMIENTO LEGAL Y ÉTICO
 Al continuar, usted confirma que comprende y acepta completamente estos términos y limitaciones.
 </string>
 
+    <string-array name="professional_types">
+        <item>Médico</item>
+        <item>Enfermero/a</item>
+        <item>Farmacéutico/a</item>
+        <item>Estudiante de Medicina</item>
+        <item>Estudiante de Enfermería</item>
+        <item>Investigador Médico</item>
+        <item>Otro Profesional de Salud</item>
+    </string-array>
+
 
 
 

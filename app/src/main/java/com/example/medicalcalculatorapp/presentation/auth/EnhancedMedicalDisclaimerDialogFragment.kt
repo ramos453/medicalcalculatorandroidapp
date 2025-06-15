@@ -13,6 +13,10 @@ import androidx.core.content.ContextCompat
 import com.example.medicalcalculatorapp.R
 import com.example.medicalcalculatorapp.databinding.DialogEnhancedMedicalDisclaimerBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.medicalcalculatorapp.presentation.auth.ProfessionalVerificationDialogFragment
+import com.example.medicalcalculatorapp.domain.service.SimpleProfessionalType
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 /**
  * Enhanced Medical Disclaimer Dialog for Google Play Compliance
