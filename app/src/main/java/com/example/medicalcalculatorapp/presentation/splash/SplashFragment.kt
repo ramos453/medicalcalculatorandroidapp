@@ -61,64 +61,15 @@ class SplashFragment : Fragment() {
 
     private fun checkComplianceAndNavigate() {
         try {
-            println("🔍 SplashFragment: Starting enhanced compliance check...")
+            println("🔍 SplashFragment: Navigating to login screen for user choice")
 
-            // Get current compliance status
-            val complianceStatus = complianceManager.getComplianceStatus()
-            val requiredFlow = complianceStatus.requiredFlow
+            // Always navigate to login screen first - let user choose their path
+            navigateToLogin("Initial app launch - user choice required")
 
-            println("📊 Compliance Status: ${complianceStatus.generateComplianceReport()}")
-
-            // Navigate based on compliance requirements and user session
-            when {
-                // Case 1: User is fully compliant and has valid session
-                requiredFlow == DisclaimerFlow.FULLY_COMPLIANT && hasValidUserSession() -> {
-                    println("✅ User fully compliant with valid session")
-                    navigateToCalculatorList("User fully compliant - direct access granted")
-                }
-
-                // Case 2: User needs basic introduction (new user)
-                requiredFlow == DisclaimerFlow.BASIC_INTRODUCTION -> {
-                    println("🆕 New user - showing basic introduction")
-                    //navigateToLogin("New user needs basic introduction")
-                    showEnhancedDisclaimerForMedicalAccess()
-                }
-
-                // Case 3: User has basic disclaimer but needs enhanced for medical access
-                requiredFlow == DisclaimerFlow.ENHANCED_MEDICAL_REQUIRED -> {
-                    println("🏥 Enhanced medical disclaimer required")
-                    showEnhancedDisclaimerForMedicalAccess()
-                }
-
-                // Case 4: Professional verification required
-                requiredFlow == DisclaimerFlow.PROFESSIONAL_VERIFICATION_REQUIRED -> {
-                    println("👨‍⚕️ Professional verification required")
-                    showProfessionalVerificationFlow()
-                }
-
-                // Case 5: Compliance update required
-                requiredFlow == DisclaimerFlow.COMPLIANCE_UPDATE_REQUIRED -> {
-                    println("📋 Compliance update required")
-                    showComplianceUpdateDialog()
-                }
-
-                // Case 6: User has some compliance but session issues
-                hasComplianceIssues() -> {
-                    println("⚠️ Compliance issues detected")
-                    handleComplianceIssues()
-                }
-
-                // Default: Go to login for safe fallback
-                else -> {
-                    println("🔐 Default fallback to login")
-                    navigateToLogin("Default fallback - compliance check")
-                }
-            }
         } catch (e: Exception) {
-            println("❌ Error during compliance check: ${e.message}")
-            e.printStackTrace()
-            // Safe fallback to login on any error
-            navigateToLogin("Error during compliance check: ${e.message}")
+            println("❌ Error in navigation: ${e.message}")
+            // Fallback to login screen
+            navigateToLogin("Error occurred - defaulting to login")
         }
     }
 

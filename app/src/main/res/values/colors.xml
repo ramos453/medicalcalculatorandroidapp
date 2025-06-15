@@ -28,4 +28,12 @@
     <color name="emergency_background">#FFEBEE</color>
     <color name="warning_background">#FFF8E1</color>
     <color name="success_background">#E8F5E8</color>
+
+    <color name="background_primary">#FFFFFF</color>
+    <color name="background_secondary">#F8F9FA</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_tertiary">#9CA3AF</color>
+    <color name="stroke_light">#E5E7EB</color>
+
 </resources>
