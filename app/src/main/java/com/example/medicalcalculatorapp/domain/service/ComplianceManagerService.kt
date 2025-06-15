@@ -4,6 +4,10 @@ import android.content.Context
 import com.example.medicalcalculatorapp.data.user.UserManager
 import com.example.medicalcalculatorapp.domain.model.DisclaimerFlow
 import com.example.medicalcalculatorapp.util.SecureStorageManager
+import com.example.medicalcalculatorapp.domain.repository.IUserComplianceRepository
+import kotlinx.coroutines.runBlocking
+import com.example.medicalcalculatorapp.domain.model.ProfessionalType
+import com.example.medicalcalculatorapp.domain.model.ConsentMethod
 
 /**
  * Simplified Compliance Manager Service - Working Implementation
@@ -12,12 +16,10 @@ import com.example.medicalcalculatorapp.util.SecureStorageManager
  * and can be enhanced later as needed.
  */
 class ComplianceManagerService(
-    private val context: Context,
+    private val secureStorageManager: SecureStorageManager,
     private val userManager: UserManager,
-    private val userComplianceRepository: Any, // Simplified - not used in basic implementation
-    private val secureStorageManager: SecureStorageManager
+    private val userComplianceRepository: IUserComplianceRepository
 ) {
-
     companion object {
         // Current compliance version
         private const val CURRENT_COMPLIANCE_VERSION = "2024.1"
@@ -122,22 +124,46 @@ class ComplianceManagerService(
      * Record complete compliance (simplified - all at once)
      */
     suspend fun recordCompleteCompliance(
-        professionalType: SimpleProfessionalType,
+        professionalType: SimpleProfessionalType? = null,
         licenseInfo: String? = null,
         method: SimpleConsentMethod = SimpleConsentMethod.APP_DIALOG
     ): Boolean {
         return try {
             val userType = userManager.getUserType()
+            val userId = userManager.getCurrentUserId()
 
             when (userType) {
                 UserManager.UserType.AUTHENTICATED -> {
-                    // For authenticated users, we'd save to database
-                    // For now, just mark as successful
-                    println("✅ Would save compliance to database for authenticated user")
+                    // For authenticated users, save to database
+                    val hasRecord = userComplianceRepository.hasComplianceRecord(userId)
+
+                    if (!hasRecord) {
+                        // Create new compliance record
+                        userComplianceRepository.createUserCompliance(userId)
+                    }
+
+                    // Record all consents
+                    userComplianceRepository.recordBasicTermsConsent(userId, true, CURRENT_COMPLIANCE_VERSION)
+                    userComplianceRepository.recordMedicalDisclaimerConsent(userId, true, CURRENT_COMPLIANCE_VERSION)
+                    userComplianceRepository.recordPrivacyPolicyConsent(userId, true, CURRENT_COMPLIANCE_VERSION)
+
+                    // Record professional verification if provided
+                    professionalType?.let {
+                        val profType = when(it) {
+                            SimpleProfessionalType.DOCTOR -> ProfessionalType.DOCTOR
+                            SimpleProfessionalType.NURSE -> ProfessionalType.NURSE
+                            SimpleProfessionalType.PHARMACIST -> ProfessionalType.PHARMACIST
+                            SimpleProfessionalType.STUDENT -> ProfessionalType.MEDICAL_STUDENT
+                            SimpleProfessionalType.OTHER -> ProfessionalType.OTHER_HEALTHCARE
+                        }
+                        userComplianceRepository.recordProfessionalVerification(userId, true, profType, licenseInfo)
+                    }
+
+                    println("✅ Saved compliance to database for authenticated user")
                     true
                 }
                 UserManager.UserType.GUEST -> {
-                    // For guest users, save to secure storage
+                    // For guest users, save to secure storage (existing logic)
                     secureStorageManager.saveGuestPreference(KEY_BASIC_DISCLAIMER_ACCEPTED, "true")
                     secureStorageManager.saveGuestPreference(KEY_ENHANCED_DISCLAIMER_ACCEPTED, "true")
                     secureStorageManager.saveGuestPreference(KEY_PROFESSIONAL_VERIFIED, "true")

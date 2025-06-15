@@ -7,37 +7,22 @@ import com.example.medicalcalculatorapp.data.db.mapper.CategoryMapper
 import com.example.medicalcalculatorapp.data.db.mapper.HistoryMapper
 import com.example.medicalcalculatorapp.data.db.mapper.UserProfileMapper
 import com.example.medicalcalculatorapp.data.db.mapper.UserSettingsMapper
+import com.example.medicalcalculatorapp.data.db.mapper.UserComplianceMapper
 import com.example.medicalcalculatorapp.data.repository.CalculatorRepository
 import com.example.medicalcalculatorapp.data.repository.CategoryRepository
 import com.example.medicalcalculatorapp.data.repository.HistoryRepository
 import com.example.medicalcalculatorapp.data.repository.UserRepository
+import com.example.medicalcalculatorapp.data.repository.UserComplianceRepository
 import com.example.medicalcalculatorapp.data.user.UserManager
 import com.example.medicalcalculatorapp.domain.repository.ICalculatorRepository
 import com.example.medicalcalculatorapp.domain.repository.ICategoryRepository
 import com.example.medicalcalculatorapp.domain.repository.IHistoryRepository
 import com.example.medicalcalculatorapp.domain.repository.IUserRepository
-import com.google.gson.Gson
+import com.example.medicalcalculatorapp.domain.repository.IUserComplianceRepository
 import com.example.medicalcalculatorapp.domain.service.CalculatorService
-
-// Import your domain calculators here
-import com.example.medicalcalculatorapp.domain.calculator.impl.MedicationDosageCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.HeparinDosageCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.UnitConverterCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.IVDripRateCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.FluidBalanceCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.ElectrolyteManagementCalculator
+import com.google.gson.Gson
 import com.example.medicalcalculatorapp.domain.calculator.impl.BMICalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.MAPCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.MinuteVentilationCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.BradenScaleCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.GlasgowComaScaleCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.PediatricDosageCalculator
-import com.example.medicalcalculatorapp.domain.calculator.impl.ApgarScoreCalculator
 
-/**
- * A simple dependency provider for the application.
- * In a larger app, you might want to use a proper DI framework like Hilt or Koin.
- */
 object AppDependencies {
 
     private var database: MedicalCalculatorDatabase? = null
@@ -45,9 +30,11 @@ object AppDependencies {
     private var categoryRepository: ICategoryRepository? = null
     private var historyRepository: IHistoryRepository? = null
     private var userRepository: IUserRepository? = null
+    private var userComplianceRepository: IUserComplianceRepository? = null
     private var userManager: UserManager? = null
-    private val gson = Gson()
     private var calculatorService: CalculatorService? = null
+    private var userComplianceMapper: UserComplianceMapper? = null
+    private val gson = Gson()
 
     fun provideDatabase(context: Context): MedicalCalculatorDatabase {
         return database ?: synchronized(this) {
@@ -57,18 +44,18 @@ object AppDependencies {
         }
     }
 
-    // ✅ SIMPLIFIED: Provide mock compliance repository to avoid complex dependencies
-    fun provideUserComplianceRepository(context: Context): Any {
-        // Return a simple mock object for now
-        return object {
-            suspend fun hasComplianceRecord(userId: String): Boolean = false
-        }
-    }
-
     fun provideUserManager(context: Context): UserManager {
         return userManager ?: synchronized(this) {
             userManager ?: UserManager(context).also {
                 userManager = it
+            }
+        }
+    }
+
+    fun provideUserComplianceMapper(): UserComplianceMapper {
+        return userComplianceMapper ?: synchronized(this) {
+            userComplianceMapper ?: UserComplianceMapper().also {
+                userComplianceMapper = it
             }
         }
     }
@@ -89,14 +76,6 @@ object AppDependencies {
         }
     }
 
-    fun provideCalculatorService(): CalculatorService {
-        return calculatorService ?: synchronized(this) {
-            calculatorService ?: createCalculatorService().also {
-                calculatorService = it
-            }
-        }
-    }
-
     fun provideHistoryRepository(context: Context): IHistoryRepository {
         return historyRepository ?: synchronized(this) {
             historyRepository ?: createHistoryRepository(context).also {
@@ -113,47 +92,64 @@ object AppDependencies {
         }
     }
 
-    private fun createCalculatorService(): CalculatorService {
-        val service = CalculatorService()
-
-        // ✅ SAFE: Only register calculators that exist
-        try {
-            service.registerCalculator(BMICalculator())
-            // Add other calculators as they become available
-            // service.registerCalculator(MedicationDosageCalculator())
-            // service.registerCalculator(HeparinDosageCalculator())
-            // ... etc
-        } catch (e: Exception) {
-            println("⚠️ Some calculators not available: ${e.message}")
+    // NEW: UserComplianceRepository provision
+    fun provideUserComplianceRepository(context: Context): IUserComplianceRepository {
+        return userComplianceRepository ?: synchronized(this) {
+            userComplianceRepository ?: createUserComplianceRepository(context).also {
+                userComplianceRepository = it
+            }
         }
+    }
 
-        return service
+    fun provideCalculatorService(): CalculatorService {
+        return calculatorService ?: synchronized(this) {
+            calculatorService ?: createCalculatorService().also {
+                calculatorService = it
+            }
+        }
     }
 
     private fun createCalculatorRepository(context: Context): CalculatorRepository {
         val database = provideDatabase(context)
         val userManager = provideUserManager(context)
-        val calculatorMapper = CalculatorMapper(gson)
+        val calculatorMapper = CalculatorMapper(gson) // ✅ Pass gson parameter
         return CalculatorRepository(database, calculatorMapper, userManager)
     }
 
     private fun createCategoryRepository(context: Context): CategoryRepository {
         val database = provideDatabase(context)
-        val categoryMapper = CategoryMapper()
+        val categoryMapper = CategoryMapper() // ✅ No parameters needed
         return CategoryRepository(database, categoryMapper)
     }
 
     private fun createHistoryRepository(context: Context): HistoryRepository {
         val database = provideDatabase(context)
         val userManager = provideUserManager(context)
-        val historyMapper = HistoryMapper(gson)
+        val historyMapper = HistoryMapper(gson) // ✅ Pass gson parameter
         return HistoryRepository(database, historyMapper, userManager)
     }
 
     private fun createUserRepository(context: Context): UserRepository {
         val database = provideDatabase(context)
-        val userProfileMapper = UserProfileMapper()
-        val userSettingsMapper = UserSettingsMapper(gson)
+        val userProfileMapper = UserProfileMapper() // ✅ No parameters needed
+        val userSettingsMapper = UserSettingsMapper(gson) // ✅ Pass gson parameter
         return UserRepository(database, userProfileMapper, userSettingsMapper)
+    }
+
+    // NEW: UserComplianceRepository creation
+    private fun createUserComplianceRepository(context: Context): UserComplianceRepository {
+        val database = provideDatabase(context)
+        val mapper = provideUserComplianceMapper()
+        return UserComplianceRepository(database, mapper)
+    }
+
+    private fun createCalculatorService(): CalculatorService {
+        val service = CalculatorService()
+        try {
+            service.registerCalculator(BMICalculator())
+        } catch (e: Exception) {
+            println("⚠️ Some calculators not available: ${e.message}")
+        }
+        return service
     }
 }

@@ -36,12 +36,18 @@ class LoginFragment : Fragment() {
         super.onCreate(savedInstanceState)
         secureStorageManager = SecureStorageManager(requireContext())
         userManager = UserManager(requireContext())
+        // Create all required dependencies first
+        val secureStorageManager = SecureStorageManager(requireContext())
+        val userManager = UserManager(requireContext())
+        val userComplianceRepository = AppDependencies.provideUserComplianceRepository(requireContext())
+
+        // Now create the service with all required parameters
         complianceManagerService = ComplianceManagerService(
-            requireContext(),
+            secureStorageManager,
             userManager,
-            AppDependencies.provideUserComplianceRepository(requireContext()),
-            secureStorageManager
+            userComplianceRepository
         )
+
         firebaseAuthService = FirebaseAuthService()
     }
 
