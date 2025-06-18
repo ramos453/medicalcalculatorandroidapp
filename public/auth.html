@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Calculator - Verificación</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">🏥</div>
+    <h1>Medical Calculator</h1>
+    <div class="spinner" id="spinner"></div>
+    <div id="status" class="status info">
+        Procesando verificación...
+    </div>
+    <div id="actions" style="display: none;">
+        <a href="#" class="btn" id="openAppBtn">Abrir App</a>
+        <a href="https://play.google.com/store" class="btn" id="downloadBtn" style="background: #34a853; margin-left: 10px;">Descargar App</a>
+    </div>
+</div>
+
+<script>
+    // Firebase Auth Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCTn-IzoHYWX4VM6-iM561_YMbw1Jwb5Y0",
+        authDomain: "medicalcalculatorapp-39631.firebaseapp.com",
+        projectId: "medicalcalculatorapp-39631",
+        storageBucket: "medicalcalculatorapp-39631.firebasestorage.app"
+    };
+
+    // Extract URL parameters
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            mode: params.get('mode'),
+            oobCode: params.get('oobCode'),
+            continueUrl: params.get('continueUrl'),
+            lang: params.get('lang') || 'es'
+        };
+    }
+
+    // Handle authentication actions
+    function handleAuthAction() {
+        const params = getUrlParams();
+        const statusDiv = document.getElementById('status');
+        const spinner = document.getElementById('spinner');
+        const actions = document.getElementById('actions');
+
+        if (!params.mode || !params.oobCode) {
+            showError('Enlace de verificación inválido');
+            return;
+        }
+
+        // Handle different auth modes
+        switch (params.mode) {
+            case 'verifyEmail':
+                handleEmailVerification(params.oobCode);
+                break;
+            case 'resetPassword':
+                handlePasswordReset(params.oobCode);
+                break;
+            case 'signIn':
+                handleEmailSignIn(params.oobCode);
+                break;
+            default:
+                showError('Acción no reconocida');
+        }
+    }
+
+    function handleEmailVerification(oobCode) {
+        showSuccess('✅ Email verificado correctamente');
+        setupAppRedirect();
+    }
+
+    function handlePasswordReset(oobCode) {
+        showInfo('🔑 Redirigiendo para establecer nueva contraseña...');
+        setupAppRedirect();
+    }
+
+    function handleEmailSignIn(oobCode) {
+        showSuccess('✅ Iniciando sesión automáticamente...');
+        setupAppRedirect();
+    }
+
+    function showSuccess(message) {
+        const statusDiv = document.getElementById('status');
+        const spinner = document.getElementById('spinner');
+
+        spinner.style.display = 'none';
+        statusDiv.className = 'status success';
+        statusDiv.textContent = message;
+    }
+
+    function showError(message) {
+        const statusDiv = document.getElementById('status');
+        const spinner = document.getElementById('spinner');
+
+        spinner.style.display = 'none';
+        statusDiv.className = 'status error';
+        statusDiv.textContent = '❌ ' + message;
+    }
+
+    function showInfo(message) {
+        const statusDiv = document.getElementById('status');
+        const spinner = document.getElementById('spinner');
+
+        spinner.style.display = 'none';
+        statusDiv.className = 'status info';
+        statusDiv.textContent = message;
+    }
+
+    function setupAppRedirect() {
+        const actions = document.getElementById('actions');
+        const openAppBtn = document.getElementById('openAppBtn');
+
+        // Try to open the app with intent
+        const appIntent = 'intent://auth#Intent;scheme=medicalcalc;package=com.example.medicalcalculatorapp;end';
+
+        openAppBtn.href = appIntent;
+        openAppBtn.onclick = function() {
+            // Fallback: redirect to Play Store after

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- 🆕 ADD INTERNET PERMISSION FOR AUTH LINKS -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".MedicalCalculatorApplication"
         android:allowBackup="true"
@@ -18,24 +21,112 @@
         <activity
             android:name=".presentation.TestActivity"
             android:exported="true">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+            <!--            <intent-filter>-->
+            <!--                <action android:name="android.intent.action.MAIN" />-->
+            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+            <!--            </intent-filter>-->
         </activity>
 
-        <!-- Main Activity (commented out launcher intent to use TestActivity for now) -->
+        <!-- 🔥 UPDATED: Main Activity with App Links Support -->
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.MedicalCalculatorApp">
 
+            <!-- Main Launcher Intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- 🆕 APP LINKS: Firebase Authentication URLs -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="medicalcalculatorapp-39631.web.app" />
+            </intent-filter>
+
+            <!-- 🆕 APP LINKS: Specific Authentication Paths -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="medicalcalculatorapp-39631.web.app"
+                    android:path="/auth" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="medicalcalculatorapp-39631.web.app"
+                    android:path="/verify" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="medicalcalculatorapp-39631.web.app"
+                    android:path="/reset-password" />
+            </intent-filter>
+
+            <!-- 🆕 CUSTOM SCHEME: Fallback for older Android versions -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="medicalcalc" />
             </intent-filter>
 
         </activity>
     </application>
 
 </manifest>
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<manifest xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:tools="http://schemas.android.com/tools">-->
+
+<!--    <application-->
+<!--        android:name=".MedicalCalculatorApplication"-->
+<!--        android:allowBackup="true"-->
+<!--        android:dataExtractionRules="@xml/data_extraction_rules"-->
+<!--        android:fullBackupContent="@xml/backup_rules"-->
+<!--        android:icon="@mipmap/ic_launcher"-->
+<!--        android:label="@string/app_name"-->
+<!--        android:roundIcon="@mipmap/ic_launcher_round"-->
+<!--        android:supportsRtl="true"-->
+<!--        android:theme="@style/Theme.MedicalCalculatorApp"-->
+<!--        tools:targetApi="31">-->
+
+<!--        &lt;!&ndash; Test Activity for validating our setup &ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name=".presentation.TestActivity"-->
+<!--            android:exported="true">-->
+<!--&lt;!&ndash;            <intent-filter>&ndash;&gt;-->
+<!--&lt;!&ndash;                <action android:name="android.intent.action.MAIN" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <category android:name="android.intent.category.LAUNCHER" />&ndash;&gt;-->
+<!--&lt;!&ndash;            </intent-filter>&ndash;&gt;-->
+<!--        </activity>-->
+
+<!--        &lt;!&ndash; Main Activity (commented out launcher intent to use TestActivity for now) &ndash;&gt;-->
+<!--        <activity-->
+<!--            android:name=".presentation.MainActivity"-->
+<!--            android:exported="true"-->
+<!--            android:theme="@style/Theme.MedicalCalculatorApp">-->
+
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+
+<!--        </activity>-->
+<!--    </application>-->
+
+<!--</manifest>-->

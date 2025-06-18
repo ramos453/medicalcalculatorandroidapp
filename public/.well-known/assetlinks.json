@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.medicalcalculatorapp",
+      "sha256_cert_fingerprints": [
+        "7BEFE34EEE704005EE5F8B52DF4A2021D8417BC21ACDB36547E223278E60904C",
+        "7BEFE34EEE704005EE5F8B52DF4A2021D8417BC21ACDB36547E223278E60904C"
+      ]
+    }
+  }
+]
