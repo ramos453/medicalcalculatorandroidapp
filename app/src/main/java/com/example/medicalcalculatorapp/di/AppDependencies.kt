@@ -14,6 +14,7 @@ import com.example.medicalcalculatorapp.data.repository.HistoryRepository
 import com.example.medicalcalculatorapp.data.repository.UserRepository
 import com.example.medicalcalculatorapp.data.repository.UserComplianceRepository
 import com.example.medicalcalculatorapp.data.user.UserManager
+import com.example.medicalcalculatorapp.domain.calculator.impl.ApgarScoreCalculator
 import com.example.medicalcalculatorapp.domain.repository.ICalculatorRepository
 import com.example.medicalcalculatorapp.domain.repository.ICategoryRepository
 import com.example.medicalcalculatorapp.domain.repository.IHistoryRepository
@@ -22,6 +23,19 @@ import com.example.medicalcalculatorapp.domain.repository.IUserComplianceReposit
 import com.example.medicalcalculatorapp.domain.service.CalculatorService
 import com.google.gson.Gson
 import com.example.medicalcalculatorapp.domain.calculator.impl.BMICalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.BradenScaleCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.ElectrolyteManagementCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.GlasgowComaScaleCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.MedicationDosageCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.PediatricDosageCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.FluidBalanceCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.IVDripRateCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.MinuteVentilationCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.UnitConverterCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.HeparinDosageCalculator
+import com.example.medicalcalculatorapp.domain.calculator.impl.MAPCalculator
+import com.example.medicalcalculatorapp.presentation.theme.MedicalCalculatorAppTheme
+
 
 object AppDependencies {
 
@@ -147,6 +161,20 @@ object AppDependencies {
         val service = CalculatorService()
         try {
             service.registerCalculator(BMICalculator())
+            service.registerCalculator(ApgarScoreCalculator())
+            service.registerCalculator(BradenScaleCalculator())
+            service.registerCalculator(GlasgowComaScaleCalculator())
+            service.registerCalculator(MedicationDosageCalculator())
+            service.registerCalculator(PediatricDosageCalculator())
+            service.registerCalculator(FluidBalanceCalculator())
+            service.registerCalculator(HeparinDosageCalculator())
+            service.registerCalculator(MAPCalculator())
+            service.registerCalculator(ElectrolyteManagementCalculator())
+            service.registerCalculator(UnitConverterCalculator())
+            service.registerCalculator(MinuteVentilationCalculator())
+            service.registerCalculator(IVDripRateCalculator())
+
+
         } catch (e: Exception) {
             println("⚠️ Some calculators not available: ${e.message}")
         }
